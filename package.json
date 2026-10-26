@@ -1,0 +1,16 @@
+{
+  "name": "personow",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test/regras.test.js && node test/server.fake.test.cjs && node test/migracao.test.cjs",
+    "start": "node server/server.js",
+    "migrar": "node scripts/migrar-dados.cjs"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.7.0"
+  }
+}

@@ -1,0 +1,22 @@
+# Blueprint do Render: cria o servidor do Personow (API + site) como Web Service.
+# (Static Site NÃO serve: ele não roda Node e devolve "Not Found" nas rotas da API.)
+services:
+  - type: web
+    name: personow
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    healthCheckPath: /saude
+    envVars:
+      - key: MP_CLIENT_ID
+        sync: false
+      - key: MP_CLIENT_SECRET
+        sync: false
+      - key: MP_WEBHOOK_SECRET
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      - key: APP_URL
+        sync: false

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3B82F6">
+    <title>Recibo da aula · PERSONOW</title>
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <style>
+        :root { --fundo: #f4f6f9; --papel: #fff; --texto: #111827; --suave: #6b7280; --linha: #e5e7eb; --accent: #3B82F6; }
+        @media (prefers-color-scheme: dark) { :root { --fundo: #0b0b0d; --papel: #1f2329; --texto: #f3f4f6; --suave: #9aa0a6; --linha: #2f353d; } }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, "Segoe UI", system-ui, sans-serif; }
+        body { background: var(--fundo); color: var(--texto); padding: 18px; }
+        .papel { max-width: 640px; margin: 0 auto; background: var(--papel); border-radius: 16px; padding: 28px 24px; box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+        h1 { font-size: 20px; } .num { color: var(--accent); font-weight: 800; }
+        .topo { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--accent); padding-bottom: 14px; margin-bottom: 16px; }
+        .emp { font-size: 12px; color: var(--suave); line-height: 1.5; }
+        h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--suave); margin: 18px 0 6px; }
+        p { font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+        .valores { margin-top: 8px; } .valores div { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--linha); font-size: 14px; }
+        .valores .total { font-size: 18px; font-weight: 800; border-bottom: 0; }
+        .aviso { margin-top: 22px; font-size: 11px; color: var(--suave); line-height: 1.5; border-top: 1px solid var(--linha); padding-top: 12px; }
+        .acoes { max-width: 640px; margin: 14px auto 0; display: flex; gap: 10px; }
+        .acoes button, .acoes a { flex: 1; text-align: center; text-decoration: none; padding: 13px; border-radius: 12px; font-weight: 700; font-size: 14px; border: 1px solid var(--accent); cursor: pointer; background: var(--accent); color: #fff; }
+        .acoes a { background: transparent; color: var(--accent); }
+        #erro { max-width: 640px; margin: 40px auto; text-align: center; color: var(--suave); }
+        @media print { body { background: #fff; padding: 0; } .papel { box-shadow: none; max-width: none; } .acoes { display: none; } :root { --papel: #fff; --texto: #111; --suave: #555; --linha: #ddd; } }
+    </style>
+</head>
+<body>
+    <p id="erro">Carregando recibo…</p>
+    <article id="recibo" class="papel" hidden>
+        <div class="topo">
+            <div><h1>Recibo da aula</h1><p class="num" id="r-numero"></p><p class="emp" id="r-emissao"></p></div>
+            <div class="emp" id="r-empresa"></div>
+        </div>
+        <h2>Aluno</h2><p id="r-aluno"></p>
+        <h2>Personal trainer</h2><p id="r-personal"></p>
+        <h2>Serviço</h2><p id="r-servico"></p>
+        <h2>Valores</h2>
+        <div class="valores">
+            <div><span>Aula</span><span id="r-valor"></span></div>
+            <div id="r-taxa-linha" hidden><span>Taxa de serviço</span><span id="r-taxa"></span></div>
+            <div class="total"><span>Total pago</span><span id="r-total"></span></div>
+        </div>
+        <h2>Pagamento</h2><p id="r-pagamento"></p>
+        <p class="aviso">Este documento é um comprovante de intermediação e de pagamento emitido pela plataforma PERSONOW. <strong>Não é Nota Fiscal de Serviço (NFS-e)</strong>. O personal trainer é profissional autônomo e responde pelas próprias obrigações fiscais.</p>
+    </article>
+    <div class="acoes" id="acoes" hidden><a href="index.html">Voltar</a><button type="button" onclick="window.print()">🖨️ Imprimir / salvar PDF</button></div>
+
+    <script type="module">
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { auth, db } from "./firebase.js";
+        import { EMPRESA } from "./config.js";
+        import { brl, esc, fmtData, fmtDataHora } from "./core.js";
+        const $ = (i) => document.getElementById(i);
+        const id = new URLSearchParams(location.search).get("id");
+        const METODOS = { pix: "Pix", account_money: "Saldo Mercado Pago", credit_card: "Cartão de crédito", debit_card: "Cartão de débito" };
+        const erro = (t) => { $("erro").textContent = t; $("erro").hidden = false; };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!id) return erro("Recibo não encontrado.");
+            if (!user) return erro("Entre no app com a conta do aluno para ver o recibo.");
+            try {
+                const s = await getDoc(doc(db, "recibos", id));
+                if (!s.exists()) return erro("Recibo não encontrado.");
+                const r = s.data();
+                $("r-numero").textContent = `Nº ${r.numeroFmt} · série ${r.serie}`;
+                $("r-emissao").textContent = "Emitido em " + fmtDataHora(r.emitidoEm);
+                $("r-empresa").innerHTML = `<strong>${esc(EMPRESA.razaoSocial)}</strong><br>CNPJ ${esc(EMPRESA.cnpj)}<br>${esc(EMPRESA.cidade)}<br>${esc(EMPRESA.email)}`;
+                $("r-aluno").textContent = [r.aluno?.nome, r.aluno?.email].filter(Boolean).join(" · ");
+                $("r-personal").textContent = [r.personal?.nome, r.personal?.cref ? "CREF " + r.personal.cref : "", r.personal?.documentoMascarado ? "CPF " + r.personal.documentoMascarado : ""].filter(Boolean).join(" · ");
+                $("r-servico").textContent = `${r.servico?.descricao} — ${r.servico?.local}, ${fmtData(r.servico?.data)}, ${r.servico?.horario}`;
+                $("r-valor").textContent = brl(r.valores?.valor); $("r-total").textContent = brl(r.valores?.total);
+                if (r.valores?.taxaFixa) { $("r-taxa-linha").hidden = false; $("r-taxa").textContent = brl(r.valores.taxaFixa); }
+                $("r-pagamento").textContent = `${METODOS[r.pagamento?.metodo] || "Mercado Pago"} · transação ${r.pagamento?.mpPaymentId}`;
+                $("erro").hidden = true; $("recibo").hidden = false; $("acoes").hidden = false;
+                document.title = `Recibo ${r.numeroFmt} · PERSONOW`;
+            } catch (e) { console.error(e); erro("Não foi possível abrir este recibo. Ele pertence a outra conta?"); }
+        });
+    </script>
+</body>
+</html>

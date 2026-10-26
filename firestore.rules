@@ -1,0 +1,81 @@
+rules_version = '2';
+// Regras de segurança do Personow.
+// Princípio: o navegador NUNCA escreve dinheiro (status "paga", recibo, split, tokens), nem cria/aceita aula,
+// nem escreve no chat ou na nota do personal. Isso é feito só pelo servidor (Render, Admin SDK).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function logado() { return request.auth != null; }
+    function dono(uid) { return logado() && request.auth.uid == uid; }
+    function personalAtivo() {
+      return logado() && exists(/databases/$(database)/documents/personais/$(request.auth.uid))
+        && get(/databases/$(database)/documents/personais/$(request.auth.uid)).data.status == 'ativo';
+    }
+    function soMudou(campos) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(campos); }
+
+    // ---------- Aulas (pedidos de treino) ----------
+    match /aulas/{id} {
+      // aluno dono, personal que aceitou, ou personal ativo vendo pedidos em aberto
+      allow read: if logado() && (
+        resource.data.alunoUid == request.auth.uid ||
+        resource.data.get('personalUid', '') == request.auth.uid ||
+        (resource.data.status == 'aberta' && personalAtivo()));
+
+      // criar, aceitar, pagar e avaliar: só o servidor.
+      allow create: if false;
+      allow delete: if false;
+
+      allow update: if logado() && (
+        // personal desiste antes da aula: o pedido volta para a fila
+        (resource.data.status == 'aceita' && resource.data.get('personalUid', '') == request.auth.uid
+          && request.resource.data.status == 'aberta' && !('personalUid' in request.resource.data)
+          && soMudou(['status', 'personalUid', 'personalNome', 'aceitoEm']))
+        // aluno cancela enquanto não pagou
+        || (resource.data.alunoUid == request.auth.uid && resource.data.status in ['aberta', 'aceita']
+          && request.resource.data.status == 'cancelada' && soMudou(['status', 'canceladoEm']))
+      );
+
+      // Chat da aula: só as duas partes leem; quem escreve é o servidor (filtra contatos externos).
+      match /mensagens/{mid} {
+        allow read: if logado() && (
+          get(/databases/$(database)/documents/aulas/$(id)).data.alunoUid == request.auth.uid ||
+          get(/databases/$(database)/documents/aulas/$(id)).data.get('personalUid', '') == request.auth.uid);
+        allow write: if false;
+      }
+    }
+
+    // ---------- Recibos: só o aluno que pagou lê ----------
+    match /recibos/{id} {
+      allow read: if logado() && resource.data.alunoUid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // ---------- Alunos ----------
+    match /alunos/{uid} { allow read, write: if dono(uid); }
+
+    // ---------- Personais ----------
+    // Perfil público (o aluno vê nome, nota, especialidade, CREF, região). Nada sensível aqui:
+    // CPF, e-mail, telefone, Pix e banco ficam em personais_privado.
+    match /personais/{uid} {
+      allow read: if logado();
+      allow create: if dono(uid) && request.resource.data.status == 'pendente'
+        && request.resource.data.keys().hasOnly(['nome', 'uid', 'status', 'indicadoPor', 'criadoEm', 'fotoGoogle', 'especialidade', 'cref']);
+      allow update: if dono(uid) && soMudou(['nome', 'especialidade', 'bio', 'cidade', 'cref', 'valorMin', 'disponibilidade', 'fotoGoogle', 'lat', 'lng', 'refCode', 'atualizadoEm'])
+        && (!('refCode' in resource.data) || request.resource.data.get('refCode', '') == resource.data.refCode);
+      allow delete: if false;
+
+      // Alunos que o personal já atende fora da plataforma e quer organizar na agenda (privado).
+      match /meus_alunos/{aid} { allow read, write: if dono(uid); }
+    }
+    match /personais_privado/{uid} { allow read, write: if dono(uid); }
+
+    // Credenciais do Mercado Pago, contadores, moderação: ninguém no navegador.
+    match /mp_tokens/{uid} { allow read, write: if false; }
+    match /contadores/{id} { allow read, write: if false; }
+    match /infracoes/{id}  { allow read, write: if false; }
+    match /moderacao/{id}  { allow read, write: if false; }
+    // pagamentos_internos (split completo): ninguém no navegador — cai na regra final.
+
+    match /{outro=**} { allow read, write: if false; }
+  }
+}

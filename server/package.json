@@ -1,0 +1,16 @@
+{
+  "name": "personow-server",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node ../test/regras.test.js && node ../test/server.fake.test.cjs && node ../test/migracao.test.cjs"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.7.0"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "PERSONOW - Personal Trainers sob demanda",
+  "short_name": "PERSONOW",
+  "description": "Peça um personal trainer para a sua academia na hora, ou receba pedidos de aula como personal.",
+  "lang": "pt-BR",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B0B0D",
+  "theme_color": "#3B82F6",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Pedir um personal",
+      "url": "./index.html"
+    },
+    {
+      "name": "Sou personal",
+      "url": "./personal.html"
+    }
+  ]
+}

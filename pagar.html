@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#3B82F6">
+    <title>Pagar aula · PERSONOW</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="polish.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <style>
+        body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .pay-card { width: 100%; max-width: 420px; padding: 26px 22px; text-align: center; }
+        .pay-card img.logo { height: 34px; margin-bottom: 18px; }
+        body.light-theme .pay-card img.logo { filter: invert(1); }
+        .pay-linha { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--glass-border); font-size: 14px; }
+        .pay-linha.total { font-size: 18px; font-weight: 800; border-bottom: 0; }
+        .pay-det { font-size: 12px; color: var(--text-muted); margin: 6px 0 16px; line-height: 1.5; overflow-wrap: anywhere; }
+        .pay-ico { font-size: 44px; margin-bottom: 8px; }
+        #msg { margin-top: 14px; font-size: 13px; color: #f59e0b; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <main class="glass pay-card">
+        <img class="logo" src="logo-branco.png" alt="PERSONOW">
+
+        <section id="estado-carregando"><span class="spinner"></span><p class="muted-line" style="margin-top:12px">Carregando a aula…</p></section>
+
+        <section id="estado-login" hidden>
+            <div class="pay-ico">🔐</div>
+            <h2 style="font-size:18px;margin-bottom:8px">Entre para pagar</h2>
+            <p class="pay-det">Use a mesma conta Google com que você pediu a aula.</p>
+            <button id="btn-entrar" class="btn btn-primary" type="button">Entrar com Google</button>
+        </section>
+
+        <section id="estado-pedido" hidden>
+            <h2 style="font-size:18px;margin-bottom:4px">Pagar aula</h2>
+            <p id="p-local" style="font-weight:700;overflow-wrap:anywhere"></p>
+            <p id="p-detalhe" class="pay-det"></p>
+            <div class="pay-linha"><span>Aula</span><strong id="p-valor"></strong></div>
+            <div class="pay-linha" id="linha-taxa" hidden><span>Taxa de serviço</span><strong id="p-taxa"></strong></div>
+            <div class="pay-linha total"><span>Total</span><strong id="p-total"></strong></div>
+            <button id="btn-pagar" class="btn btn-primary" type="button" style="margin-top:18px">💳 Pagar com Pix ou cartão</button>
+            <p class="pay-det" style="margin-top:12px">Pagamento seguro pelo Mercado Pago. O repasse ao personal é automático.</p>
+        </section>
+
+        <section id="estado-aguardando" hidden>
+            <span class="spinner"></span>
+            <h2 style="font-size:18px;margin:14px 0 6px">Confirmando o pagamento…</h2>
+            <p class="pay-det">Isso leva alguns segundos. Não feche esta tela.</p>
+        </section>
+
+        <section id="estado-ok" hidden>
+            <div class="pay-ico">✅</div>
+            <h2 style="font-size:20px;margin-bottom:6px">Pagamento confirmado!</h2>
+            <p class="pay-det">Seu recibo foi emitido. Bom treino! 💪</p>
+            <a id="link-recibo" class="btn btn-primary" href="index.html" style="display:block;text-decoration:none">Ver recibo</a>
+            <a class="btn btn-outline" href="index.html" style="display:block;text-decoration:none;margin-top:8px">Voltar ao app</a>
+        </section>
+
+        <p id="msg" role="alert" hidden></p>
+    </main>
+
+    <script type="module">
+        import { doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { auth, db, googleProvider, chamarFuncao } from "./firebase.js";
+        import { brl, fmtData, estaPaga, valorCentavos, calcularSplit } from "./core.js";
+        import { $, iniciarTema, registrarSW } from "./ui.js";
+        iniciarTema(); registrarSW();
+
+        const params = new URLSearchParams(location.search);
+        const id = params.get("id"), paymentId = params.get("payment_id") || params.get("collection_id"), retorno = params.get("retorno");
+        const ESTADOS = ["estado-carregando", "estado-login", "estado-pedido", "estado-aguardando", "estado-ok"];
+        const mostrar = (q) => ESTADOS.forEach((e) => ($(e).hidden = e !== q));
+        const aviso = (t) => { $("msg").textContent = t; $("msg").hidden = !t; };
+        let parar = null;
+
+        function sucesso(a) {
+            parar?.(); parar = null;
+            const link = $("link-recibo");
+            if (a.reciboId) link.href = `recibo.html?id=${encodeURIComponent(a.reciboId)}`; else { link.href = "index.html"; link.textContent = "Voltar ao app"; }
+            mostrar("estado-ok"); aviso("");
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!id) { mostrar(""); return aviso("Link de pagamento inválido: aula não encontrada."); }
+            if (!user) return mostrar("estado-login");
+            try {
+                const snap = await getDoc(doc(db, "aulas", id));
+                if (!snap.exists()) { mostrar(""); return aviso("Aula não encontrada."); }
+                const a = { id, ...snap.data() };
+                if (a.alunoUid !== user.uid) { mostrar(""); return aviso("Esta aula pertence a outra conta. Entre com a conta do aluno que fez o pedido."); }
+                if (estaPaga(a)) return sucesso(a);
+                if (a.status === "cancelada") { mostrar(""); return aviso("Esta aula foi cancelada."); }
+                if (a.status !== "aceita") { mostrar(""); return aviso("Ainda não há personal nesta aula. O pagamento libera quando alguém aceitar."); }
+
+                const sp = calcularSplit(valorCentavos(a));   // só exibição: quem cobra de verdade é o servidor
+                $("p-local").textContent = a.local ?? a.loja;
+                $("p-detalhe").textContent = `${fmtData(a.data)} · ${a.horario} · ${a.foco}${a.personalNome ? " · com " + a.personalNome : ""}`;
+                $("p-valor").textContent = brl(sp.valor); $("p-total").textContent = brl(sp.total);
+                if (sp.taxaFixa) { $("linha-taxa").hidden = false; $("p-taxa").textContent = brl(sp.taxaFixa); }
+
+                if (retorno === "success" || paymentId) {          // voltou do Mercado Pago
+                    mostrar("estado-aguardando");
+                    parar = onSnapshot(doc(db, "aulas", id), (d) => { if (estaPaga(d.data() || {})) sucesso({ id, ...d.data() }); });   // o webhook pode chegar primeiro
+                    if (paymentId) chamarFuncao("confirmarPagamento", { aulaId: id, paymentId }).then((r) => {
+                        if (r.aprovado === false) { parar?.(); mostrar("estado-pedido"); aviso(r.status === "pending" || r.status === "in_process" ? "Pagamento ainda em análise. Assim que for aprovado, o recibo é emitido." : "Pagamento não aprovado. Tente novamente."); }
+                    }).catch((e) => { if (e.code !== "backend-nao-configurado") console.warn(e); });
+                    setTimeout(() => { if (!$("estado-aguardando").hidden) { mostrar("estado-pedido"); aviso("Ainda não recebemos a confirmação. Se você pagou, aguarde um minuto e atualize a página."); } }, 45000);
+                } else if (retorno === "failure") { mostrar("estado-pedido"); aviso("O pagamento não foi concluído. Você pode tentar de novo."); }
+                else if (retorno === "pending") { mostrar("estado-pedido"); aviso("Pagamento pendente. Se for Pix, conclua no app do seu banco; a confirmação é automática."); }
+                else mostrar("estado-pedido");
+            } catch (e) { console.error(e); mostrar(""); aviso("Não foi possível carregar a aula."); }
+        });
+
+        $("btn-entrar").onclick = () => signInWithPopup(auth, googleProvider).catch((e) => aviso("Não foi possível entrar (" + (e.code || "erro") + ")."));
+
+        $("btn-pagar").onclick = async () => {
+            const b = $("btn-pagar"); b.disabled = true; b.innerHTML = '<span class="spinner"></span> Abrindo pagamento…'; aviso("");
+            try {
+                const { init_point } = await chamarFuncao("criarCobranca", { aulaId: id });
+                if (!/^https:\/\//.test(init_point || "")) throw new Error("sem link");
+                location.href = init_point;
+            } catch (e) {
+                console.error(e);
+                aviso(e.code === "personal-sem-mp" ? "Este personal ainda não conectou o Mercado Pago para receber. Peça para ele conectar na aba Carteira."
+                    : e.code === "backend-nao-configurado" || e.code === "rede" ? "O servidor de pagamentos não respondeu. Tente de novo em instantes."
+                    : e.code === 404 || e.code === "rota-inexistente" ? "O servidor de pagamentos não respondeu (404). Confira o endereço do servidor em config.js."
+                    : e.message && e.message !== "sem link" ? e.message : "Não foi possível iniciar o pagamento. Tente de novo.");
+                b.disabled = false; b.innerHTML = "💳 Pagar com Pix ou cartão";
+            }
+        };
+    </script>
+</body>
+</html>

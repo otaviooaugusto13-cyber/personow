@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>PERSONOW - Painel do Aluno</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="polish.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#3B82F6">
+</head>
+<body>
+
+    <!-- Botão Flutuante de Suporte WhatsApp -->
+    <a href="https://wa.me/5519999999999" target="_blank" id="btn-whatsapp-suporte" class="btn-whatsapp" title="Suporte via WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+    </a>
+
+    <!-- TELA DE LOGIN DO ALUNO -->
+    <div id="screen-login" class="screen active login-screen">
+        <div class="auth-card">
+            <div class="auth-brand"><img src="logo-branco.png" alt="PERSONOW" class="brand-logo"><p>Treinos e aulas sob demanda</p></div>
+            <div class="auth-switch"><a href="index.html" class="on">Sou aluno</a><a href="personal.html" class="">Sou personal</a></div>
+            <h2 class="auth-title">Entre na sua conta</h2>
+            <p class="auth-sub">Contrate um personal em minutos e acompanhe seus treinos.</p>
+            <label class="auth-terms"><input type="checkbox" id="check-termos-aluno"><span>Li e concordo com os <a href="#" onclick="abrirModalTermosAluno(); return false;">Termos de Uso</a></span></label>
+            <button id="btn-login-aluno" class="btn btn-google-login" disabled onclick="loginGoogleAluno()"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> Continuar com Google</button>
+            <div class="auth-links"><a href="landing.html">Conhecer a plataforma</a></div>
+        </div>
+    </div>
+
+    <!-- TELA PRINCIPAL DO APP DO ALUNO -->
+    <div id="screen-main" class="screen main-app-screen">
+        <div id="tab-home" class="tab-content active" style="padding-bottom: 110px;">
+            <header class="home-head">
+                <div class="home-head-txt">
+                    <h2>Olá, <span id="display-name-home" class="highlight">Aluno</span>! 👋</h2>
+                    <span class="loc-badge" id="loc-badge">📍 <span id="loc-text">Sua região</span></span>
+                </div>
+                <div class="avatar" id="main-user-avatar">A</div>
+            </header>
+
+            <section class="hero-card">
+                <h3>O que você quer treinar hoje?</h3>
+                <p>Escolha o foco e chame um personal em poucos toques.</p>
+                <div class="chips-row" id="hero-chips" role="radiogroup" aria-label="Foco do treino">
+                    <button type="button" class="chip sel" data-v="Musculação"><span class="ico">💪</span>Musculação</button>
+                    <button type="button" class="chip" data-v="Hipertrofia"><span class="ico">🔥</span>Hipertrofia</button>
+                    <button type="button" class="chip" data-v="Emagrecimento"><span class="ico">⚡</span>Emagrecimento</button>
+                    <button type="button" class="chip" data-v="Corrida"><span class="ico">🏃‍♂️</span>Corrida</button>
+                    <button type="button" class="chip" data-v="Funcional"><span class="ico">🤸‍♂️</span>Funcional</button>
+                    <button type="button" class="chip" data-v="Avaliação Física"><span class="ico">📋</span>Avaliação</button>
+                </div>
+                <button type="button" class="btn btn-primary hero-cta" onclick="abrirSheetPedido()">⚡ Chamar personal agora</button>
+            </section>
+
+            <div class="section-title">Radar na região</div>
+            <div class="radar-box" id="radar-box">
+                <div class="radar-fallback" id="radar-fallback" aria-hidden="false">
+                    <div class="radar-ring r1"></div><div class="radar-ring r2"></div><div class="radar-ring r3"></div>
+                    <div class="radar-sweep"></div>
+                    <div class="radar-me" title="Você"></div>
+                    <div id="radar-blips"></div>
+                </div>
+                <div id="mapa-quadrado" class="radar-map"></div>
+                <div class="radar-count" id="radar-count">Buscando personais…</div>
+            </div>
+
+            <div class="section-title">Personais disponíveis</div>
+            <div id="lista-personais-reais" class="pc-list"></div>
+        </div>
+
+        <div id="tab-mensagens" class="tab-content">
+            <div class="header-glass" style="margin-bottom: 20px;">
+                <h2>Suas Conversas</h2>
+            </div>
+            <div id="lista-conversas"></div>
+        </div>
+
+        <div id="tab-pedidos" class="tab-content" style="padding-bottom:110px;">
+            <div class="header-personal glass"><h2 style="margin:0;font-size:20px;">Meus Pedidos</h2></div>
+            <div id="lista-pedidos"><div class="empty-state"><div class="empty-icon">🏋️‍♂️</div><h4>Nenhum pedido ainda</h4><p>Solicite um personal na aba Início e acompanhe o andamento aqui.</p></div></div>
+        </div>
+
+        <div id="tab-agenda" class="tab-content" style="padding-bottom:110px;">
+            <div class="header-personal glass"><h2 style="margin:0;font-size:20px;">Agenda de Treinos</h2></div>
+            <div class="glass" style="padding:15px;margin-bottom:15px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                    <button onclick="mudarMesCalendario(-1)" class="btn-cal">◀</button>
+                    <h3 id="calendar-month-year" style="margin:0;font-size:15px;"></h3>
+                    <button onclick="mudarMesCalendario(1)" class="btn-cal">▶</button>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;font-weight:bold;color:var(--text-muted);margin-bottom:10px;"><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div><div>D</div></div>
+                <div id="calendar-days-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center;"></div>
+            </div>
+            <div id="selected-date-label" style="text-align:center;color:var(--text-muted);font-size:12px;margin-bottom:15px;">Escolha uma data para ver os treinos agendados.</div>
+            <div id="lista-agenda" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+
+        <div id="tab-carteira" class="tab-content" style="padding-bottom:110px;">
+            <div class="header-personal glass"><h2 style="margin:0;font-size:20px;">Carteira</h2></div>
+            <div class="glass finance-card">
+                <div class="finance-header">Resumo de gastos</div>
+                <div class="finance-values">
+                    <div class="finance-item"><span>Aulas abertas</span><h3 id="cart-abertos">0</h3></div>
+                    <div class="finance-item"><span>Total pago</span><h3 id="cart-total" style="color:var(--gold);">R$ 0,00</h3></div>
+                </div>
+                <p class="muted-line">Os pagamentos das aulas concluídas aparecem aqui.</p>
+            </div>
+            <div class="section-title" style="margin:6px 4px 10px">Histórico de pagamentos</div>
+            <div id="lista-extrato" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px"></div>
+            <button class="btn btn-outline" style="margin-bottom:15px" onclick="exportarExtrato()">⬇️ Exportar extrato (CSV)</button>
+            <div class="glass" style="padding:20px;text-align:center;margin-bottom:15px;border-left:4px solid var(--gold);">
+                <div style="font-size:32px;margin-bottom:8px;">💳</div>
+                <h3 style="font-size:15px;margin-bottom:6px;">Forma de pagamento</h3>
+                <p class="muted-line" style="margin-bottom:14px;">Cadastre como você paga os personais.</p>
+                <button class="btn btn-primary" onclick="abrirOpcaoMenu('pagamento')">Cadastrar</button>
+            </div>
+        </div>
+
+        <div id="tab-perfil" class="tab-content" style="padding-bottom: 110px;">
+            <div class="profile-header" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                <div class="profile-photo-container" style="width: 80px; height: 80px; border-radius: 50%; background: var(--gold); color: #000; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; position: relative; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px;">
+                    <img id="img-aluno-perfil-preview" src="" alt="Foto" style="display:none; width:100%; height:100%; object-fit:cover;">
+                    <span id="display-avatar-profile">A</span>
+                    <label for="input-foto-aluno" class="btn-change-photo" style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.7); color: #fff; font-size: 9px; text-align: center; padding: 3px 0; cursor: pointer;">📷 Alterar</label>
+                    <input type="file" id="input-foto-aluno" accept="image/*" onchange="atualizarFotoPerfilAluno(event)" style="display: none;">
+                </div>
+                <h3 id="display-name-profile" style="font-size: 20px; font-weight: bold;">Nome do Aluno</h3>
+                <span id="profile-role-badge" style="font-size: 12px; color: var(--gold); font-weight: bold; background: rgba(212, 175, 55, 0.1); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--gold); margin-top: 5px;">
+                    Aluno PERSONOW
+                </span>
+            </div>
+
+            <div class="glass" style="padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--gold);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h4 style="font-size: 13px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">🏋️‍♂️ Próximo Treino Agendado</h4>
+                    <span style="font-size: 10px; color: var(--text-muted);">Em breve</span>
+                </div>
+                <div id="card-proximo-treino-conteudo">
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 5px 0;">Buscando agendamentos...</p>
+                </div>
+            </div>
+
+            <div class="glass" style="padding: 15px; margin-bottom: 15px;">
+                <h4 style="font-size: 14px; color: var(--gold); margin-bottom: 10px;">🎯 Objetivo de Treino</h4>
+                <select id="aluno-select-objetivo" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); color: var(--text-color); border: 1px solid var(--glass-border); border-radius: 8px; margin-bottom: 10px;">
+                    <option value="Hipertrofia">Hipertrofia & Ganho de Massa</option>
+                    <option value="Emagrecimento">Emagrecimento & Definição</option>
+                    <option value="Musculação">Musculação Geral</option>
+                    <option value="Funcional">Treinamento Funcional</option>
+                </select>
+
+                <label style="font-size: 11px; color: var(--text-muted);">Telefone / WhatsApp:</label>
+                <input type="text" id="aluno-input-telefone" placeholder="pelo botão de WhatsApp na tela de entrada" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-color); font-size: 13px; margin-top: 4px; margin-bottom: 10px;">
+
+                <button class="btn btn-primary" style="padding: 10px; font-size: 12px;" onclick="salvarPerfilAluno()">Salvar Perfil</button>
+            </div>
+
+            <div class="glass" style="padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <h4 style="font-size: 14px; color: var(--text-color); margin-bottom: 5px;">⚙️ Ajustes de Exibição</h4>
+                <div class="settings-item" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
+                    <span style="font-size: 13px;">Modo Claro / Escuro</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle" onchange="toggleTheme()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="section-title">Mais opções</div>
+            <div class="glass-list" style="margin-bottom:15px;">
+                <div class="menu-option-item" onclick="abrirOpcaoMenu('pagamento')"><div class="option-left"><span>💳</span><span>Forma de pagamento</span></div><span class="option-arrow">›</span></div>
+                <div class="menu-option-item" onclick="abrirOpcaoMenu('preferencias')"><div class="option-left"><span>💼</span><span>Preferências de treino</span></div><span class="option-arrow">›</span></div>
+                <div class="menu-option-item" onclick="abrirOpcaoMenu('indicar')"><div class="option-left"><span>🎁</span><span>Indicar amigos</span></div><span class="option-arrow">›</span></div>
+                <div class="menu-option-item" onclick="abrirOpcaoMenu('notificacoes')"><div class="option-left"><span>🔔</span><span>Notificações</span></div><span class="option-arrow">›</span></div>
+                <div class="menu-option-item" onclick="abrirOpcaoMenu('ajuda')" style="border-bottom:none;"><div class="option-left"><span>🌐</span><span>Ajuda e suporte</span></div><span class="option-arrow">›</span></div>
+            </div>
+
+            <div class="settings-item glass" onclick="logoutAluno()" style="cursor: pointer; padding: 15px; text-align: center;">
+                <span style="color: #ff3333; font-weight: bold; font-size: 14px;">🚪 Sair da Conta</span>
+            </div>
+        </div>
+
+        <div class="bottom-nav glass-nav" id="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('tab-home', this)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>Início</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-pedidos', this)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect><line x1="9" y1="12" x2="15" y2="12"></line><line x1="9" y1="16" x2="15" y2="16"></line></svg>
+                <span>Pedidos</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-agenda', this)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span>Agenda</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-carteira', this)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                <span>Carteira</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-mensagens', this)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                <span>Chat</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('tab-perfil', this)">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <span>Menu</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="subscreen-pagamento" class="app-overlay sub-overlay" style="display:none">
+        <div class="sub-inner">
+            <div class="sub-head"><button onclick="fecharSubtela('subscreen-pagamento')" aria-label="Voltar">❮</button><h2>Forma de pagamento</h2></div>
+            <label class="fld">Método preferido</label><select id="pg-metodo"><option>Pix</option><option>Cartão de crédito</option><option>Cartão de débito</option></select><label class="fld">CPF / Dados para nota</label><input type="text" id="pg-doc" placeholder="000.000.000-00" inputmode="numeric"><button class="btn btn-primary" onclick="salvarPagamento()">Salvar</button>
+        </div>
+    </div>
+    <div id="subscreen-preferencias" class="app-overlay sub-overlay" style="display:none">
+        <div class="sub-inner">
+            <div class="sub-head"><button onclick="fecharSubtela('subscreen-preferencias')" aria-label="Voltar">❮</button><h2>Preferências de treino</h2></div>
+            <label class="fld">Foco mais pedido</label><select id="pref-foco"><option>Musculação</option><option>Hipertrofia</option><option>Emagrecimento</option><option>Funcional</option><option>Avaliação Física</option></select><label class="fld">Horário preferido</label><select id="pref-turno"><option>Manhã (08:00)</option><option>Tarde (14:00)</option><option>Noite (19:00)</option></select><button class="btn btn-primary" onclick="salvarPreferencias()">Salvar preferências</button>
+        </div>
+    </div>
+    <div id="subscreen-indicar" class="app-overlay sub-overlay" style="display:none">
+        <div class="sub-inner">
+            <div class="sub-head"><button onclick="fecharSubtela('subscreen-indicar')" aria-label="Voltar">❮</button><h2>Indicar amigos</h2></div>
+            <div class="glass" style="padding:16px;margin-bottom:16px;"><p style="font-size:13px;line-height:1.5;">Convide outro aluno ou amigo para treinar com personais da sua região pelo PERSONOW.</p></div><label class="fld">Seu link de indicação</label><input type="text" id="input-link-indicacao" readonly value=""><button class="btn btn-primary" onclick="copiarLinkIndicacao()" style="margin-bottom:10px">Copiar link</button><button class="btn btn-outline" onclick="compartilharWhatsApp()">Compartilhar no WhatsApp</button>
+        </div>
+    </div>
+    <div id="subscreen-notificacoes" class="app-overlay sub-overlay" style="display:none">
+        <div class="sub-inner">
+            <div class="sub-head"><button onclick="fecharSubtela('subscreen-notificacoes')" aria-label="Voltar">❮</button><h2>Notificações</h2></div>
+            <label class="sw-row"><span>Personal aceitou meu pedido</span><input type="checkbox" checked></label><label class="sw-row"><span>Mensagens no chat</span><input type="checkbox" checked></label><label class="sw-row"><span>Início e conclusão da aula</span><input type="checkbox" checked></label><button class="btn btn-primary" onclick="salvarNotificacoes()">Salvar</button>
+        </div>
+    </div>
+    <div id="subscreen-ajuda" class="app-overlay sub-overlay" style="display:none">
+        <div class="sub-inner">
+            <div class="sub-head"><button onclick="fecharSubtela('subscreen-ajuda')" aria-label="Voltar">❮</button><h2>Ajuda e suporte</h2></div>
+            <div class="glass" style="padding:18px;margin-bottom:16px;"><h3 style="color:var(--gold);font-size:15px;margin-bottom:8px;">Suporte PERSONOW</h3><p style="font-size:13px;line-height:1.7;">📧 suporte@personow.com.br<br>📱 (19) 99999-9999</p></div><button class="btn btn-outline" onclick="fecharSubtela('subscreen-ajuda')">Voltar</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM SHEET: PEDIR PERSONAL -->
+    <div id="sheet-pedido" class="sheet-overlay" onclick="if(event.target===this)fecharSheetPedido()">
+        <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-titulo">
+            <div class="sheet-grab"></div>
+            <div class="sheet-head"><h3 id="sheet-titulo">Pedir personal</h3><button type="button" class="sheet-x" onclick="fecharSheetPedido()" aria-label="Fechar">✕</button></div>
+            <p class="sheet-sub" id="sheet-sub">Os personais da região recebem o seu pedido.</p>
+
+            <input type="hidden" id="solicitacao-foco" value="Musculação">
+            <div class="chips-row" id="sheet-chips" role="radiogroup" aria-label="Foco do treino">
+                <button type="button" class="chip sel" data-v="Musculação"><span class="ico">💪</span>Musculação</button>
+                <button type="button" class="chip" data-v="Hipertrofia"><span class="ico">🔥</span>Hipertrofia</button>
+                <button type="button" class="chip" data-v="Emagrecimento"><span class="ico">⚡</span>Emagrecimento</button>
+                <button type="button" class="chip" data-v="Corrida"><span class="ico">🏃‍♂️</span>Corrida</button>
+                <button type="button" class="chip" data-v="Funcional"><span class="ico">🤸‍♂️</span>Funcional</button>
+                <button type="button" class="chip" data-v="Avaliação Física"><span class="ico">📋</span>Avaliação</button>
+            </div>
+
+            <label class="sheet-label" for="solicitacao-local">Onde?</label>
+            <input type="text" id="solicitacao-local" placeholder="Nome da academia / endereço" autocomplete="street-address">
+
+            <label class="sheet-label" for="solicitacao-data">Quando?</label>
+            <input type="date" id="solicitacao-data">
+            <div class="sheet-row">
+                <div><label class="sheet-mini" for="solicitacao-entrada">Início</label><input type="time" id="solicitacao-entrada"></div>
+                <div><label class="sheet-mini" for="solicitacao-saida">Término</label><input type="time" id="solicitacao-saida"></div>
+            </div>
+
+            <label class="sheet-label" for="solicitacao-valor">Quanto você quer pagar? <small>(valor da aula)</small></label>
+            <div class="chips-row valor-chips">
+                <button type="button" class="chip" onclick="definirValor(60)">R$ 60</button>
+                <button type="button" class="chip" onclick="definirValor(80)">R$ 80</button>
+                <button type="button" class="chip" onclick="definirValor(100)">R$ 100</button>
+                <button type="button" class="chip" onclick="definirValor(150)">R$ 150</button>
+            </div>
+            <input type="number" id="solicitacao-valor" min="1" step="1" placeholder="Ex: 80" inputmode="decimal" oninput="atualizarResumoValor()">
+            <div class="resumo-valor"><span>Personal recebe (85%): <strong id="rv-prom">R$ 0,00</strong></span><span>Plataforma (15%): <strong id="rv-taxa">R$ 0,00</strong></span></div>
+
+            <button type="button" class="btn btn-primary" style="margin-top:14px;" onclick="confirmarPedido()">🚀 Solicitar personal</button>
+            <p class="muted-line" style="margin-top:10px;text-align:center;">Você só paga depois da aula, escaneando o QR Code do personal.</p>
+        </div>
+    </div>
+
+    <!-- BOTTOM SHEET: PERFIL DO PERSONAL -->
+    <div id="sheet-perfil" class="sheet-overlay" onclick="if(event.target===this)fecharSheetPerfil()">
+        <div class="sheet" role="dialog" aria-modal="true" aria-label="Perfil do personal">
+            <div class="sheet-grab"></div>
+            <div id="sheet-perfil-corpo"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: CHAT DA AULA -->
+    <div id="modal-chat-aluno" class="app-overlay" role="dialog" aria-modal="true" aria-labelledby="chat-aluno-titulo">
+        <div class="glass modal-box" style="max-width:450px;width:100%;height:80vh;display:flex;flex-direction:column;padding:15px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--glass-border);padding-bottom:10px;margin-bottom:10px;">
+                <h3 id="chat-aluno-titulo" style="margin:0;color:var(--accent);font-size:16px;">Conversa</h3>
+                <button type="button" onclick="fecharChatAula()" aria-label="Fechar" style="background:transparent;border:none;color:#ff3333;font-size:18px;font-weight:bold;cursor:pointer;">✕</button>
+            </div>
+            <div id="chat-aluno-box" class="chat-messages-container" style="flex:1;margin-bottom:10px;"></div>
+            <p class="muted-line" style="font-size:11px;margin:0 0 8px">Combine tudo por aqui. Telefone, e-mail, links e Pix não são permitidos no chat.</p>
+            <div style="display:flex;gap:8px;">
+                <input type="text" id="chat-aluno-input" maxlength="500" placeholder="Digite sua mensagem..." autocomplete="off" style="flex:1;margin:0;">
+                <button type="button" class="btn btn-primary" onclick="enviarMensagemAluno()" style="padding:0 15px;border-radius:8px;width:auto;">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM SHEET: AVALIAR PERSONAL -->
+    <div id="sheet-avaliar" class="sheet-overlay" onclick="if(event.target===this)fecharAvaliacao()">
+        <div class="sheet" role="dialog" aria-modal="true" aria-label="Avaliar personal">
+            <div class="sheet-grab"></div>
+            <div class="sheet-head"><h3>Avaliar aula</h3><button type="button" class="sheet-x" onclick="fecharAvaliacao()" aria-label="Fechar">✕</button></div>
+            <p class="sheet-sub" id="avaliar-sub">Como foi a aula?</p>
+            <div class="stars" id="avaliar-estrelas" role="group" aria-label="Nota de 1 a 5"></div>
+            <textarea id="avaliar-comentario" rows="3" maxlength="300" placeholder="Comentário (opcional)" style="width:100%;margin-bottom:12px;"></textarea>
+            <button type="button" class="btn btn-primary" onclick="enviarAvaliacao()">Enviar avaliação</button>
+        </div>
+    </div>
+
+    <!-- MODAL TERMOS -->
+    <div id="modal-termos-aluno" class="app-overlay">
+        <div class="glass modal-box" style="max-height: 80vh; overflow-y: auto; text-align: left; padding: 25px;">
+            <h3 style="color: var(--gold); margin-bottom: 10px;">📜 Termos de Uso - PERSONOW</h3>
+            <p style="font-size: 12px; color: var(--text-color); line-height: 1.5; margin-bottom: 10px;">
+                Bem-vindo ao <strong>PERSONOW</strong>. Ao acessar com sua conta Google, você concorda com as diretrizes de solicitação e repasse de aulas:
+            </p>
+            <h4 style="font-size: 13px; color: var(--gold); margin-top: 10px;">1. Intermediação de Serviços</h4>
+            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+                As transações são processadas via gateway seguro. A plataforma retém a taxa operacional para manutenção do sistema de geolocalização.
+            </p>
+            <button class="btn btn-primary" style="margin-top: 20px; width: 100%;" onclick="aceitarTermosAlunoModal()">Li e Concordo</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkTermos = document.getElementById('check-termos-aluno');
+            const btnLogin = document.getElementById('btn-login-aluno');
+
+            if (checkTermos && btnLogin) {
+                checkTermos.addEventListener('change', () => {
+                    if (checkTermos.checked) {
+                        btnLogin.disabled = false;
+                        btnLogin.style.opacity = '1';
+                        btnLogin.style.cursor = 'pointer';
+                    } else {
+                        btnLogin.disabled = true;
+                        btnLogin.style.opacity = '0.5';
+                        btnLogin.style.cursor = 'not-allowed';
+                    }
+                });
+            }
+        });
+
+        window.abrirModalTermosAluno = function() {
+            document.getElementById('modal-termos-aluno').classList.add('active');
+        }
+
+        window.aceitarTermosAlunoModal = function() {
+            const checkTermos = document.getElementById('check-termos-aluno');
+            const btnLogin = document.getElementById('btn-login-aluno');
+            if (checkTermos) checkTermos.checked = true;
+            if (btnLogin) {
+                btnLogin.disabled = false;
+                btnLogin.style.opacity = '1';
+                btnLogin.style.cursor = 'pointer';
+            }
+            document.getElementById('modal-termos-aluno').classList.remove('active');
+        }
+    </script>
+
+    <!-- O módulo precisa carregar ANTES do Maps, pois o Maps chama window.initMap -->
+    <script type="module" src="script.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCYuhjdqUwLqt1wBkq4SkkUcC3FDaPXspU&libraries=geometry&callback=initMap" async defer></script>
+</body>
+</html>
