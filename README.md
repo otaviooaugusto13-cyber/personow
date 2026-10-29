@@ -54,3 +54,7 @@ node scripts/migrar-dados.cjs            # simulação
 node scripts/migrar-dados.cjs --aplicar  # grava (não apaga nada do antigo)
 ```
 Renomeia `contratantes→alunos`, `profissionais→personais (+personais_privado)`, `solicitacoes→aulas` (`loja→local`, `promotor*→personal*`, valores em centavos). Personais cujo documento tinha o CPF como id e sem conta Google **não** podem ser migrados: entram de novo pelo Google.
+
+
+## Atualização (segurança, admin, perfil inteligente)
+Veja **ATUALIZACAO.md** (o que entrou, o que ficou de fora e a ordem de publicação). Novos comandos: `npm run gerar-chaves`, `npm run migrar-cripto`, `npm run definir-admin -- email`. Painel: `/admin.html`.

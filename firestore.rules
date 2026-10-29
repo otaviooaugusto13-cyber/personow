@@ -12,6 +12,8 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/personais/$(request.auth.uid)).data.status == 'ativo';
     }
     function soMudou(campos) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(campos); }
+    // campo opcional: ausente OU texto de até n caracteres (limita abuso de armazenamento)
+    function str(campo, n) { return !(campo in request.resource.data) || (request.resource.data[campo] is string && request.resource.data[campo].size() <= n); }
 
     // ---------- Aulas (pedidos de treino) ----------
     match /aulas/{id} {
@@ -51,7 +53,13 @@ service cloud.firestore {
     }
 
     // ---------- Alunos ----------
-    match /alunos/{uid} { allow read, write: if dono(uid); }
+    // `recado` (mensagem do suporte) e `status` só o servidor escreve: o aluno não forja nem apaga por aqui (usa POST /perfil/recado/lido).
+    match /alunos/{uid} {
+      allow read: if dono(uid);
+      allow create: if dono(uid) && !('recado' in request.resource.data) && !('status' in request.resource.data);
+      allow update: if dono(uid) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['recado', 'status']);
+      allow delete: if false;
+    }
 
     // ---------- Personais ----------
     // Perfil público (o aluno vê nome, nota, especialidade, CREF, região). Nada sensível aqui:
@@ -61,19 +69,28 @@ service cloud.firestore {
       allow create: if dono(uid) && request.resource.data.status == 'pendente'
         && request.resource.data.keys().hasOnly(['nome', 'uid', 'status', 'indicadoPor', 'criadoEm', 'fotoGoogle', 'especialidade', 'cref']);
       allow update: if dono(uid) && soMudou(['nome', 'especialidade', 'bio', 'cidade', 'cref', 'valorMin', 'disponibilidade', 'fotoGoogle', 'lat', 'lng', 'refCode', 'atualizadoEm'])
-        && (!('refCode' in resource.data) || request.resource.data.get('refCode', '') == resource.data.refCode);
+        && (!('refCode' in resource.data) || request.resource.data.get('refCode', '') == resource.data.refCode)
+        && str('nome', 100) && str('especialidade', 60) && str('bio', 300) && str('cidade', 80) && str('cref', 20)
+        && (!('valorMin' in request.resource.data) || (request.resource.data.valorMin is number && request.resource.data.valorMin >= 0 && request.resource.data.valorMin <= 1000))
+        && (!('lat' in request.resource.data) || (request.resource.data.lat is number && request.resource.data.lat >= -34 && request.resource.data.lat <= 6))
+        && (!('lng' in request.resource.data) || (request.resource.data.lng is number && request.resource.data.lng >= -74 && request.resource.data.lng <= -28));
+      // `experiencias`, `palavrasChave`, `recado`, `status`, `mpConectado`, notas: só o servidor (PUT /perfil/personal/inteligente, painel admin, Mercado Pago).
       allow delete: if false;
 
       // Alunos que o personal já atende fora da plataforma e quer organizar na agenda (privado).
       match /meus_alunos/{aid} { allow read, write: if dono(uid); }
     }
-    match /personais_privado/{uid} { allow read, write: if dono(uid); }
+    // CPF, telefone, nascimento, banco e Pix ficam CIFRADOS (AES-256-GCM) e só passam pelo servidor
+    // (GET/PUT /perfil/personal/privado). O navegador não lê nem escreve aqui. Rode scripts/migrar-cripto.cjs ANTES de publicar esta regra.
+    match /personais_privado/{uid} { allow read, write: if false; }
 
     // Credenciais do Mercado Pago, contadores, moderação: ninguém no navegador.
     match /mp_tokens/{uid} { allow read, write: if false; }
     match /contadores/{id} { allow read, write: if false; }
     match /infracoes/{id}  { allow read, write: if false; }
     match /moderacao/{id}  { allow read, write: if false; }
+    match /auditoria/{id}  { allow read, write: if false; }   // trilha de auditoria: só servidor/admin
+    match /config/{id}     { allow read, write: if false; }   // aviso global etc.: lido via GET /aviso
     // pagamentos_internos (split completo): ninguém no navegador — cai na regra final.
 
     match /{outro=**} { allow read, write: if false; }

@@ -5,9 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node ../test/regras.test.js && node ../test/server.fake.test.cjs && node ../test/migracao.test.cjs"
+    "test": "node ../test/regras.test.js && node ../test/perfil.test.js && node ../test/server.fake.test.cjs && node ../test/seguranca.test.cjs && node ../test/migracao.test.cjs && node ../test/cripto-e-admin.test.cjs"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",

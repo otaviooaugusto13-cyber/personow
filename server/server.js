@@ -11,6 +11,10 @@
 //    POST /criarCobranca           checkout com split automático
 //    /webhookMP, POST /confirmarPagamento
 //  Diagnóstico: GET /saude, GET /diagnostico
+//  Segurança / operação (módulos adaptados do Abastece Já):
+//    lib/seguranca.js   CSP/HSTS, CSRF, CORS fechado, rate limit, token com checagem de revogação, auditoria
+//    lib/validacao.js   entrada estrita (tipos, tamanhos, listas permitidas)   lib/cripto.js  AES-256-GCM em repouso
+//    rotas/perfil.js    dados sensíveis cifrados, perfil inteligente, recado    rotas/admin.js painel administrativo
 // ============================================================
 const express = require("express");
 const cors = require("cors");
@@ -19,9 +23,15 @@ const crypto = require("crypto");
 const path = require("path");
 const fs = require("fs");
 const R = require("./regras");
+const C = require("./lib/config");
+const { Falha } = require("./lib/erros");
+const Seg = require("./lib/seguranca");
+const Cripto = require("./lib/cripto");
+const V = require("./lib/validacao");
 
 const app = express();
 app.set("trust proxy", 1);
+app.disable?.("x-powered-by");
 
 // ---------- Firebase Admin ----------
 function credencialFirebase() {
@@ -55,6 +65,13 @@ const APP_URL = process.env.APP_URL || "";
 const PORT = process.env.PORT || 3000;
 const MP_API = "https://api.mercadopago.com";
 
+// Em produção o servidor se recusa a subir sem o essencial (melhor falhar no deploy do que cobrar errado).
+if (C.PRODUCAO) {
+  const faltam = [["MP_CLIENT_ID", MP_CLIENT_ID], ["MP_CLIENT_SECRET", MP_CLIENT_SECRET], ["MP_WEBHOOK_SECRET", MP_WEBHOOK_SECRET], ["APP_URL", APP_URL],
+    ["DATA_ENCRYPTION_KEYS", process.env.DATA_ENCRYPTION_KEYS], ["BLIND_INDEX_KEY", process.env.BLIND_INDEX_KEY]].filter(([, v]) => !v).map(([k]) => k);
+  if (faltam.length) { console.error(`🛑 Variáveis obrigatórias ausentes em produção: ${faltam.join(", ")}`); process.exit(1); }
+}
+
 const appUrl = () => (APP_URL || "").replace(/\/$/, "");
 const origemDe = (u) => { try { return new URL(u).origin; } catch { return ""; } };
 const getBaseUrl = (req) => {
@@ -70,12 +87,29 @@ const primeiroNome = (n) => String(n || "").trim().split(/\s+/)[0].slice(0, 30);
 const cpfMascarado = (cpf) => { const d = String(cpf || "").replace(/\D/g, ""); return d.length === 11 ? `***.${d.slice(3, 6)}.${d.slice(6, 9)}-**` : ""; };
 const estaPaga = (a) => a.status === "paga" || a.status === "concluida";
 
-const origensPermitidas = [origemDe(APP_URL), origemDe(process.env.RENDER_EXTERNAL_URL || "")].filter(Boolean);
-app.use(cors({ origin: origensPermitidas.length ? [...origensPermitidas, /^http:\/\/localhost(:\d+)?$/] : true }));
-app.use(express.json({ limit: "20kb" }));
+// ---------- Pipeline HTTP (segurança) ----------
+const permitidas = Seg.origensPermitidas(APP_URL, process.env.ORIGENS_PERMITIDAS);
+const auth = Seg.criarAuth({ admin, db, FieldValue });
+const limitador = Seg.criarLimitador(), { limitar } = limitador;
+app.use(Seg.cabecalhos());
+app.use(cors(Seg.opcoesCors(permitidas)));
+app.use(express.json({ limit: C.BODY_LIMITE }));
+app.use(Seg.protecaoCsrf(permitidas, { isentas: ["/webhookMP"] }));
+app.use(limitar({ janelaMs: 60_000, max: 240, nome: "global" }));
+// Limites por rota (por IP). Registrados com app.use para não alterar a assinatura das rotas abaixo.
+app.use("/criarAula", limitar({ janelaMs: 60_000, max: 10, nome: "criar-aula" }));
+app.use("/aceitarAula", limitar({ janelaMs: 60_000, max: 30, nome: "aceitar-aula" }));
+app.use("/enviarMensagem", limitar({ janelaMs: 60_000, max: 40, nome: "chat" }));
+app.use("/avaliarAula", limitar({ janelaMs: 60_000, max: 20, nome: "avaliar" }));
+app.use("/criarCobranca", limitar({ janelaMs: 60_000, max: 10, nome: "cobranca" }));
+app.use("/confirmarPagamento", limitar({ janelaMs: 60_000, max: 30, nome: "confirmar" }));
+app.use("/mpConectarUrl", limitar({ janelaMs: 60_000, max: 10, nome: "mp-conectar" }));
+app.use(/^\/(saude|diagnostico|perfil|admin|aviso|criar|aceitar|enviar|avaliar|confirmar|mpConectarUrl)/, Seg.semCache);
 
-class Falha extends Error {
-  constructor(status, msg, codigo, detalhe) { super(msg); this.status = status; this.codigo = codigo; this.detalhe = detalhe; }
+/** Trilha de auditoria para eventos do próprio sistema (webhook, pagamento). Nunca derruba a operação. */
+async function auditarSistema(acao, alvo = "", detalhes = {}) {
+  try { await db.collection("auditoria").doc().set({ em: FieldValue.serverTimestamp(), uid: "sistema", acao, alvo: String(alvo).slice(0, 160), detalhes }); }
+  catch (e) { console.error("auditoria", acao, e.message); }
 }
 
 // ---------- Autenticação ----------
@@ -83,8 +117,11 @@ async function usuario(req) {
   const h = req.get("authorization") || "";
   const token = h.startsWith("Bearer ") ? h.slice(7) : "";
   if (!token) throw new Falha(401, "login necessário", "sem-login");
-  try { return await admin.auth().verifyIdToken(token); }
-  catch { throw new Falha(401, "sessão inválida", "sessao-invalida"); }
+  try {
+    const u = await admin.auth().verifyIdToken(token, true);   // true = recusa sessões revogadas (ex.: conta bloqueada pelo admin)
+    if (u.email_verified === false) throw new Error("email nao verificado");
+    return u;
+  } catch { throw new Falha(401, "sessão inválida", "sessao-invalida"); }
 }
 
 const envelope = (fn) => async (req, res) => {
@@ -150,7 +187,9 @@ function splitDaAula(a) {
 // SAÚDE / DIAGNÓSTICO
 // ============================================================
 app.get("/saude", (req, res) => res.json({ ok: true }));
-app.get("/diagnostico", (req, res) => {
+app.get("/diagnostico", async (req, res) => {
+  // Em produção só o admin vê o detalhe da configuração (evita mapear o servidor para um atacante).
+  if (C.PRODUCAO) { let adm = false; try { adm = Seg.ehAdmin(await auth.autenticar(req)); } catch {} if (!adm) return res.json({ ok: true }); }
   const problemas = [];
   if (!MP_CLIENT_ID) problemas.push("MP_CLIENT_ID ausente");
   if (!MP_CLIENT_SECRET) problemas.push("MP_CLIENT_SECRET ausente");
@@ -182,10 +221,12 @@ app.post("/criarAula", envelope(async (req, res) => {
 
   const sp = R.calcularSplit(valorCentavos);
   const ref = db.collection("aulas").doc();
+  let geo = null;
+  if (b.lat !== undefined || b.lng !== undefined) { try { geo = V.coordenada(b.lat, b.lng, "localização do treino"); } catch { geo = null; } }   // opcional: coordenada ruim é ignorada, não derruba o pedido
   const aula = {
     alunoUid: u.uid, alunoNome: primeiroNome(u.name) || "Aluno", local, data, entrada, saida, horario: `${entrada}–${saida}`,
     minutos: R.minutosEntre(entrada, saida), foco, valorCentavos: sp.valor, valorPersonalCentavos: sp.personal,
-    status: "aberta", criadoEm: FieldValue.serverTimestamp()
+    status: "aberta", criadoEm: FieldValue.serverTimestamp(), ...(geo || {})
   };
 
   if (b.personalPreferidoUid) {
@@ -384,12 +425,13 @@ async function finalizarPagamento(aulaId, { paymentId, metodo, taxaMpCentavos = 
     const proximo = (cont.data()?.ultimo || 0) + 1;
     tx.set(contRef, { ultimo: proximo });
     const al = aluno.data() || {}, pv = privado.data() || {}, pe = personal.data() || {};
+    const cpfPersonal = pv.cpfEnc ? (() => { try { return Cripto.decifrar(pv.cpfEnc, `personais_privado/cpf/${atual.personalUid}`); } catch { return ""; } })() : pv.cpf;
     const rRef = db.collection("recibos").doc();
     tx.set(rRef, {
       numero: proximo, numeroFmt: String(proximo).padStart(6, "0"), serie: "A1", tipo: "recibo_aula_plataforma", fiscal: { nfse: null },
       aulaId, alunoUid: atual.alunoUid,
       aluno: { nome: al.nome || atual.alunoNome || "", email: al.email || "" },
-      personal: { nome: pe.nome || atual.personalNome || "", cref: pe.cref || "", documentoMascarado: cpfMascarado(pv.cpf) },
+      personal: { nome: pe.nome || atual.personalNome || "", cref: pe.cref || "", documentoMascarado: cpfMascarado(cpfPersonal) },
       servico: { descricao: `Aula de personal trainer — ${atual.foco}`, local: atual.local, data: atual.data, horario: atual.horario },
       valores: { valor: sp.valor, taxaFixa: sp.taxaFixa, total: sp.total },
       pagamento: { mpPaymentId: String(paymentId), metodo: metodo || "" },
@@ -399,6 +441,7 @@ async function finalizarPagamento(aulaId, { paymentId, metodo, taxaMpCentavos = 
     tx.set(db.collection("pagamentos_internos").doc(aulaId), { alunoUid: atual.alunoUid, split: sp, status: "aprovado", mpPaymentId: String(paymentId), metodo: metodo || "", taxaMpCentavos, pagoEm: FieldValue.serverTimestamp() }, { merge: true });
     return rRef.id;
   });
+  await auditarSistema("pagamento.aprovado", aulaId, { paymentId: String(paymentId), metodo: metodo || "", total: sp.total });
   return { aprovado: true, reciboId };
 }
 
@@ -457,25 +500,34 @@ app.post("/confirmarPagamento", envelope(async (req, res) => {
 }));
 
 // ============================================================
-// SITE ESTÁTICO (o servidor também serve o app)
+// PERFIL (dados cifrados, perfil inteligente, recado) e ADMIN
+// ============================================================
+const ctx = { db, admin, FieldValue, Timestamp, R, C, V, Cripto, Falha, auth, limitar, envelope: Seg.envelope };
+require("./rotas/perfil")(app, ctx);
+require("./rotas/admin")(app, ctx);
+
+// ============================================================
+// SITE ESTÁTICO (o servidor também serve o app) — só extensões de front; nada de código do servidor, regras ou segredos
 // ============================================================
 const RAIZ = path.join(__dirname, "..");
+const BLOQUEADOS = /^\/(server|functions|test|scripts|node_modules|docs)(\/|$)|(^|\/)\./i;
 app.use((req, res, next) => {
-  const bloqueado = /^\/(server|functions|test|scripts|node_modules|\.git)(\/|$)/i.test(req.path)
-    || (/\.(md|rules|yaml|yml|json)$/i.test(req.path) && !/manifest\.json$/i.test(req.path));
-  if (bloqueado) return res.status(404).send("Not Found");
+  let p; try { p = decodeURIComponent(req.path); } catch { return res.status(400).send("Bad Request"); }
+  if (BLOQUEADOS.test(p) || !/^\/([\w.-]+\/)*[\w.-]*$/.test(p)) return res.status(404).send("Not Found");
+  if (p !== "/" && !/\.(html|css|js|png|jpe?g|svg|ico|webp|woff2)$/i.test(p) && p !== "/manifest.json") return res.status(404).send("Not Found");
   next();
 });
-app.use(express.static(RAIZ, { dotfiles: "ignore" }));
+app.use(express.static(RAIZ, { dotfiles: "ignore", index: ["index.html"], maxAge: 0, setHeaders: (res, f) => { if (f.endsWith("sw.js")) res.setHeader("Cache-Control", "no-cache"); } }));
 
 app.use((req, res) => {
-  if (req.method !== "GET" || /^\/(mp|criar|aceitar|enviar|avaliar|confirmar|webhook)/.test(req.path)) {
+  if (req.method !== "GET" || /^\/(mp|criar|aceitar|enviar|avaliar|confirmar|webhook|perfil|admin|aviso)/.test(req.path)) {
     return res.status(404).json({ erro: `rota não encontrada: ${req.method} ${req.path}`, codigo: "rota-inexistente" });
   }
   res.status(404).send("Not Found");
 });
+app.use(Seg.tratadorErros);
 
 if (require.main === module) {
   app.listen(PORT, "0.0.0.0", () => console.log(`Personow rodando na porta ${PORT}`));
 }
-module.exports = { app, finalizarPagamento, processarPagamento };
+module.exports = { app, ctx, finalizarPagamento, processarPagamento };

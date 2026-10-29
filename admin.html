@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B0B0D">
+<title>Admin — Personow</title>
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body class="ax-body">
+
+<div id="ax-login" class="ax-card ax-login">
+  <h1>Painel administrativo</h1>
+  <p class="ax-mut ax-mb">Acesso restrito à equipe. Use a conta Google autorizada.</p>
+  <button class="ax-btn pri" id="ax-entrar" style="width:100%">Entrar com Google</button>
+  <p class="ax-erro ax-mt" id="ax-login-erro" role="alert"></p>
+</div>
+
+<div id="ax-app" hidden>
+  <aside class="ax-side" aria-label="Menu principal">
+    <div class="ax-brand"><i>P</i> Personow</div>
+    <nav id="ax-nav">
+      <button class="ax-nav sel" data-v="visao">◎ Visão geral</button>
+      <button class="ax-nav" data-v="personais">☰ Personais <span class="ax-badge" id="n-pend" hidden></span></button>
+      <button class="ax-nav" data-v="aulas">▤ Aulas</button>
+      <button class="ax-nav" data-v="moderacao">⚑ Moderação</button>
+      <button class="ax-nav" data-v="auditoria">☷ Auditoria</button>
+      <button class="ax-nav" data-v="config">⚙ Aviso e exportação</button>
+    </nav>
+    <div style="margin-top:auto;padding:12px 10px"><p class="ax-xs ax-mut" id="ax-quem" style="word-break:break-all"></p><button class="ax-btn sm ax-mt" id="ax-sair" style="width:100%">Sair</button></div>
+  </aside>
+
+  <div class="ax-wrap">
+    <header class="ax-top"><h1 id="ax-titulo">Visão geral</h1></header>
+    <main class="ax-main">
+      <p class="ax-erro ax-mb" id="ax-msg" role="alert"></p>
+
+      <section id="v-visao">
+        <div class="ax-grid ax-g4" id="kpis"></div>
+        <p class="ax-mut ax-xs ax-mt">Valores das aulas pagas (o Mercado Pago divide o pagamento na hora: o repasse vai direto ao personal e a comissão fica com a plataforma).</p>
+      </section>
+
+      <section id="v-personais" hidden>
+        <div class="ax-tabs" id="tabs-status">
+          <button class="ax-btn sm sel" data-s="pendente">Em análise</button><button class="ax-btn sm" data-s="ativo">Ativos</button><button class="ax-btn sm" data-s="bloqueado">Bloqueados</button>
+        </div>
+        <div class="ax-card ax-mt"><table class="ax-tbl"><thead><tr><th>Nome</th><th>CREF</th><th>Cidade</th><th>Mercado Pago</th><th>Nota</th><th></th></tr></thead><tbody id="tb-personais"></tbody></table></div>
+      </section>
+
+      <section id="v-aulas" hidden>
+        <div class="ax-tabs" id="tabs-aulas">
+          <button class="ax-btn sm sel" data-s="paga">Pagas</button><button class="ax-btn sm" data-s="concluida">Concluídas</button><button class="ax-btn sm" data-s="aceita">Aceitas</button><button class="ax-btn sm" data-s="aberta">Abertas</button><button class="ax-btn sm" data-s="cancelada">Canceladas</button>
+        </div>
+        <div class="ax-card ax-mt"><table class="ax-tbl"><thead><tr><th>Data</th><th>Horário</th><th>Foco</th><th>Aluno</th><th>Personal</th><th>Valor</th><th>Repasse</th></tr></thead><tbody id="tb-aulas"></tbody></table></div>
+      </section>
+
+      <section id="v-moderacao" hidden>
+        <h2 class="ax-h2">Reincidentes (revisão manual)</h2>
+        <div class="ax-card"><table class="ax-tbl"><thead><tr><th>UID</th><th>Ocorrências</th><th>Última</th><th></th></tr></thead><tbody id="tb-reinc"></tbody></table></div>
+        <h2 class="ax-h2 ax-mt">Mensagens bloqueadas no chat</h2>
+        <div class="ax-card"><table class="ax-tbl"><thead><tr><th>Quando</th><th>UID</th><th>Trecho</th></tr></thead><tbody id="tb-moder"></tbody></table></div>
+      </section>
+
+      <section id="v-auditoria" hidden>
+        <div class="ax-card"><table class="ax-tbl"><thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Alvo</th></tr></thead><tbody id="tb-aud"></tbody></table></div>
+      </section>
+
+      <section id="v-config" hidden>
+        <div class="ax-card ax-mb">
+          <h2 class="ax-h2">Aviso para todos os usuários</h2>
+          <label class="ax-lbl"><input type="checkbox" id="av-ativo"> Mostrar aviso</label>
+          <select id="av-nivel" class="ax-in"><option value="info">Informativo</option><option value="alerta">Alerta</option></select>
+          <input id="av-texto" class="ax-in" maxlength="200" placeholder="Ex.: Manutenção hoje às 23h.">
+          <button class="ax-btn pri ax-mt" id="av-salvar">Salvar aviso</button>
+        </div>
+        <div class="ax-card">
+          <h2 class="ax-h2">Exportar (CSV)</h2>
+          <button class="ax-btn" data-csv="personais">Personais</button> <button class="ax-btn" data-csv="aulas">Aulas pagas</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<dialog id="dlg" class="ax-dlg"><div id="dlg-corpo"></div><div class="ax-row ax-mt"><button class="ax-btn" id="dlg-fechar">Fechar</button></div></dialog>
+<script type="module" src="admin.js"></script>
+</body>
+</html>

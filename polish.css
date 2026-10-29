@@ -349,3 +349,26 @@ body.light-theme .home-head, body.light-theme .hero-card, body.light-theme .pc {
 .rating-line { font-size: 12px; color: #f59e0b; font-weight: 700; }
 .aviso-box { padding: 12px 14px; border-radius: 12px; font-size: 12px; line-height: 1.5; background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.4); color: var(--text-color); margin-bottom: 12px; }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+
+/* ===== Acréscimos (módulos adaptados do Abastece Já) — só adiciona; nada acima foi alterado ===== */
+#toast.toast-ok { border-color: rgba(34,197,94,.6); }
+#toast.toast-erro { border-color: rgba(255,51,51,.6); }
+.skeleton { height: 64px; border-radius: 14px; margin-bottom: 10px; background: linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.05) 75%); background-size: 200% 100%; animation: skel 1.3s infinite; }
+body.light-theme .skeleton { background: linear-gradient(90deg, rgba(0,0,0,.05) 25%, rgba(0,0,0,.1) 50%, rgba(0,0,0,.05) 75%); background-size: 200% 100%; }
+@keyframes skel { to { background-position: -200% 0; } }
+.aviso-global { position: sticky; top: 0; z-index: 100000; display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 14px; font-size: 12px; background: rgba(59,130,246,.18); border-bottom: 1px solid var(--accent); color: var(--text-color); }
+.aviso-global.alerta { background: rgba(245,158,11,.2); border-color: #f59e0b; }
+.aviso-global button { background: transparent; border: none; color: inherit; font-size: 20px; line-height: 1; cursor: pointer; }
+.banner-recado { display: flex; gap: 10px; align-items: flex-start; }
+.banner-recado .grow { flex: 1; min-width: 0; }
+.banner-recado .acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.chip-match { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--glass-border); color: var(--accent); background: rgba(59,130,246,.12); }
+.chip-match.alto { border-color: rgba(34,197,94,.55); color: #22c55e; background: rgba(34,197,94,.12); }
+.chip-match.baixo { color: var(--text-muted); background: transparent; }
+.razoes-match { font-size: 11px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+.filtros-ofertas { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.filtros-ofertas .btn-mini.ativo { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tags-perfil { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 0; }
+.tags-perfil span { font-size: 11px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--glass-border); color: var(--text-muted); }
+.exp-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 13px; }
+.exp-linha select { width: 110px; padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,.15); background: #1f1f23; color: #fff; }

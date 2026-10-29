@@ -52,3 +52,8 @@ export const FUNCTIONS_BASE = mesmaOrigem ? location.origin : URL_RENDER;
 
 // Emuladores locais (só testes): abra o app com ?emulador=1 em localhost.
 export const USAR_EMULADOR = typeof location !== "undefined" && location.hostname === "localhost" && new URLSearchParams(location.search).has("emulador");
+
+// ---- Localização e ranking (adaptado do Abastece Já) ----
+export const RAIO_KM_AULAS = 20;                   // "Perto de mim": pedidos até 20 km da posição do personal
+export const LOCAL_MAX_IDADE_MS = 120_000;         // posição em cache aceita por até 2 min (economiza bateria)
+export const ANOS_EXPERIENCIA_MAX = 50;            // espelho de PERFIL_ANOS_MAX no servidor

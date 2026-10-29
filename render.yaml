@@ -10,13 +10,25 @@ services:
     plan: free
     healthCheckPath: /saude
     envVars:
+      - key: AMBIENTE
+        value: producao              # liga as travas de produção: o servidor não sobe sem as variáveis abaixo
+      - key: APP_URL
+        sync: false                  # https://SEU-APP.onrender.com (ou seu domínio), sem barra final
+      - key: ORIGENS_PERMITIDAS
+        sync: false                  # opcional: outros domínios do front (separados por vírgula)
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
       - key: MP_CLIENT_ID
         sync: false
       - key: MP_CLIENT_SECRET
         sync: false
       - key: MP_WEBHOOK_SECRET
         sync: false
-      - key: FIREBASE_SERVICE_ACCOUNT
+      - key: DATA_ENCRYPTION_KEYS    # npm run gerar-chaves (guarde BACKUP: perder a chave = perder CPF/Pix cifrados)
         sync: false
-      - key: APP_URL
+      - key: DATA_ENCRYPTION_KEY_ID
         sync: false
+      - key: BLIND_INDEX_KEY
+        sync: false
+      - key: ADMIN_EXIGE_MFA         # exige 2ª etapa do Google para o painel admin (ative MFA no Firebase Auth antes)
+        value: "0"

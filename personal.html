@@ -353,6 +353,14 @@
             <label style="font-size: 12px; font-weight: bold; color: #e4e4e7; display: block; margin-bottom: 6px;">Apresentação / Experiência como Personal</label>
             <textarea id="personal-input-bio" rows="3" placeholder="Conte sua formação, CREF, especialidades e experiência na academia..." style="width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #ffffff; background: #1f1f23; font-size: 13px; margin-bottom: 20px; outline: none; box-sizing: border-box;"></textarea>
 
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-bottom: 15px;">
+                <label style="font-size: 12px; font-weight: bold; color: #e4e4e7; display: block; margin-bottom: 4px;">Experiência por foco</label>
+                <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 8px 0;">Usamos isso para sugerir os pedidos que mais combinam com você e para mostrar sua experiência ao aluno.</p>
+                <div id="lista-experiencias"></div>
+                <button type="button" class="btn-mini" onclick="gerarSugestaoPerfil()" style="margin-top: 10px;">✨ Gerar apresentação e palavras-chave</button>
+                <div id="tags-perfil" class="tags-perfil"></div>
+            </div>
+
             <button class="btn btn-primary" onclick="salvarPerfilProfissionalCompleto()" style="width: 100%; font-weight: bold; padding: 14px; border-radius: 12px; font-size: 14px; cursor: pointer; margin-bottom: 30px;">Salvar Alterações</button>
         </div>
     </div>

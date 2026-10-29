@@ -8,15 +8,19 @@ import { collection, doc, setDoc, getDoc, addDoc, updateDoc, deleteDoc, deleteFi
 import { signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase, ref, set, onDisconnect, onValue, serverTimestamp as rtdbServerTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { app, auth, db, googleProvider, chamarFuncao, mensagemErroAuth } from "./firebase.js";
-import { FOCOS } from "./config.js";
+import { FOCOS, RAIO_KM_AULAS } from "./config.js";
+import { pintarRecado } from "./recado.js";
+import { filtrarPorRaio, distanciaKm, pontoDaAula, fmtKm } from "./geo.js";
+import { gerarPerfil, ranquearOfertas, normalizarExperiencias } from "./perfil-inteligente.js";
 import {
     esc, brl, fmtData, hojeLocal, estaPaga, valorPersonal, valorCentavos, conflitoNaAgenda, mensagemSuspeita, ROTULO_STATUS, iconeFoco,
     cpfValido, mascaraCPF, mascaraTelefone, urlImagemSegura, textoTermos
 } from "./core.js";
-import { $, toast, iniciarTema, alternarTema, registrarSW, notificar, pedirPermissaoNotificacao, vazio } from "./ui.js";
+import { $, toast, iniciarTema, alternarTema, registrarSW, notificar, pedirPermissaoNotificacao, vazio, carregarAviso } from "./ui.js";
 
 iniciarTema();
 registrarSW();
+carregarAviso();
 
 // ---------- estado ----------
 let usuario = null;
@@ -35,6 +39,9 @@ let idsOfertasVistas = new Set();
 const unsub = [];
 let desligarOfertas = null;
 let timerOfertas = null;
+let posicaoPersonal = null;        // { lat, lng } para distância/ranking dos pedidos
+let ordemOfertas = "sugeridas";    // "sugeridas" | "cedo"
+let soPerto = false;               // true = só pedidos até RAIO_KM_AULAS
 const chat = { aulaId: null, desligar: null, enviando: false };
 
 const textoErro = (e, padrao) => (e?.message && e.code !== "backend-nao-configurado" ? e.message : padrao);
@@ -102,9 +109,8 @@ async function processarUsuario(user) {
         });
         snap = await getDoc(pRef);
     }
-    if (snap.data().status === "bloqueado") { toast("❌ Acesso não liberado para esta conta."); await signOut(auth); setLoading(false); return; }
-    usuario = user;
-    await setDoc(doc(db, "personais_privado", user.uid), { uid: user.uid, email: user.email || "" }, { merge: true });
+    if (snap.data().status === "bloqueado") { toast("❌ Acesso não liberado para esta conta." + (snap.data().recado?.texto ? " Motivo: " + snap.data().recado.texto : "")); await signOut(auth); setLoading(false); return; }
+    usuario = user;   // o e-mail e os dados sensíveis são gravados pelo servidor (personais_privado é fechado ao navegador)
     entrarNoPainel(snap.data());
 }
 
@@ -127,7 +133,7 @@ function pararTudo() {
     clearInterval(timerOfertas); timerOfertas = null;
     aulas = []; ofertas = []; meusAlunos = [];
     primeiraCargaAulas = primeiraCargaOfertas = true; statusAnterior = new Map(); idsOfertasVistas = new Set();
-    loginInterativo = false;
+    loginInterativo = false; posicaoPersonal = null; soPerto = false; ordemOfertas = "sugeridas";
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -190,6 +196,9 @@ function aplicarPerfilPublico(d) {
         if (Array.isArray(d.disponibilidade.dias)) document.querySelectorAll(".btn-dia").forEach((b, i) => { if (b.classList.contains("active") !== d.disponibilidade.dias.includes(i)) window.toggleDiaTrabalho?.(b); });
     }
     if (d.especialidade && $("pref-estilo")) { const o = [...$("pref-estilo").options].find((x) => x.text === d.especialidade); if (o) $("pref-estilo").value = o.value; }
+    perfil.experiencias = normalizarExperiencias(d.experiencias); perfil.palavrasChave = Array.isArray(d.palavrasChave) ? d.palavrasChave : [];
+    renderExperiencias();
+    pintarRecado($("tab-inicio"), d.recado, "personal");
     const analise = $("card-status-analise"); if (analise) analise.style.display = ativo() ? "none" : "block";
     const avisoAg = $("aviso-analise-agenda"); if (avisoAg) avisoAg.style.display = ativo() ? "none" : "flex";
     renderMP();
@@ -197,15 +206,14 @@ function aplicarPerfilPublico(d) {
 
 async function carregarPrivado() {
     try {
-        const s = await getDoc(doc(db, "personais_privado", usuario.uid));
-        const d = s.data() || {};
+        const d = await chamarFuncao("perfil/personal/privado", null);   // servidor decifra só para o próprio dono
         if ($("perfil-input-cpf") && d.cpf) $("perfil-input-cpf").value = mascaraCPF(d.cpf);
         if ($("perfil-input-nascimento") && d.nascimento) $("perfil-input-nascimento").value = d.nascimento;
         if ($("perfil-input-telefone") && d.telefone) $("perfil-input-telefone").value = d.telefone;
         if ($("personal-input-telefone") && d.telefone) $("personal-input-telefone").value = d.telefone;
         if (d.banco) { const m = { "bank-select-banco": d.banco.banco, "bank-select-tipo-conta": d.banco.tipo, "bank-input-agencia": d.banco.agencia, "bank-input-conta": d.banco.conta, "bank-input-digito": d.banco.digito }; for (const [id, v] of Object.entries(m)) if ($(id) && v) $(id).value = v; }
         if (d.pix) { if ($("bank-select-tipo-pix") && d.pix.tipo) $("bank-select-tipo-pix").value = d.pix.tipo; if ($("bank-input-chave-pix") && d.pix.chave) $("bank-input-chave-pix").value = d.pix.chave; }
-    } catch (e) { console.warn("Dados privados:", e.code); }
+    } catch (e) { console.warn("Dados privados:", e.code || e.message); }
 }
 
 // ---------- presença "online de verdade" (Realtime Database) ----------
@@ -225,6 +233,8 @@ function monitorarPresencaOnline(uid) {
 function registrarLocalizacao() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(async (pos) => {
+        posicaoPersonal = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        renderOfertas();
         try { await updateDoc(doc(db, "personais", usuario.uid), { lat: Number(pos.coords.latitude.toFixed(3)), lng: Number(pos.coords.longitude.toFixed(3)), atualizadoEm: serverTimestamp() }); } catch (e) {}
     }, () => {}, { maximumAge: 600000, timeout: 8000 });
 }
@@ -260,7 +270,8 @@ function fecharSubtela(id) { if ($(id)) $(id).style.display = "none"; }
 // PERFIL / BANCO / PREFERÊNCIAS
 // ==========================================
 async function salvarPublico(dados) { await updateDoc(doc(db, "personais", usuario.uid), { ...dados, atualizadoEm: serverTimestamp() }); }
-async function salvarPrivado(dados) { await setDoc(doc(db, "personais_privado", usuario.uid), { ...dados, atualizadoEm: serverTimestamp() }, { merge: true }); }
+/** Dados sensíveis (CPF, telefone, nascimento, banco, Pix) vão ao servidor: ele valida, cifra e impede CPF duplicado. */
+async function salvarPrivado(dados) { await chamarFuncao("perfil/personal/privado", dados, "PUT"); }
 
 async function salvarPerfilProfissionalCompleto() {
     const nome = $("perfil-input-nome").value.trim();
@@ -271,11 +282,36 @@ async function salvarPerfilProfissionalCompleto() {
     const tel = $("perfil-input-telefone").value.trim();
     if (tel && tel.replace(/\D/g, "").length < 10) { toast("Telefone incompleto. Use DDD + número."); return; }
     try {
-        await salvarPublico({ nome, cref, cidade: $("perfil-input-naturalidade").value.trim(), bio: $("personal-input-bio").value.trim() });
+        await salvarPublico({ nome, cref, cidade: $("perfil-input-naturalidade").value.trim() });
         await salvarPrivado({ cpf, telefone: tel, nascimento: $("perfil-input-nascimento").value });
+        await salvarInteligente({ bio: $("personal-input-bio").value.trim() });
         toast("✅ Perfil salvo! Se ainda estiver em análise, a equipe avalia CPF e CREF.");
         fecharSubtela("subscreen-perfil-detalhes");
-    } catch (e) { console.error(e); toast("Não foi possível salvar o perfil."); }
+    } catch (e) { console.error(e); toast(textoErro(e, "Não foi possível salvar o perfil.")); }
+}
+
+// ---------- perfil inteligente: experiência por foco → bio e palavras-chave ----------
+const ANOS_OPCOES = [0, 1, 2, 3, 4, 5, 7, 10, 15, 20];
+function renderExperiencias() {
+    const box = $("lista-experiencias"); if (!box || box.contains(document.activeElement)) return;
+    const atuais = Object.fromEntries((perfil.experiencias || []).map((e) => [e.foco, e.anos]));
+    box.innerHTML = FOCOS.map((f) => `<div class="exp-linha"><span>${f.ico} ${esc(f.v)}</span><select data-exp="${esc(f.v)}" aria-label="Anos de experiência em ${esc(f.v)}"><option value="">Nenhuma</option>${ANOS_OPCOES.map((a) => `<option value="${a}" ${atuais[f.v] === a ? "selected" : ""}>${a === 0 ? "Menos de 1 ano" : a + (a === 1 ? " ano" : " anos")}</option>`).join("")}</select></div>`).join("");
+    const t = $("tags-perfil"); if (t) t.innerHTML = (perfil.palavrasChave || []).map((k) => `<span>${esc(k)}</span>`).join("");
+}
+function lerExperiencias() {
+    return normalizarExperiencias([...document.querySelectorAll("#lista-experiencias select[data-exp]")].filter((s) => s.value !== "").map((s) => ({ foco: s.dataset.exp, anos: Number(s.value) })));
+}
+/** Botão "Gerar bio": preenche a apresentação com base nas experiências (você revisa antes de salvar). */
+function gerarSugestaoPerfil() {
+    const g = gerarPerfil({ experiencias: lerExperiencias(), cref: !!$("perfil-input-cref")?.value.trim() });
+    if ($("personal-input-bio")) $("personal-input-bio").value = g.bio;
+    const t = $("tags-perfil"); if (t) t.innerHTML = g.palavrasChave.map((k) => `<span>${esc(k)}</span>`).join("");
+    toast("✨ Sugestão gerada. Revise o texto e toque em Salvar.");
+}
+async function salvarInteligente({ bio }) {
+    const experiencias = lerExperiencias();
+    const g = gerarPerfil({ experiencias, cref: !!$("perfil-input-cref")?.value.trim() });
+    await chamarFuncao("perfil/personal/inteligente", { experiencias, bio, palavrasChave: g.palavrasChave }, "PUT");
 }
 
 async function salvarDadosBancarios() {
@@ -288,13 +324,13 @@ async function salvarDadosBancarios() {
         });
         toast("✅ Dados salvos!");
         fecharSubtela("subscreen-dados-bancarios");
-    } catch (e) { toast("Não foi possível salvar os dados."); }
+    } catch (e) { toast(textoErro(e, "Não foi possível salvar os dados.")); }
 }
 
 async function salvarContato() {
     const tel = $("personal-input-telefone").value.trim();
     if (tel.replace(/\D/g, "").length < 10) { toast("Informe telefone com DDD."); return; }
-    try { await salvarPrivado({ telefone: tel }); toast("✅ Contato salvo!"); } catch (e) { toast("Não foi possível salvar o contato."); }
+    try { await salvarPrivado({ telefone: tel }); toast("✅ Contato salvo!"); } catch (e) { toast(textoErro(e, "Não foi possível salvar o contato.")); }
 }
 
 async function salvarPrefs() {
@@ -427,6 +463,8 @@ document.addEventListener("click", (e) => {
         case "chat": abrirChat(id); break;
         case "desistir": desistirAula(id, b); break;
         case "remover-aluno": removerAluno(id); break;
+        case "ordem": ordemOfertas = id; renderOfertas(); break;
+        case "perto": soPerto = !soPerto; renderOfertas(); break;
     }
 });
 
@@ -485,22 +523,34 @@ function renderOfertas() {
     if (!el || !usuario) return;
     if (!ativo()) { el.innerHTML = vazio("🔒", "Pedidos liberados após aprovação", "Estamos analisando seu cadastro de personal. Complete CPF e CREF em Menu → Perfil."); return; }
     const hoje = hojeLocal();
-    const lista = ofertas
+    let base = ofertas
         .filter((o) => o.alunoUid !== usuario.uid && o.data >= hoje && visivelParaMim(o) && valorPersonal(o) >= Math.round(perfil.valorMin * 100))
-        .sort((a, b) => `${a.data}${a.entrada}`.localeCompare(`${b.data}${b.entrada}`));
+        .map((o) => ({ ...o, valorPersonalCentavos: valorPersonal(o), distKm: posicaoPersonal ? distanciaKm(posicaoPersonal, pontoDaAula(o)) : null }))
+        .map((o) => ({ ...o, distKm: Number.isFinite(o.distKm) ? o.distKm : null }));
+    if (soPerto && posicaoPersonal) base = filtrarPorRaio(base, posicaoPersonal, RAIO_KM_AULAS);
+    const lista = ordemOfertas === "cedo"
+        ? base.map((o) => ({ ...o, match: null })).sort((a, b) => `${a.data}${a.entrada}`.localeCompare(`${b.data}${b.entrada}`))
+        : ranquearOfertas(base, { experiencias: perfil.experiencias || [], valorMinCentavos: Math.round(perfil.valorMin * 100), fmtKm });
     const aviso = perfil.mpConectado ? "" : `<div class="aviso-box">⚠️ Conecte o Mercado Pago na aba <strong>Carteira</strong> para poder aceitar aulas.</div>`;
-    el.innerHTML = aviso + (lista.length ? lista.map((o) => {
+    const filtros = `<div class="filtros-ofertas">
+        <button type="button" class="btn-mini ${ordemOfertas === "sugeridas" ? "ativo" : ""}" data-acao="ordem" data-id="sugeridas">✨ Sugeridas</button>
+        <button type="button" class="btn-mini ${ordemOfertas === "cedo" ? "ativo" : ""}" data-acao="ordem" data-id="cedo">🕒 Mais cedo</button>
+        ${posicaoPersonal ? `<button type="button" class="btn-mini ${soPerto ? "ativo" : ""}" data-acao="perto" data-id="x">📍 Perto de mim (${RAIO_KM_AULAS} km)</button>` : ""}</div>`;
+    el.innerHTML = aviso + (base.length || soPerto ? filtros : "") + (lista.length ? lista.map((o) => {
         const choque = conflitoNaAgenda(aulas, o);
         const paraMim = o.personalPreferidoUid === usuario.uid;
         const botao = choque ? `<span class="muted-line" style="margin:0;color:#f59e0b">Choque com sua aula das ${esc(choque.entrada)}</span>`
             : `<button type="button" class="btn-mini primario" data-acao="aceitar" data-id="${esc(o.id)}" ${perfil.mpConectado ? "" : "disabled"}>Aceitar</button>`;
+        const m = o.match, chip = m && m.score !== null ? `<span class="chip-match ${m.nivel}" title="Afinidade com seu perfil">${m.score}% match</span>` : "";
+        const dist = o.distKm !== null ? ` · 📍 ${fmtKm(o.distKm)}` : "";
         return `<div class="glass agenda-slot slot-livre">
-            <div class="pedido-linha"><div class="slot-info-name">${iconeFoco(o.foco)} ${esc(o.local ?? o.loja)}</div>
-            <div class="slot-info-desc">${fmtData(o.data)} · ${esc(o.entrada)}–${esc(o.saida)} · ${esc(o.foco)}${o.alunoNome ? " · " + esc(o.alunoNome) : ""}</div>
-            <div style="font-size:13px;color:var(--accent);font-weight:bold;margin-top:4px">Você recebe: ${brl(valorPersonal(o))}</div></div>
+            <div class="pedido-linha"><div class="slot-info-name">${iconeFoco(o.foco)} ${esc(o.local ?? o.loja)} ${chip}</div>
+            <div class="slot-info-desc">${fmtData(o.data)} · ${esc(o.entrada)}–${esc(o.saida)} · ${esc(o.foco)}${o.alunoNome ? " · " + esc(o.alunoNome) : ""}${dist}</div>
+            <div style="font-size:13px;color:var(--accent);font-weight:bold;margin-top:4px">Você recebe: ${brl(valorPersonal(o))}</div>
+            ${m?.razoes?.length ? `<div class="razoes-match">${m.razoes.map(esc).join(" · ")}</div>` : ""}</div>
             ${paraMim ? '<span class="badge badge-ok">Reservado p/ você</span>' : ""}
             <div class="aula-acoes">${botao}</div></div>`;
-    }).join("") : vazio("🏋️", "Sem pedidos no momento", perfil.valorMin ? "Há pedidos abaixo do seu valor mínimo? Ajuste em Preferências." : "Novos pedidos de treino aparecerão aqui."));
+    }).join("") : vazio("🏋️", soPerto ? "Nenhum pedido por perto" : "Sem pedidos no momento", soPerto ? `Nenhum pedido a até ${RAIO_KM_AULAS} km. Toque em “Perto de mim” para ver todos.` : perfil.valorMin ? "Há pedidos abaixo do seu valor mínimo? Ajuste em Preferências." : "Novos pedidos de treino aparecerão aqui."));
 }
 
 async function aceitarOferta(id, btn) {
@@ -621,7 +671,7 @@ Object.assign(window, {
     abrirOpcaoMenu, fecharSubtela, salvarPerfilProfissionalCompleto, salvarDadosBancarios, salvarPrefs, salvarContato,
     atualizarFotoPerfil, sairModoPessoal, switchTabPersonal, mudarMesCalendario, selecionarDia,
     abrirModalCadastrarAluno, fecharModalCadastrarAluno, confirmarCadastroAluno,
-    fecharConversaModal, enviarMensagemChat, initMapAlunos, toggleTheme, toast, fecharQR, conectarMercadoPago
+    gerarSugestaoPerfil, fecharConversaModal, enviarMensagemChat, initMapAlunos, toggleTheme, toast, fecharQR, conectarMercadoPago
 });
 
 // Se o Maps carregou antes do módulo, inicia agora

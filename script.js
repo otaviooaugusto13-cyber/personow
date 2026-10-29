@@ -11,10 +11,13 @@ import {
     esc, brl, fmtData, hojeLocal, ymdLocal, reaisParaCentavos, calcularSplit, validarAula, mensagemSuspeita, estaPaga, valorCentavos,
     ROTULO_STATUS, iconeFoco, urlImagemSegura, mascaraTelefone, mascaraCPF, cpfValido
 } from "./core.js";
-import { $, toast, iniciarTema, alternarTema, registrarSW, notificar, pedirPermissaoNotificacao, baixarCSV, vazio } from "./ui.js";
+import { $, toast, iniciarTema, alternarTema, registrarSW, notificar, pedirPermissaoNotificacao, baixarCSV, vazio, carregarAviso } from "./ui.js";
+import { pintarRecado } from "./recado.js";
+import { pontuarPersonal } from "./perfil-inteligente.js";
 
 iniciarTema();
 registrarSW();
+carregarAviso();
 
 // ---------- estado ----------
 let usuarioAtual = null;
@@ -166,6 +169,7 @@ async function carregarPerfilAluno() {
         const snap = await getDoc(doc(db, "alunos", usuarioAtual.uid));
         if (!snap.exists()) return;
         const d = snap.data();
+        pintarRecado($("screen-main"), d.recado, "aluno");
         if (d.objetivo) $("aluno-select-objetivo").value = d.objetivo;
         if (d.telefone) $("aluno-input-telefone").value = d.telefone;
         if (d.pagamento?.metodo) $("pg-metodo").value = d.pagamento.metodo;
@@ -196,6 +200,7 @@ function salvarPagamento() {
 }
 function salvarPreferencias() {
     preferenciaFoco = $("pref-foco").value;
+    aplicarDistancias();   // reordena a lista de personais pelo foco preferido
     salvarCampos({ preferencias: { foco: preferenciaFoco, turno: $("pref-turno").value } }, "✅ Preferências salvas!", "subscreen-preferencias");
 }
 async function salvarNotificacoes() {
@@ -254,6 +259,7 @@ function cartaoPersonal(p, i) {
             </div>
         </div>
         <div class="pc-meta"><span>${dist}</span><span>${preco}</span></div>
+        ${p._match?.score != null && preferenciaFoco ? `<div class="razoes-match"><span class="chip-match ${p._match.nivel}">${p._match.score}% combina</span> ${p._match.razoes.map(esc).join(" · ")}</div>` : ""}
         <div class="pc-actions">
             <button type="button" class="pc-btn ghost" onclick="verPerfil(${i})">Ver perfil</button>
             <button type="button" class="pc-btn" onclick="chamarPersonal(${i})">⚡ Chamar agora</button>
@@ -280,7 +286,9 @@ function verPerfil(i) {
         <div class="pc-meta pf-meta"><span>${p._km != null ? "📍 " + fmtKm(p._km) + " de você" : "📍 Na sua região"}</span><span>${Number(p.valorMin) > 0 ? "💰 A partir de " + brl(Math.round(p.valorMin * 100)) + "/aula" : "💰 Valor definido no pedido"}</span></div>
         ${(p.cref || "").trim() ? `<p class="pf-line">🛡️ CREF informado: <strong>${esc(p.cref)}</strong></p>` : ""}
         ${p.cidade ? `<p class="pf-line">🏙️ Atua em ${esc(p.cidade)}</p>` : ""}
+        ${Array.isArray(p.experiencias) && p.experiencias.length ? `<p class="pf-line">💼 ${p.experiencias.map((e) => `${esc(e.foco)}${e.anos >= 1 ? " (" + e.anos + (e.anos === 1 ? " ano" : " anos") + ")" : ""}`).join(" · ")}</p>` : ""}
         <p class="pf-bio">${p.bio ? esc(p.bio) : "Este personal ainda não escreveu uma apresentação."}</p>
+        ${Array.isArray(p.palavrasChave) && p.palavrasChave.length ? `<div class="tags-perfil">${p.palavrasChave.map((k) => `<span>${esc(k)}</span>`).join("")}</div>` : ""}
         <button type="button" class="btn btn-primary" onclick="fecharSheetPerfil();chamarPersonal(${i})">⚡ Chamar ${esc(nome.split(" ")[0])}</button>
         <button type="button" class="btn btn-outline" style="margin-top:8px" onclick="fecharSheetPerfil()">Fechar</button>`;
     $("sheet-perfil").classList.add("open");
@@ -289,7 +297,10 @@ function verPerfil(i) {
 
 function aplicarDistancias() {
     personaisAtivos.forEach((p) => { p._km = posicaoAluno && temCoord(p) ? kmEntre(posicaoAluno, p) : null; });
-    personaisAtivos.sort((a, b) => (a._km ?? 1e9) - (b._km ?? 1e9));
+    const foco = preferenciaFoco || "";   // só a preferência salva do aluno reordena (o select do pedido sempre tem um valor padrão)
+    personaisAtivos.forEach((p) => { p._match = pontuarPersonal(p, { foco, distKm: p._km, fmtKm }); });
+    // com foco escolhido: melhor afinidade primeiro (distância desempata); sem foco: mais perto primeiro, como antes
+    personaisAtivos.sort((a, b) => foco && a._match.score !== b._match.score ? (b._match.score ?? -1) - (a._match.score ?? -1) : (a._km ?? 1e9) - (b._km ?? 1e9));
     renderListaPersonais();
     atualizarRadar();
     marcarPersonaisNoMapa();
@@ -440,6 +451,7 @@ async function confirmarPedido() {
     try {
         await chamarFuncao("criarAula", {
             local, data, entrada, saida, foco: $("solicitacao-foco").value, valorCentavos: valorCent,
+            ...(posicaoAluno ? { lat: posicaoAluno.lat, lng: posicaoAluno.lng } : {}),   // o servidor arredonda (~110 m) e valida
             ...(pedidoPreferido?.uid ? { personalPreferidoUid: pedidoPreferido.uid } : {})
         });
         toast("✅ Pedido enviado! Os personais da região serão avisados.");

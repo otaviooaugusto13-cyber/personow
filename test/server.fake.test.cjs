@@ -57,7 +57,7 @@ const adminFake = {
   auth: () => ({ verifyIdToken: async (t) => { if (!tokens[t]) throw new Error("x"); return tokens[t]; } })
 };
 const rotas = {};
-const expressFake = () => ({ set() {}, use() {}, get: (p, h) => (rotas["GET " + p] = h), post: (p, h) => (rotas["POST " + p] = h), all: (p, h) => (rotas["ALL " + p] = h), listen() {} });
+const expressFake = () => ({ set() {}, use() {}, get: (p, h) => (rotas["GET " + p] = h), post: (p, h) => (rotas["POST " + p] = h), all: (p, h) => (rotas["ALL " + p] = h), put() {}, delete() {}, disable() {}, listen() {} });
 expressFake.json = () => {}; expressFake.static = () => {};
 const orig = Module._load;
 Module._load = function (req, ...r) { if (req === "express") return expressFake; if (req === "cors") return () => {}; if (req === "firebase-admin") return adminFake; return orig.call(this, req, ...r); };
