@@ -1,0 +1,50 @@
+/* Tela de login com cena (split-screen no desktop, cartão de vidro sobre a cena no celular). Usada por ti.html e admin.html.
+   Para usar uma foto no lado esquerdo: salve como ti-hero.webp na raiz e troque --lg-foto por url("ti-hero.webp"). */
+.lg-login { --lg-cyan:#35e0ff; --lg-mut:#8fa6bf; --lg-glass:rgba(12,24,42,.58); --lg-line:rgba(120,200,255,.22); --lg-red:#ff6b6b; --lg-foto:none; font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+.lg-login[hidden] { display:none !important; }
+@media (prefers-reduced-motion:reduce) { .lg-login * { animation:none !important; } }
+.lg-login { position:relative; min-height:100dvh; display:grid; grid-template-columns:1fr; isolation:isolate; }
+.lg-hero { position:absolute; inset:0; z-index:-1; overflow:hidden; background:radial-gradient(900px 500px at 30% 20%,#0f3a5c 0,transparent 70%),radial-gradient(700px 500px at 80% 90%,#16124a 0,transparent 70%),#06111f; }
+.lg-hero-bg { position:absolute; inset:0; background-image:var(--lg-foto); background-size:cover; background-position:center; opacity:.9; }
+.lg-hero::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(5,11,22,.55),rgba(5,11,22,.82)); }
+.lg-scene { position:absolute; inset:0; width:100%; height:100%; opacity:.55; }
+.lg-panel rect:first-child { fill:rgba(8,28,48,.82); stroke:#35e0ff55; }
+.lg-panel text { fill:#8fd8ff; font:600 11px 'Rajdhani',sans-serif; letter-spacing:.12em; }
+.lg-nodes circle,.lg-pulse circle { animation:lg-p 2.4s ease-in-out infinite; transform-origin:center; transform-box:fill-box; }
+.lg-nodes circle:nth-child(2n),.lg-pulse circle:nth-child(2n) { animation-delay:.8s; }
+@keyframes lg-p { 0%,100% { opacity:.55; transform:scale(1); } 50% { opacity:1; transform:scale(1.35); } }
+.lg-net path { stroke-dasharray:6 8; animation:lg-flow 6s linear infinite; }
+@keyframes lg-flow { to { stroke-dashoffset:-140; } }
+.lg-logo { position:absolute; top:max(20px,env(safe-area-inset-top)); left:24px; z-index:2; display:flex; align-items:center; gap:12px; font:700 28px 'Rajdhani',sans-serif; letter-spacing:.01em; color:#fff; }
+.lg-logo img { border-radius:10px; }
+.lg-hero-foot { display:none; position:absolute; left:24px; bottom:24px; z-index:2; color:var(--lg-mut); font:600 13px 'Rajdhani',sans-serif; letter-spacing:.18em; text-transform:uppercase; }
+
+.lg-side { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px; padding:96px 20px 28px; min-height:100dvh; }
+.lg-circuit { position:absolute; inset:0; z-index:0; opacity:.5; pointer-events:none;
+  background:
+    linear-gradient(90deg,transparent 49.5%,rgba(53,224,255,.16) 50%,transparent 50.5%) 0 0/64px 64px,
+    linear-gradient(0deg,transparent 49.5%,rgba(53,224,255,.12) 50%,transparent 50.5%) 0 0/64px 64px,
+    radial-gradient(circle,rgba(53,224,255,.35) 1.5px,transparent 2px) 0 0/64px 64px;
+  -webkit-mask:radial-gradient(70% 60% at 50% 50%,#000,transparent); mask:radial-gradient(70% 60% at 50% 50%,#000,transparent); }
+.lg-card { position:relative; z-index:1; width:min(440px,100%); padding:34px 28px; text-align:center; border-radius:22px; border:1px solid var(--lg-line);
+  background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03)),var(--lg-glass);
+  -webkit-backdrop-filter:blur(18px) saturate(140%); backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:0 30px 80px -30px #000,inset 0 1px 0 rgba(255,255,255,.18),0 0 0 1px rgba(53,224,255,.06); }
+.lg-card h1 { font-size:clamp(24px,5.4vw,30px); letter-spacing:.06em; font-weight:700; text-shadow:0 0 24px rgba(53,224,255,.35); }
+.lg-foot { position:relative; z-index:1; margin:0; color:var(--lg-mut); font-size:12.5px; text-align:center; }
+.lg-foot a { color:#9fe8ff; }
+
+
+/* desktop: split-screen */
+@media (min-width:960px) {
+  .lg-login { grid-template-columns:minmax(0,1.25fr) minmax(420px,1fr); }
+  .lg-hero { position:relative; inset:auto; z-index:0; grid-column:1; }
+  .lg-hero::after { background:linear-gradient(90deg,rgba(5,11,22,.15),rgba(5,11,22,.65)); }
+  .lg-scene { opacity:.9; } .lg-hero-foot { display:block; }
+  .lg-side { grid-column:2; padding:40px; background:linear-gradient(180deg,#07182b,#050b16); border-left:1px solid var(--lg-line); }
+}
+@media (min-width:1800px) { .lg-card { width:520px; padding:44px 38px; } .lg-card h1 { font-size:36px; } }
+@media (max-width:420px) { .lg-card { padding:28px 20px; } .lg-logo { font-size:24px; left:18px; } }
+/* o cartão reaproveita ax-card/ax-login: aqui só tira a margem de topo e o limite de largura herdados */
+.lg-card.ax-login { margin:0; width:min(440px,100%); max-width:none; }
+.lg-card .ax-erro { min-height:20px; }

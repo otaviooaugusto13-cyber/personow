@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Conferir autenticidade — Personow</title>
+    <meta name="theme-color" content="#07090e">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main style="max-width:460px;margin:0 auto;padding:28px 18px 60px">
+    <h1 style="font-size:22px;margin:0 0 6px">Conferir autenticidade</h1>
+    <p class="muted" style="margin:0 0 18px">Informe os dados impressos no comprovante para confirmar que ele foi emitido pelo Personow e não foi alterado.</p>
+    <div class="field"><label for="v-id">Código do documento</label><input id="v-id" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ex.: 3fK9aB…"></div>
+    <div class="field"><label for="v-cod">Código de verificação (24 dígitos)</label><input id="v-cod" inputmode="numeric" autocomplete="off" placeholder="0000 0000 0000 0000 0000 0000"></div>
+    <button class="btn btn-primary" id="v-ok" type="button">Conferir</button>
+    <div id="v-res" role="status" aria-live="polite" style="margin-top:18px"></div>
+    <p class="muted small" style="margin-top:24px">Este comprovante tem layout baseado no DANFE, mas <strong>não é documento fiscal</strong>, a menos que traga chave de acesso e protocolo de autorização.</p>
+</main>
+<script type="module" src="verificar.js"></script>
+</body>
+</html>

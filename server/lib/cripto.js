@@ -1,4 +1,4 @@
-// Criptografia de dados sensíveis em repouso (CPF, nascimento, telefone, Pix, dados do responsável).
+// Criptografia de dados sensíveis em repouso (CPF, nascimento, telefone, Pix).
 //  - AES-256-GCM (autenticada). IV aleatório de 96 bits por valor.
 //  - AAD amarra o texto cifrado ao "contexto" (coleção/campo/uid): copiar o valor de outro usuário/campo falha.
 //  - Versão de chave no prefixo (v1., v2.…): permite rotação sem reencriptar tudo de uma vez.
@@ -32,7 +32,7 @@ let K = null;
 const chaves = () => (K ||= carregarChaves());
 const b64u = (b) => b.toString("base64url");
 
-/** Cifra um valor (string ou objeto JSON). `contexto` ex.: "profissionais_privado/cpf/UID". */
+/** Cifra um valor (string ou objeto JSON). `contexto` ex.: "personais_privado/cpf/UID". */
 function cifrar(valor, contexto) {
   if (valor === undefined || valor === null || valor === "") return null;
   const { mapa, atual } = chaves();

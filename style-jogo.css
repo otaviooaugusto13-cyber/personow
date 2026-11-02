@@ -1,0 +1,135 @@
+/* ============================================================
+   PERSONOW — camada "jogo": níveis, vidas, check-in/out, chamado relâmpago, tela de banimento.
+   Dark premium + glassmorphism. Tudo respeita prefers-reduced-motion.
+   ============================================================ */
+:root {
+    --glass: rgba(255, 255, 255, .06);
+    --glass-line: rgba(255, 255, 255, .14);
+    --bronze: #cd7f32; --prata: #c6ccd6; --ouro: #f5c542; --platina: #7fe3ff;
+    --heart: #ff4d6d; --heart-glow: rgba(255, 77, 109, .55);
+}
+body.light-theme { --glass: rgba(255, 255, 255, .72); --glass-line: rgba(15, 23, 42, .1); }
+
+.glass-card { background: var(--glass); border: 1px solid var(--glass-line); border-radius: var(--radius); padding: 16px; backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); box-shadow: var(--shadow); }
+.glass-card.raio { position: relative; overflow: hidden; }
+.glass-card.raio::before { content: ""; position: absolute; inset: -40% -20% auto auto; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, var(--nivel-cor, var(--gold)) 0%, transparent 65%); opacity: .22; pointer-events: none; }
+
+/* ---------- Corações (vidas) ---------- */
+.vidas { display: inline-flex; gap: 6px; align-items: center; }
+.vidas .coracao { width: 26px; height: 26px; display: block; transition: transform .3s; }
+.vidas.sm .coracao { width: 18px; height: 18px; }
+.vidas .coracao path { transition: fill .5s, stroke .5s, filter .5s; }
+.coracao.cheio path { fill: var(--heart); stroke: var(--heart); filter: drop-shadow(0 0 6px var(--heart-glow)); }
+.coracao.cheio { animation: batida 2.4s ease-in-out infinite; }
+.coracao.vazio path { fill: rgba(152, 162, 179, .18); stroke: rgba(152, 162, 179, .5); stroke-dasharray: 3 2; }
+.coracao.quebrando { animation: quebrar 1.1s cubic-bezier(.3, 1.6, .5, 1) both; }
+.coracao.quebrando path { animation: esmaecer 1.1s .35s forwards; }
+@keyframes batida { 0%, 100% { transform: scale(1); } 8% { transform: scale(1.14); } 16% { transform: scale(1); } 24% { transform: scale(1.1); } 32% { transform: scale(1); } }
+@keyframes quebrar { 0% { transform: scale(1); } 15% { transform: scale(1.5) rotate(-8deg); } 30% { transform: scale(1.35) rotate(8deg); } 45% { transform: scale(1.4) rotate(-6deg); } 100% { transform: scale(1) rotate(0); } }
+@keyframes esmaecer { to { fill: rgba(152, 162, 179, .18); stroke: rgba(152, 162, 179, .5); filter: none; } }
+.vidas-linha { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.vidas-txt { font-size: 12.5px; color: var(--muted); }
+.vidas-txt b { color: var(--text); }
+
+/* ---------- Nível ---------- */
+.nivel-topo { display: flex; align-items: center; gap: 14px; }
+.medalha { --c: var(--bronze); width: 60px; height: 60px; flex: none; display: grid; place-items: center; border-radius: 50%; font-size: 26px; color: #1a1400; font-weight: 800;
+    background: radial-gradient(circle at 30% 25%, #fff8, transparent 40%), conic-gradient(from 210deg, var(--c), #fff6 18%, var(--c) 40%, color-mix(in srgb, var(--c) 55%, #000) 70%, var(--c)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent), 0 10px 26px -8px var(--c); }
+.medalha.bronze { --c: var(--bronze); } .medalha.prata { --c: var(--prata); } .medalha.ouro { --c: var(--ouro); } .medalha.platina { --c: var(--platina); }
+.medalha.sm { width: 34px; height: 34px; font-size: 15px; }
+.medalha.nova { animation: subir 1.4s cubic-bezier(.2, 1.4, .4, 1) both; }
+.nivel-nome { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+.nivel-sub { font-size: 12.5px; color: var(--muted); }
+.barra-nivel { height: 10px; border-radius: 99px; background: var(--surface-2); overflow: hidden; margin: 12px 0 6px; position: relative; }
+.barra-nivel i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--nivel-cor, var(--gold)), #fff9); transition: width 1.1s cubic-bezier(.2, .8, .2, 1); position: relative; }
+.barra-nivel i::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, #fff7 50%, transparent 70%); animation: brilho 2.6s infinite; }
+@keyframes brilho { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@keyframes subir { 0% { transform: scale(.2) rotate(-120deg); opacity: 0; } 60% { transform: scale(1.25) rotate(8deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+.trilha { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px; }
+.trilha .etapa { text-align: center; font-size: 11px; color: var(--muted); padding: 10px 4px; border-radius: var(--radius-sm); border: 1px solid var(--glass-line); background: var(--glass); }
+.trilha .etapa.atual { border-color: var(--nivel-cor, var(--gold)); color: var(--text); box-shadow: 0 0 0 1px var(--nivel-cor, var(--gold)) inset; }
+.trilha .etapa.ok { color: var(--text); }
+.trilha .etapa .medalha { margin: 0 auto 6px; }
+.trilha .etapa:not(.ok):not(.atual) .medalha { filter: grayscale(1) opacity(.45); }
+.chip-nivel { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 800; padding: 3px 10px 3px 4px; border-radius: 99px; background: var(--glass); border: 1px solid var(--glass-line); }
+
+/* ---------- Check-in / check-out ---------- */
+.radar { position: relative; width: 190px; height: 190px; margin: 6px auto 14px; border-radius: 50%; display: grid; place-items: center;
+    background: radial-gradient(circle, color-mix(in srgb, var(--cor, var(--blue)) 18%, transparent) 0 30%, transparent 31%), repeating-radial-gradient(circle, transparent 0 28px, var(--glass-line) 29px 30px); border: 1px solid var(--glass-line); }
+.radar.ok { --cor: var(--green); } .radar.longe { --cor: var(--red); } .radar.busca { --cor: var(--blue); }
+.radar::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, color-mix(in srgb, var(--cor, var(--blue)) 55%, transparent), transparent 28%); animation: varredura 2.6s linear infinite; }
+.radar.ok::before, .radar.longe::before { animation-duration: 6s; opacity: .5; }
+.radar .alvo { position: relative; font-size: 30px; filter: drop-shadow(0 0 10px var(--cor, var(--blue))); }
+.radar .dist { position: absolute; bottom: 20px; font-size: 13px; font-weight: 800; background: var(--bg); border: 1px solid var(--glass-line); padding: 2px 10px; border-radius: 99px; }
+@keyframes varredura { to { transform: rotate(360deg); } }
+.gps-linha { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--line); }
+.gps-linha b { color: var(--text); }
+
+.camera-box { position: relative; width: 100%; aspect-ratio: 3/4; max-height: 52dvh; background: #000; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass-line); }
+.camera-box video, .camera-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.camera-box .mira { position: absolute; inset: 8%; border: 2px dashed #fff8; border-radius: 14px; pointer-events: none; }
+.camera-box .dica { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-size: 12px; color: #fff; text-shadow: 0 1px 4px #000; }
+.camera-acoes { display: flex; gap: 10px; justify-content: center; align-items: center; margin: 12px 0; }
+.btn-disparo { width: 68px; height: 68px; border-radius: 50%; border: 4px solid #fff; background: var(--gold); box-shadow: 0 0 0 3px var(--bg), 0 8px 24px -6px #000; cursor: pointer; transition: transform .15s; }
+.btn-disparo:active { transform: scale(.9); }
+.conclusao-opcoes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+.conclusao-opcoes label { border: 1px solid var(--glass-line); background: var(--glass); border-radius: var(--radius-sm); padding: 12px; text-align: center; cursor: pointer; font-weight: 700; font-size: 13px; }
+.conclusao-opcoes input { position: absolute; opacity: 0; pointer-events: none; }
+.conclusao-opcoes label:has(input:checked) { border-color: var(--green); background: var(--green-soft); box-shadow: 0 0 0 1px var(--green) inset; }
+.conclusao-opcoes label:has(input:focus-visible) { outline: 2px solid var(--blue); }
+.fase-pill { display: inline-flex; gap: 6px; align-items: center; font-size: 11.5px; font-weight: 800; padding: 4px 10px; border-radius: 99px; }
+.fase-pill.andamento { background: var(--blue-soft); color: var(--blue); }
+.fase-pill.andamento::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: pisca 1.2s infinite; }
+.fase-pill.executada { background: var(--green-soft); color: var(--green); }
+@keyframes pisca { 50% { opacity: .25; } }
+.foto-mini { width: 74px; height: 74px; border-radius: 12px; object-fit: cover; border: 1px solid var(--glass-line); cursor: zoom-in; background: var(--surface-2); }
+
+/* ---------- Chamado relâmpago ---------- */
+.card.relampago { border-color: rgba(255, 107, 107, .55); background: linear-gradient(180deg, var(--red-soft), var(--surface) 70%); position: relative; overflow: hidden; }
+.card.relampago::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 0 rgba(255, 107, 107, .5); animation: pulso 2s infinite; pointer-events: none; }
+@keyframes pulso { 70% { box-shadow: 0 0 0 12px rgba(255, 107, 107, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); } }
+.badge-raio { background: linear-gradient(90deg, #ff4d6d, #ff9f43); color: #fff; }
+.bonus-tag { font-size: 12px; font-weight: 800; color: var(--gold); }
+.contagem { font-variant-numeric: tabular-nums; font-weight: 800; }
+.bonus-opcoes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+.bonus-opcoes label { text-align: center; border: 1px solid var(--glass-line); background: var(--glass); border-radius: var(--radius-sm); padding: 12px 4px; font-weight: 800; cursor: pointer; font-size: 14px; }
+.bonus-opcoes input { position: absolute; opacity: 0; pointer-events: none; }
+.bonus-opcoes label:has(input:checked) { border-color: var(--gold); background: var(--gold-soft); box-shadow: 0 0 0 1px var(--gold) inset; }
+.alerta-relampago { position: fixed; left: 12px; right: 12px; top: calc(10px + env(safe-area-inset-top, 0px)); z-index: 400; max-width: 560px; margin: 0 auto; background: linear-gradient(120deg, rgba(255, 77, 109, .95), rgba(255, 159, 67, .95)); color: #fff; border-radius: 18px; padding: 14px 16px; box-shadow: 0 18px 50px -10px rgba(255, 77, 109, .7); backdrop-filter: blur(10px); animation: desce .45s cubic-bezier(.2, 1.3, .4, 1) both; display: flex; gap: 12px; align-items: center; }
+.alerta-relampago .zap { font-size: 30px; animation: pisca 1s infinite; }
+.alerta-relampago button { border: 0; background: #fff; color: #b3123a; font-weight: 800; padding: 9px 14px; border-radius: 12px; cursor: pointer; }
+.alerta-relampago .x { background: transparent; color: #fff; padding: 4px 8px; font-size: 18px; }
+@keyframes desce { from { transform: translateY(-120%); opacity: 0; } }
+
+/* ---------- Tela de banimento ---------- */
+.banido-tela { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(circle at 50% 0%, rgba(255, 40, 70, .35), transparent 60%), rgba(8, 2, 4, .97); overflow-y: auto; }
+.banido-tela.ativa { display: flex; animation: fade .4s both; }
+.banido-caixa { width: 100%; max-width: 460px; border: 1px solid rgba(255, 77, 109, .7); border-radius: 24px; padding: 26px 22px; text-align: center; background: linear-gradient(180deg, rgba(255, 40, 70, .16), rgba(20, 6, 10, .85)); backdrop-filter: blur(16px); box-shadow: 0 0 0 1px rgba(255, 77, 109, .25), 0 0 80px -10px rgba(255, 40, 70, .6); color: #fff; }
+.banido-caixa h2 { color: #ff4d6d; font-size: 24px; letter-spacing: .02em; margin: 14px 0 6px; text-transform: uppercase; }
+.banido-caixa .vidas { justify-content: center; margin: 8px 0; }
+.banido-motivo { text-align: left; background: rgba(0, 0, 0, .4); border: 1px solid rgba(255, 77, 109, .45); border-left: 4px solid #ff4d6d; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.5; margin: 16px 0; }
+.banido-motivo small { display: block; color: #ff9fb0; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.banido-lista { text-align: left; font-size: 12.5px; color: #ffd0d8; max-height: 160px; overflow: auto; margin: 0 0 14px; }
+.banido-lista div { padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.sirene { font-size: 46px; animation: pisca 1s infinite; }
+
+/* ---------- Perda de vida (modal animado) ---------- */
+.perda-vida { position: fixed; inset: 0; z-index: 900; display: none; place-items: center; background: rgba(5, 1, 3, .82); backdrop-filter: blur(6px); }
+.perda-vida.ativa { display: grid; animation: fade .25s both; }
+.perda-vida .caixa { text-align: center; max-width: 340px; padding: 26px 22px; border-radius: 22px; background: var(--glass); border: 1px solid rgba(255, 77, 109, .5); color: var(--text); animation: tremer .55s .15s both; }
+.perda-vida .vidas .coracao { width: 44px; height: 44px; }
+@keyframes tremer { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+/* ---------- Lightbox de foto (interno, sem nova aba) ---------- */
+.lightbox { position: fixed; inset: 0; z-index: 950; display: none; flex-direction: column; background: rgba(0, 0, 0, .92); }
+.lightbox.ativa { display: flex; animation: fade .2s both; }
+.lightbox img { flex: 1; min-height: 0; width: 100%; object-fit: contain; }
+.lightbox .barra { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 16px; color: #fff; font-size: 13px; }
+.lightbox button { border: 1px solid #fff4; background: #fff1; color: #fff; padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 700; }
+
+/* ---------- Infrações ---------- */
+.infracao { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.infracao .n { width: 28px; height: 28px; flex: none; border-radius: 50%; background: var(--red-soft); color: var(--red); display: grid; place-items: center; font-weight: 800; }
+.infracao.revogada { opacity: .5; text-decoration: line-through; }
+
+@media (prefers-reduced-motion: reduce) { .coracao.cheio, .radar::before, .barra-nivel i::after, .card.relampago::after, .sirene, .fase-pill.andamento::before, .alerta-relampago .zap { animation: none !important; } .medalha.nova, .coracao.quebrando, .perda-vida .caixa, .alerta-relampago { animation-duration: .01s !important; } }

@@ -3,17 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node test/regras.test.js && node test/perfil.test.js && node test/server.fake.test.cjs && node test/seguranca.test.cjs && node test/migracao.test.cjs && node test/cripto-e-admin.test.cjs",
+    "test": "node test/split.test.js && node test/perfil.test.js && node test/backend.test.cjs && node test/ti.test.cjs && node test/jogo.test.cjs && node test/eneagrama.test.js",
     "start": "node server/server.js",
-    "migrar": "node scripts/migrar-dados.cjs",
-    "gerar-chaves": "node scripts/gerar-chaves.cjs",
-    "migrar-cripto": "node scripts/migrar-cripto.cjs",
-    "definir-admin": "node scripts/definir-admin.cjs"
+    "dev": "node server/server.js",
+    "gerar-chaves": "node scripts/gerar-chaves.js",
+    "migrar": "node scripts/migrar-dados.js"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
+    "@google-cloud/firestore": "^9.3.1",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "firebase-admin": "^12.7.0"

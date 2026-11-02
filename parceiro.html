@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-portal="parceiro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Personow — Painel do parceiro</title>
+    <meta name="description" content="Acompanhe em tempo real a execução das aulas dos alunos: horas por região, aula completa, fotos de auditoria e ranking de personais.">
+    <meta name="theme-color" content="#07090e">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-jogo.css">
+    <link rel="stylesheet" href="style-b2b.css">
+</head>
+<body>
+
+<div id="screen-login" class="screen active login-screen">
+    <div class="auth-card">
+        <div class="auth-brand"><h1>PERSON<span class="highlight">OW</span></h1><p>Painel para parceiros e indústrias</p></div>
+        <h2 class="auth-title">Execução em tempo real</h2>
+        <p class="auth-sub">Acompanhe as aulas realizadas na sua academia, com fotos de auditoria e presença confirmada por GPS.</p>
+        <button id="btn-login" class="btn btn-google-login">Entrar com Google</button>
+    </div>
+</div>
+
+<div id="screen-espera" class="screen login-screen">
+    <div class="auth-card">
+        <div class="auth-brand"><h1>PERSON<span class="highlight">OW</span></h1><p>Painel para parceiros e indústrias</p></div>
+        <h2 class="auth-title">Acesso ainda não liberado</h2>
+        <p class="auth-sub" id="espera-msg">Sua conta ainda não está vinculada a um parceiro. Peça à equipe do Personow para vincular o e-mail <b id="espera-email"></b> e toque em “Já fui liberado”.</p>
+        <button id="btn-liberado" class="btn btn-primary">Já fui liberado</button>
+        <button id="btn-espera-sair" class="btn btn-ghost mt">Sair</button>
+    </div>
+</div>
+
+<div id="screen-painel" class="screen b2b">
+    <header class="b2b-top glass-card">
+        <div><h1 id="b-parceiro">Painel do parceiro</h1><p class="muted small" id="b-atual">Carregando…</p></div>
+        <div class="b2b-filtros">
+            <select id="f-dias" aria-label="Período"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="365">12 meses</option></select>
+            <select id="f-regiao" aria-label="Região"><option value="">Todas as regiões</option></select>
+            <button class="btn btn-ghost btn-sm" id="btn-atualizar" type="button">↻</button>
+            <label class="theme-switch" title="Modo claro"><input type="checkbox" id="theme-toggle" aria-label="Modo claro"><span class="slider"></span></label>
+            <button class="btn btn-ghost btn-sm" id="btn-sair" type="button">Sair</button>
+        </div>
+    </header>
+
+    <section class="b2b-kpis" id="kpis" aria-label="Indicadores"></section>
+
+    <div class="b2b-grid">
+        <section class="glass-card" aria-labelledby="h-reg"><h3 id="h-reg">Horas trabalhadas por região</h3><div id="g-regioes"></div></section>
+        <section class="glass-card" aria-labelledby="h-gon"><h3 id="h-gon">Aula completa</h3><div id="g-conclusao"></div></section>
+        <section class="glass-card" aria-labelledby="h-vivo"><h3 id="h-vivo">Ao vivo agora <span class="fase-pill andamento" id="n-vivo"></span></h3><div id="g-vivo"></div></section>
+        <section class="glass-card" aria-labelledby="h-rank"><h3 id="h-rank">Personais mais eficientes</h3><div id="g-rank"></div></section>
+    </div>
+
+    <section class="glass-card mt" aria-labelledby="h-fotos"><h3 id="h-fotos">Fotos de auditoria (check-out)</h3><div class="galeria" id="g-fotos"></div></section>
+    <section class="glass-card mt" aria-labelledby="h-pres"><h3 id="h-pres">Histórico de presença (GPS auditado)</h3><div class="tabela-rolar"><table class="tabela" id="g-presenca"></table></div></section>
+    <p class="muted small center mt" id="b-rodape"></p>
+</div>
+
+<script type="module" src="parceiro.js"></script>
+</body>
+</html>

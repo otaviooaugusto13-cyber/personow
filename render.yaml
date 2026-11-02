@@ -1,5 +1,4 @@
-# Blueprint do Render: cria o servidor do Personow (API + site) como Web Service.
-# (Static Site NÃO serve: ele não roda Node e devolve "Not Found" nas rotas da API.)
+# Blueprint do Render: servidor Node (API + site). Static Site NÃO serve: não roda Node.
 services:
   - type: web
     name: personow
@@ -11,24 +10,49 @@ services:
     healthCheckPath: /saude
     envVars:
       - key: AMBIENTE
-        value: producao              # liga as travas de produção: o servidor não sobe sem as variáveis abaixo
+        value: producao              # liga as travas de produção (chaves obrigatórias, MODO_TESTE proibido)
+      - key: FIREBASE_PROJECT_ID     # ID do projeto Firebase (obrigatório em produção: valida o emissor dos tokens)
+        sync: false
       - key: APP_URL
-        sync: false                  # https://SEU-APP.onrender.com (ou seu domínio), sem barra final
+        sync: false                  # https://seu-servico.onrender.com (ou seu domínio)
       - key: ORIGENS_PERMITIDAS
         sync: false                  # opcional: outros domínios do front (separados por vírgula)
       - key: FIREBASE_SERVICE_ACCOUNT
         sync: false
-      - key: MP_CLIENT_ID
+      - key: ADMIN_BOOTSTRAP_EMAIL   # opcional: e-mail(s) da conta Google que vira ADMIN ao reiniciar (sem terminal). Remova depois de entrar.
         sync: false
-      - key: MP_CLIENT_SECRET
+      - key: TI_BOOTSTRAP_EMAIL      # opcional: cria o 1º gestor de TI (use um e-mail NOVO, sem conta anterior)
+        sync: false
+      - key: TI_BOOTSTRAP_NOME
+        sync: false
+      - key: TI_BOOTSTRAP_SENHA      # uso único (troca obrigatória no 1º login) — REMOVA depois de entrar
+        sync: false
+      - key: MP_ACCESS_TOKEN         # conta Mercado Pago da PLATAFORMA (todo pagamento entra aqui)
         sync: false
       - key: MP_WEBHOOK_SECRET
         sync: false
-      - key: DATA_ENCRYPTION_KEYS    # npm run gerar-chaves (guarde BACKUP: perder a chave = perder CPF/Pix cifrados)
+      - key: DATA_ENCRYPTION_KEYS    # npm run gerar-chaves
         sync: false
       - key: DATA_ENCRYPTION_KEY_ID
         sync: false
       - key: BLIND_INDEX_KEY
         sync: false
-      - key: ADMIN_EXIGE_MFA         # exige 2ª etapa do Google para o painel admin (ative MFA no Firebase Auth antes)
-        value: "0"
+      - key: CRON_SECRET             # agendador chama POST /interno/liberar com x-cron-secret
+        sync: false
+      - key: ADMIN_EXIGE_MFA
+        value: "1"
+      - key: LIBERACAO_DIAS
+        value: "2"
+
+  # Manutenção horária: libera carência, detecta faltas, expira chamados relâmpago e aplica inatividade de nível.
+  - type: cron
+    name: personow-manutencao
+    runtime: node
+    schedule: "0 * * * *"
+    buildCommand: "true"
+    startCommand: 'curl -fsS -X POST -H "x-cron-secret: $CRON_SECRET" "$APP_URL/interno/manutencao"'
+    envVars:
+      - key: CRON_SECRET
+        sync: false
+      - key: APP_URL
+        sync: false

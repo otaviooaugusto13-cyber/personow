@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-portal="aluno">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Comprovante de serviço — Personow</title>
+    <meta name="theme-color" content="#07090e">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="nota.css">
+</head>
+<body>
+<div class="nota-pagina">
+    <div class="nota-barra no-print" id="acoes" hidden>
+        <button class="btn btn-primary" id="btn-imprimir" type="button">🖨 Imprimir / salvar em PDF</button>
+        <a class="btn btn-ghost" href="verificar.html" target="_blank" rel="noopener">✔ Conferir autenticidade</a>
+        <a class="btn btn-ghost" href="index.html">← Voltar ao painel</a>
+    </div>
+
+    <div id="estado" class="auth-loader no-print" style="justify-content:center;margin-top:60px"><span class="spinner"></span> Gerando comprovante…</div>
+
+    <div id="login" class="auth-card no-print" hidden style="margin:40px auto">
+        <h2 class="auth-title">Entre para emitir o comprovante</h2>
+        <p class="auth-sub">Use a conta Google do aluno que fez a aula.</p>
+        <button class="btn btn-google-login" id="btn-entrar" type="button">Continuar com Google</button>
+    </div>
+
+    <article class="danfe" id="nota" hidden aria-label="Comprovante de serviço"></article>
+</div>
+<script type="module" src="nota.js"></script>
+</body>
+</html>

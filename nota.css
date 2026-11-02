@@ -1,0 +1,84 @@
+/* ============================================================
+   COMPROVANTE DE SERVIÇO — layout DANFE simplificado, A4 retrato.
+   O papel é sempre branco com texto preto (independe do tema escuro do app) para imprimir com legibilidade máxima.
+   Regras de impressão: nenhuma linha de tabela quebra entre páginas, o cabeçalho dos itens se repete, os blocos não se partem.
+   ============================================================ */
+@page { size: A4 portrait; margin: 8mm; }
+* { box-sizing: border-box; }
+.nota-pagina { background: #e9ecf1; min-height: 100vh; padding: 16px 10px 48px; font-family: Arial, Helvetica, sans-serif; color: #000; }
+.nota-barra { max-width: 210mm; margin: 0 auto 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+.nota-barra .btn { width: auto; flex: 1; min-width: 150px; text-align: center; text-decoration: none; }
+
+.danfe { position: relative; max-width: 210mm; margin: 0 auto; padding: 8mm; background: #fff; color: #000; box-shadow: 0 8px 30px rgba(0, 0, 0, .18); font-size: 9pt; line-height: 1.25; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.danfe * { color: inherit; }
+.danfe .mono { font-family: "Courier New", Courier, monospace; letter-spacing: .04em; }
+
+/* caixas e células */
+.bl { border: .3mm solid #000; margin-top: 1.6mm; break-inside: avoid; page-break-inside: avoid; position: relative; z-index: 1; background: transparent; }
+.bt { margin: 2.2mm 0 .5mm; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; break-after: avoid; page-break-after: avoid; }
+.lin { display: flex; }
+.lin + .lin { border-top: .3mm solid #000; }
+.c { flex: 1 1 0; min-width: 0; padding: .9mm 1.4mm 1mm; }
+.c + .c { border-left: .3mm solid #000; }
+.c.w2 { flex: 2 1 0; } .c.w3 { flex: 3 1 0; }
+.r { display: block; font-size: 6pt; font-weight: 400; text-transform: uppercase; letter-spacing: .03em; color: #222; margin-bottom: .3mm; }
+.v { display: block; font-size: 9pt; font-weight: 700; overflow-wrap: anywhere; }
+.v.n { font-weight: 400; } .v.g { font-size: 12pt; }
+.dir { text-align: right; }
+
+/* cabeçalho: emitente | identificação do documento */
+.cab .c.emit { flex: 2.2 1 0; } .cab .c.doc { flex: 1.2 1 0; text-align: center; }
+.cab .razao { font-size: 11pt; font-weight: 700; margin-bottom: 1mm; overflow-wrap: anywhere; }
+.cab .tit { font-size: 13pt; font-weight: 800; line-height: 1.1; }
+.cab .sub { font-size: 6.5pt; margin: .8mm 0; }
+.cab .num { font-size: 11pt; font-weight: 800; }
+.cod { padding: 1.6mm 2mm; }
+.cod .bc { display: block; width: 100%; height: 13mm; }
+.cod .linha { display: flex; justify-content: space-between; gap: 4mm; align-items: baseline; margin-top: 1mm; flex-wrap: wrap; }
+.cod .cod-num { font-size: 10.5pt; font-weight: 700; }
+
+/* itens */
+table.itens { width: 100%; border-collapse: collapse; table-layout: fixed; border: .3mm solid #000; margin-top: 1.6mm; }
+table.itens thead { display: table-header-group; }          /* repete o cabeçalho em cada página */
+table.itens tfoot { display: table-row-group; }
+table.itens tr { break-inside: avoid; page-break-inside: avoid; }
+table.itens th { font-size: 6.5pt; text-transform: uppercase; letter-spacing: .03em; text-align: left; padding: 1mm 1.4mm; border: .3mm solid #000; background: #efefef; }
+table.itens td { font-size: 8.5pt; padding: 1.1mm 1.4mm; border: .3mm solid #000; vertical-align: top; overflow-wrap: anywhere; }
+table.itens .n { text-align: right; white-space: nowrap; }
+table.itens .cod { width: 14%; } table.itens .desc { width: 44%; } table.itens .un { width: 9%; } table.itens .qt { width: 8%; } table.itens .vu, table.itens .vt { width: 12.5%; }
+table.itens small { display: block; font-size: 7pt; color: #333; margin-top: .4mm; }
+table.itens tfoot td { font-weight: 700; background: #f6f6f6; }
+
+.adic ul { margin: 0; padding-left: 4mm; } .adic li { font-size: 8pt; margin-bottom: .8mm; }
+.rodape { margin-top: 3mm; font-size: 7pt; color: #333; display: flex; justify-content: space-between; gap: 6mm; flex-wrap: wrap; }
+
+/* marca d'água e faixa de estorno */
+.marca { position: absolute; inset: 0; z-index: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; pointer-events: none; user-select: none; }
+.marca span { font-size: 44pt; font-weight: 900; letter-spacing: .05em; color: rgba(0, 0, 0, .075); transform: rotate(-26deg); white-space: nowrap; }
+.estorno { position: relative; z-index: 1; margin-top: 1.6mm; border: .6mm solid #b00020; color: #b00020 !important; padding: 1.6mm 2mm; font-weight: 800; text-align: center; font-size: 10pt; break-inside: avoid; }
+.estorno * { color: #b00020 !important; }
+.selo-pg { display: inline-block; border: .5mm solid #000; padding: .3mm 2mm; font-weight: 800; font-size: 8pt; letter-spacing: .08em; }
+
+/* tela pequena (nunca em impressão: a folha impressa tem ~794 px) */
+@media screen and (max-width: 640px) {
+    .danfe { padding: 12px; font-size: 10pt; }
+    .lin { display: grid; grid-template-columns: 1fr 1fr; }
+    .lin + .lin { border-top: .3mm solid #000; }
+    .c, .c + .c { border-left: 0; border-top: .3mm solid #000; } .lin > .c:nth-child(-n+2) { border-top: 0; }
+    .lin > .c:nth-child(even) { border-left: .3mm solid #000; }
+    .c.w2, .c.w3, .cab .c.emit, .cab .c.doc { grid-column: 1 / -1; border-left: 0 !important; } .lin > .c.w2:nth-child(2), .lin > .c.w3:nth-child(2) { border-top: .3mm solid #000; }
+    .v.g { font-size: 14pt; }
+    table.itens th.cod, table.itens td.cod, table.itens th.un, table.itens td.un { display: none; }       /* só na tela pequena: código e unidade saem; na impressão A4 tudo aparece */
+    table.itens .desc { width: auto; } table.itens .qt { width: 11%; } table.itens .vu, table.itens .vt { width: 24%; }
+    table.itens th, table.itens td { font-size: 8.5pt; padding: 1.2mm; } table.itens td.n { white-space: normal; }
+    .marca span { font-size: 24pt; }
+}
+
+@media print {
+    /* o tema escuro do app define body { min-height: 100dvh } e um fundo: isso geraria uma página extra em branco */
+    html, body { background: #fff !important; background-image: none !important; min-height: 0 !important; height: auto !important; overflow: visible !important; }
+    .nota-pagina { background: #fff; padding: 0; min-height: 0; }
+    .no-print, #toast-area { display: none !important; }
+    .danfe { max-width: none; width: 100%; margin: 0; padding: 0; box-shadow: none; }
+    .marca { position: fixed; inset: 0; }                  /* repete em todas as páginas; o contêiner recorta a marca e não cria página extra */
+}

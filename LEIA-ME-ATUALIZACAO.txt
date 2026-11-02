@@ -1,0 +1,9 @@
+ATUALIZAÇÃO — Abastece Já → Personow
+
+1) Faça backup/commit do projeto atual. Apague os arquivos antigos do projeto (menos .git e node_modules) e extraia este zip por cima.
+2) Em config.js, preencha FIREBASE_CONFIG (hoje: COLE_AQUI...). No Firebase: ative E-mail/Senha + Google e autorize o domínio.
+3) No Render, defina FIREBASE_PROJECT_ID (novo, obrigatório) e confira as demais variáveis do render.yaml.
+4) As coleções agora são /alunos e /personais. Dados do Abastece Já NÃO são migrados: use um projeto Firebase/banco novo para o Personow.
+5) npm test  →  git add . && git commit -m "Personow" && git push origin main
+
+Ver README.md para detalhes.
