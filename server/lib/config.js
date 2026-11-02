@@ -1,5 +1,6 @@
 // Constantes de compliance e operação. Valores financeiros ficam em ../split.js.
-const PRODUCAO = process.env.AMBIENTE === "producao" || process.env.NODE_ENV === "production";
+// AMBIENTE, quando informado, manda: o Render define NODE_ENV=production por padrão, então AMBIENTE=homolog precisa vencer para o modo de teste funcionar.
+const PRODUCAO = process.env.AMBIENTE ? process.env.AMBIENTE === "producao" : process.env.NODE_ENV === "production";
 const inteiro = (v, padrao) => { const n = Number.parseInt(v, 10); return Number.isFinite(n) ? n : padrao; };
 
 module.exports = {

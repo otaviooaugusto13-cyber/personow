@@ -43,7 +43,7 @@ const { criarAuthProxy } = require("./lib/auth-proxy");
 
 // ---------- Ambiente ----------
 const MODO_TESTE = ["1", "true", "sim"].includes(String(process.env.MODO_TESTE || "").trim().toLowerCase());
-if (MODO_TESTE && C.PRODUCAO) { console.error("🛑 MODO_TESTE não pode ficar ligado em produção (AMBIENTE=producao). Desligue e reinicie."); process.exit(1); }
+if (MODO_TESTE && C.PRODUCAO) { console.error("🛑 MODO_TESTE não pode ficar ligado em produção. Defina AMBIENTE=homolog (ou desligue MODO_TESTE) e reinicie."); process.exit(1); }
 const APP_URL = (process.env.APP_URL || "").replace(/\/$/, "");
 const PORT = process.env.PORT || 3000;
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN || "";      // conta da PLATAFORMA: todo pagamento entra aqui
