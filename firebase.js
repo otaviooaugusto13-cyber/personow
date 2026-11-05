@@ -96,12 +96,48 @@ export async function contaDeTeste() {
     try { return (await auth.currentUser.getIdTokenResult()).claims.teste === true; } catch (e) { return false; }
 }
 
-// ---------- Login / logout (um único caminho para os três portais) ----------
+// ---------- Login / logout (um único caminho para todos os portais) ----------
+/** Navegadores embutidos (Instagram, Facebook, WhatsApp, TikTok…): o Google recusa o login ali (erro 403 disallowed_useragent). */
+export const navegadorEmbutido = () => /Instagram|FBAN|FBAV|FB_IAB|Line\/|MicroMessenger|WhatsApp|TikTok|musical_ly|Snapchat|Twitter|LinkedInApp|; wv\)/i.test(navigator.userAgent || "");
+/** App instalado na tela inicial (PWA). No iOS o popup do Google não funciona nesse modo: o caminho certo é o redirecionamento. */
+const modoApp = () => { try { return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch (e) { return false; } };
+const erroCod = (code, message) => Object.assign(new Error(message), { code });
+
+/** Mensagem em português para qualquer erro de login (Google ou e-mail). Devolve null quando a pessoa só fechou a janela. */
+export function mensagemErroAuth(e) {
+    const c = e?.code || "";
+    if (["auth/popup-closed-by-user", "auth/cancelled-popup-request", "auth/user-cancelled"].includes(c)) return null;
+    const m = {
+        "config/nao-configurado": "O login ainda não foi configurado: faltam os dados do Firebase em config.js.",
+        "app/navegador-embutido": "O Google não permite o login dentro deste navegador (Instagram, WhatsApp…). Toque em ⋮ ou ⤴ e escolha “Abrir no Chrome/Safari”.",
+        "auth/unauthorized-domain": `Este endereço (${location.hostname}) não está autorizado no Firebase: Authentication → Configurações → Domínios autorizados.`,
+        "auth/operation-not-allowed": "O login com Google não está ativado no Firebase (Authentication → Método de login).",
+        "auth/invalid-api-key": "A chave do Firebase em config.js é inválida.",
+        "auth/api-key-not-valid.-please-pass-a-valid-api-key.": "A chave do Firebase em config.js é inválida.",
+        "auth/app-not-authorized": "Este app não está autorizado a usar esta chave do Firebase.",
+        "auth/configuration-not-found": "O Firebase Authentication não está ativado neste projeto.",
+        "auth/popup-blocked": "O navegador bloqueou a janela do Google. Tente de novo.",
+        "auth/network-request-failed": "Sem conexão com a internet.",
+        "auth/web-storage-unsupported": "O navegador está bloqueando o armazenamento. Saia do modo anônimo ou libere os cookies deste site.",
+        "auth/user-disabled": "Esta conta foi desativada.",
+        "auth/account-exists-with-different-credential": "Este e-mail já tem conta com outro método de entrada. Use e-mail e senha.",
+        "auth/too-many-requests": "Muitas tentativas. Aguarde alguns minutos e tente de novo.",
+        "auth/internal-error": "O Google não respondeu. Tente de novo; se continuar, abra o site no Chrome ou Safari."
+    }[c];
+    return m || `Não foi possível entrar com o Google. (${c || "erro"})`;
+}
+
 /**
- * Entra com o Google. Tenta POPUP (rápido, sem sair da página); se o navegador bloquear o popup ou não o suportar, cai para REDIRECIONAMENTO
- * (quem conclui é `concluirLoginGoogle()` ao carregar a página). Devolve a credencial (popup), ou null (redirect iniciado / popup fechado pela pessoa).
+ * Entra com o Google. Mobile primeiro:
+ *  • app instalado (PWA) → REDIRECIONAMENTO direto (popup não abre no iOS nesse modo);
+ *  • demais casos → POPUP (rápido, sem sair da página) e, se o navegador bloquear ou não suportar, cai para REDIRECIONAMENTO.
+ * Quem conclui o redirecionamento é `getRedirectResult` ao carregar a página (ver `concluirLoginGoogle`).
+ * Devolve a credencial (popup) ou null (redirect iniciado / janela fechada pela pessoa). Lança erros com `code` conhecido por `mensagemErroAuth`.
  */
 export async function entrarComGoogle() {
+    if (!FIREBASE_CONFIGURADO) throw erroCod("config/nao-configurado", "Firebase sem configuração.");
+    if (navegadorEmbutido()) throw erroCod("app/navegador-embutido", "Navegador embutido.");
+    if (modoApp()) { await signInWithRedirect(auth, googleProvider); return null; }
     try { return await signInWithPopup(auth, googleProvider); }
     catch (e) {
         if (["auth/popup-closed-by-user", "auth/cancelled-popup-request"].includes(e.code)) return null;
@@ -146,4 +182,15 @@ export async function baixarBlobProtegido(caminho) {
     const r = await fetch(`${FUNCTIONS_BASE}/${caminho}`, { headers: { Authorization: `Bearer ${idToken}` } });
     if (!r.ok) { const j = await r.json().catch(() => ({})); throw Object.assign(new Error(j.erro || "falha"), { code: j.codigo || r.status }); }
     return URL.createObjectURL(await r.blob());
+}
+
+// ---------- Aviso de configuração ausente (antes o login falhava sem explicar) ----------
+if (!FIREBASE_CONFIGURADO && typeof document !== "undefined") {
+    const mostrar = () => {
+        const alvo = document.querySelector(".auth-card, .lg-card"); if (!alvo || alvo.querySelector(".aviso-config")) return;
+        const d = document.createElement("div"); d.className = "aviso-config"; d.setAttribute("role", "alert");
+        d.innerHTML = "<strong>Login ainda não configurado.</strong> Cole os dados do app Web do Firebase em <code>config.js</code> (FIREBASE_CONFIG) e publique de novo.";
+        alvo.appendChild(d);
+    };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mostrar); else mostrar();
 }

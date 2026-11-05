@@ -5,7 +5,7 @@
 import { chave } from "./portal.js";
 import { collection, addDoc, doc, setDoc, getDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getRedirectResult, onAuthStateChanged, reauthenticateWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { auth, db, googleProvider, chamarFuncao, consultar, baixarCSVProtegido, renovarToken, testeAtivo, loginDeTeste, contaDeTeste, entrarComGoogle, sairDaConta, aquecerServidor } from "./firebase.js";
+import { auth, db, googleProvider, chamarFuncao, consultar, baixarCSVProtegido, renovarToken, testeAtivo, loginDeTeste, contaDeTeste, entrarComGoogle, mensagemErroAuth, navegadorEmbutido, sairDaConta, aquecerServidor } from "./firebase.js";
 import { guardarEmailPendente, resolverAcesso, telaOutroPerfil, telaFalhaTemporaria, telaBloqueado, irParaPainel, limparGuarda } from "./acesso.js";
 import { ligarLoginEmail } from "./login-email.js";
 import { ligarSeletorDeModo, modoSalvo, gravarModo } from "./entrada.js";
@@ -52,7 +52,7 @@ try { const et = new URLSearchParams(location.search).get("et"); if (et) localSt
 const refRecebido = () => { try { return localStorage.getItem(chave("ref")) || ""; } catch (e) { return ""; } };
 
 // ---------- login ----------
-const msgAuth = (e) => ({ "auth/unauthorized-domain": "Domínio não autorizado no Firebase.", "auth/operation-not-allowed": "Login com Google não está ativado no Firebase.", "auth/popup-blocked": "O navegador bloqueou a janela do Google. Libere pop-ups ou tente de novo.", "auth/network-request-failed": "Sem conexão com a internet." })[e.code] ?? ((e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request") ? null : `Falha ao autenticar (${e.code || "erro"}).`);
+const msgAuth = mensagemErroAuth;   // firebase.js: mensagens em português para todos os erros de login
 const TXT_LOGIN = {
     entrar: { titulo: "Entrar na minha conta", sub: "Entre com a sua conta Google ou com e-mail e senha.", botao: "Entrar com Google" },
     criar: { titulo: "Comece a pegar aulas", sub: refRecebido() ? "🎁 Você foi convidado por um personal. Cadastre-se e faça seu primeira aula!" : "Cadastro rápido com Google ou e-mail. Depois de aprovado (com conferência do CREF), você vê as aulas da região.", botao: "Criar conta com Google" }
@@ -76,7 +76,7 @@ $("btn-login").addEventListener("click", async () => {
     catch (e) { clearTimeout(vigiaLogin); const m = msgAuth(e); if (m) erro(m); resetarLogin(); }
 });
 aquecerServidor();
-if (/Instagram|FBAN|FBAV|Line\/|MicroMessenger|WhatsApp/i.test(navigator.userAgent)) { try { toast("Dica: se o login com Google não abrir, abra este site no Chrome ou Safari."); } catch (e) {} }
+if (navegadorEmbutido()) { try { toast("Dica: o Google não deixa entrar por este navegador. Abra o site no Chrome ou Safari."); } catch (e) {} }
 testeAtivo().then((a) => { $("bloco-teste").hidden = !a; });
 $("btn-login-teste").addEventListener("click", async () => {
     const b = $("btn-login-teste"); b.disabled = true;
@@ -762,7 +762,7 @@ async function enviarQuiz() {
 
 // ---------- resultado ----------
 function confete(box) {
-    const cores = ["#f5c542", "#3ddc97", "#5aa9ff", "#ff6b6b"], f = document.createElement("div");
+    const cores = ["#3B82F6", "#FFFFFF", "#6EA3F8", "#A1A9B5"], f = document.createElement("div");
     f.className = "confete"; f.setAttribute("aria-hidden", "true");
     f.innerHTML = Array.from({ length: 22 }, (_, i) => `<i style="--x:${Math.round(Math.random() * 100)}%;--d:${(Math.random() * .6).toFixed(2)}s;--c:${cores[i % 4]};--r:${Math.round(Math.random() * 360)}deg"></i>`).join("");
     box.appendChild(f); setTimeout(() => f.remove(), 2800);

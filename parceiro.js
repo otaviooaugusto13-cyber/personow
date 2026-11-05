@@ -1,8 +1,8 @@
 // ============================================================
 // PERSONOW — painel B2B (parceiros/indústrias). Atualiza a cada 15 s (consulta ao servidor; o Firestore não é aberto a parceiros).
 // ============================================================
-import { signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { auth, googleProvider, chamarFuncao, consultar, renovarToken, papelAtual } from "./firebase.js";
+import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { auth, chamarFuncao, consultar, renovarToken, papelAtual, entrarComGoogle, concluirLoginGoogle, mensagemErroAuth } from "./firebase.js";
 import { esc, fmtDataHora } from "./core.js";
 import { $, erro, iniciarTema, alternarTema, registrarSW } from "./ui.js";
 import { abrirFoto, chip, } from "./parceiro-ui.js";
@@ -12,8 +12,11 @@ const tela = (id) => document.querySelectorAll(".screen").forEach((s) => s.class
 let timer = null, regioesMontadas = "";
 
 $("btn-login").addEventListener("click", async () => {
-    try { await signInWithPopup(auth, googleProvider); } catch (e) { if (e.code === "auth/popup-blocked") { try { await signInWithRedirect(auth, googleProvider); } catch (e2) { erro("Não foi possível entrar."); } } else if (!/popup-closed|cancelled/.test(e.code || "")) erro("Não foi possível entrar com o Google."); }
+    const b = $("btn-login"); b.disabled = true;
+    try { await entrarComGoogle(); } catch (e) { console.error(e); const m = mensagemErroAuth(e); if (m) erro(m); }
+    b.disabled = false;
 });
+concluirLoginGoogle().then(({ erro: e }) => { const m = e && mensagemErroAuth(e); if (m && !/no-auth-event/.test(e.code || "")) erro(m); });
 const sair = async () => { clearInterval(timer); await signOut(auth); };
 $("btn-sair").addEventListener("click", sair); $("btn-espera-sair").addEventListener("click", sair);
 $("theme-toggle").addEventListener("change", alternarTema);

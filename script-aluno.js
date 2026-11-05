@@ -4,7 +4,7 @@
 // ============================================================
 import { collection, doc, addDoc, setDoc, getDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { auth, db, chamarFuncao, consultar, baixarCSVProtegido, renovarToken, testeAtivo, loginDeTeste, contaDeTeste, entrarComGoogle, sairDaConta } from "./firebase.js";
+import { auth, db, chamarFuncao, consultar, baixarCSVProtegido, renovarToken, testeAtivo, loginDeTeste, contaDeTeste, entrarComGoogle, mensagemErroAuth, sairDaConta } from "./firebase.js";
 import { guardarEmailPendente, resolverAcesso, telaOutroPerfil, telaFalhaTemporaria, irParaPainel, limparGuarda } from "./acesso.js";
 import { ligarLoginEmail } from "./login-email.js";
 import { ligarSeletorDeModo, modoSalvo, gravarModo, termosAceitos, gravarTermos } from "./entrada.js";
@@ -46,13 +46,7 @@ iniciarTaxas(textosTaxas);
 // ============================================================
 // LOGIN / LOGOUT
 // ============================================================
-const msgAuth = (e) => ({
-    "auth/unauthorized-domain": "Domínio não autorizado no Firebase (Authentication → Settings → Domínios autorizados).",
-    "auth/operation-not-allowed": "Login com Google não está ativado no Firebase.",
-    "auth/popup-blocked": "O navegador bloqueou a janela do Google. Libere pop-ups ou tente de novo.",
-    "auth/network-request-failed": "Sem conexão com a internet.",
-    "auth/popup-closed-by-user": null, "auth/cancelled-popup-request": null
-})[e.code] ?? `Não foi possível entrar com o Google. (${e.code || "erro"})`;
+const msgAuth = mensagemErroAuth;   // firebase.js: mensagens em português para todos os erros de login
 
 const TXT_LOGIN = {
     entrar: { titulo: "Entrar na minha conta", sub: "Entre com a sua conta Google ou com e-mail e senha.", botao: "Entrar com Google" },

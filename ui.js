@@ -30,13 +30,13 @@ export function iniciarTema() {
     const claro = t ? t === "claro" : window.matchMedia?.("(prefers-color-scheme: light)").matches;
     document.body.classList.toggle("light-theme", !!claro);
     const cb = $("theme-toggle"); if (cb) cb.checked = !!claro;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", claro ? "#f6f7fb" : "#07090e");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", claro ? "#FFFFFF" : "#0B0B0D");
 }
 export function alternarTema() {
     const claro = $("theme-toggle").checked;
     document.body.classList.toggle("light-theme", claro);
     try { localStorage.setItem("personow_tema", claro ? "claro" : "escuro"); } catch (e) {}
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", claro ? "#f6f7fb" : "#07090e");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", claro ? "#FFFFFF" : "#0B0B0D");
 }
 
 // ---- Máscaras: <input data-mask="cpf|cnpj|doc|tel"> ----

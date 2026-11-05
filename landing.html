@@ -3,180 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Personow — personal trainers sob demanda</title>
-    <meta name="description" content="Personal trainers sob demanda: o aluno pede a aula, o personal aceita, o pagamento é dividido automaticamente e o comprovante sai na hora.">
-    <meta property="og:title" content="Personow — personal trainers sob demanda">
-    <meta property="og:description" content="Aulas e consultorias de treino com personal trainers registrados no CREF, perto de você.">
-    <meta name="theme-color" content="#0b1324">
+    <title>Personow — personal trainer na hora, perto de você</title>
+    <meta name="description" content="Peça uma aula e um personal trainer com CREF verificado aceita na hora. Sem mensalidade, sem fidelidade. Você paga depois do treino, por Pix ou cartão.">
+    <meta property="og:title" content="Personow — personal trainer na hora, perto de você">
+    <meta property="og:description" content="Personal trainers com CREF verificado, sob demanda. Sem mensalidade e sem fidelidade.">
+    <meta property="og:image" content="icons/icon-512.png">
+    <meta name="theme-color" content="#0B0B0D">
+    <meta name="color-scheme" content="dark">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="style-landing.css">
 </head>
 <body>
 
-<header class="nav">
+<!-- ícones (sprite inline: nenhuma requisição extra) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+        <symbol id="i-barbell" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8.2-8 9-4.8-.8-8-4.5-8-9V6l8-3z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+        <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+        <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></symbol>
+        <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/></symbol>
+        <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+        <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/></symbol>
+        <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7a2 2 0 0 1 2-2h12v4"/><path d="M4 7v10a2 2 0 0 0 2 2h14V9H6a2 2 0 0 1-2-2z"/><circle cx="16.5" cy="14" r="1"/></symbol>
+        <symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V5l8-2v18M12 8h8v13M8 9v.01M8 13v.01M8 17v.01M16 12v.01M16 16v.01"/></symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+        <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 3.5 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.5 1 2 2 2 0-3-1-5 1-8z"/></symbol>
+        <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></symbol>
+        <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/></symbol>
+        <symbol id="i-glove" viewBox="0 0 24 24"><path d="M7 11V7a3 3 0 0 1 6 0v1h2a4 4 0 0 1 4 4v3a5 5 0 0 1-5 5H9a4 4 0 0 1-4-4v-3a2 2 0 0 1 2-2z"/></symbol>
+        <symbol id="i-screen" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+        <symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></symbol>
+        <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.46-2.4-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.08-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.23 1.36.2 1.88.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.05 21.8h-.01a9.9 9.9 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.9-9.88 2.64 0 5.13 1.03 7 2.9a9.82 9.82 0 0 1 2.89 7c0 5.45-4.44 9.88-9.9 9.88zM20.52 3.45A11.8 11.8 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.17-3.48-8.41z"/></symbol>
+    </defs>
+</svg>
+
+<header class="nav" id="topo">
     <div class="wrap nav-in">
-        <a class="logo" href="landing.html" aria-label="Personow">Person<span>ow</span></a>
+        <a class="brand" href="landing.html" aria-label="Personow — início">
+            <img src="icons/icon-192.png" width="36" height="36" alt="" decoding="async">
+            <span>PERSON<b>OW</b></span>
+        </a>
         <nav class="nav-links" aria-label="Seções">
-            <a href="#roi-calculo">Por que o Personow</a>
             <a href="#como-funciona">Como funciona</a>
-            <a href="#solucoes">Soluções</a>
+            <a href="#modalidades">Modalidades</a>
+            <a href="#personal">Para personais</a>
+            <a href="#academias">Academias</a>
         </nav>
-        <a href="index.html" class="btn btn-gold btn-sm">Acessar app</a>
+        <a href="index.html" class="btn btn-line btn-sm">Entrar</a>
     </div>
 </header>
 
 <main>
-    <!-- HERO -->
-    <section class="hero">
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="inicio">
         <div class="wrap hero-in">
             <div class="hero-copy">
-                <h1>Seu personal trainer a um toque de distância</h1>
-                <p class="lead">Conecte-se a personal trainers com CREF verificado, sob demanda. Sem mensalidade e sem fidelidade.</p>
-                <div class="hero-actions">
-                    <a href="index.html?modo=criar" class="btn btn-gold">Quero treinar</a>
-                    <a href="personal.html?modo=criar" class="btn btn-ghost">Sou personal trainer</a>
+                <p class="chip"><i class="live" aria-hidden="true"></i> Personais com CREF verificado perto de você</p>
+                <h1>Seu personal.<br><em>No seu horário.</em></h1>
+                <p class="lead">Peça a aula, um personal trainer aceita e vai até você. Sem mensalidade, sem fidelidade. Você só paga depois do treino.</p>
+                <div class="hero-cta">
+                    <a href="index.html?modo=criar" class="btn btn-blue">Quero treinar <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                    <a href="personal.html?modo=criar" class="btn btn-line">Sou personal trainer</a>
                 </div>
-                <p class="hero-note">Você só paga depois da aula feita, por Pix ou cartão. O comprovante é emitido automaticamente.</p>
+                <ul class="trust" aria-label="Garantias">
+                    <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> CREF conferido</li>
+                    <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Pix ou cartão</li>
+                    <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Comprovante automático</li>
+                </ul>
             </div>
 
-            <figure class="hero-art" aria-label="Agenda com um horário livre sendo preenchido por uma aula aceita por um personal">
-                <div class="shelf" aria-hidden="true">
-                    <div class="shelf-row"><i class="p c1"></i><i class="p c2"></i><i class="p c3"></i><i class="p c1"></i><i class="p c4"></i><i class="p c2"></i></div>
-                    <div class="shelf-row"><i class="p c4"></i><i class="p c1"></i><i class="gap"><b class="refill"></b></i><i class="p c3"></i><i class="p c2"></i><i class="p c4"></i></div>
-                    <div class="shelf-row"><i class="p c3"></i><i class="p c2"></i><i class="p c4"></i><i class="p c1"></i><i class="p c3"></i><i class="p c1"></i></div>
-                </div>
-                <figcaption class="order-card">
-                    <div class="order-top">
-                        <span class="dot"></span>
-                        <strong>Aula aceita</strong>
+            <figure class="phone" aria-label="Exemplo ilustrativo da tela do aplicativo: aula aceita por um personal">
+                <div class="phone-in">
+                    <div class="ph-bar"><span class="ph-live"><i aria-hidden="true"></i> Aula aceita</span><span class="ph-time">17:42</span></div>
+                    <div class="ph-map" aria-hidden="true">
+                        <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+                        <span class="pin you"></span><span class="pin pt"></span>
                     </div>
-                    <dl>
-                        <div><dt>Serviço</dt><dd>Musculação</dd></div>
-                        <div><dt>Quando</dt><dd>Hoje, 18h às 19h</dd></div>
-                        <div><dt>Valor da aula</dt><dd>R$&nbsp;100,00</dd></div>
-                    </dl>
-                </figcaption>
+                    <div class="ph-card">
+                        <div class="ph-who">
+                            <span class="ph-av" aria-hidden="true">R</span>
+                            <div><strong>Rafael L.</strong><small>Personal trainer · CREF verificado</small></div>
+                            <span class="ph-eta">4 min</span>
+                        </div>
+                        <dl>
+                            <div><dt>Treino</dt><dd>Musculação</dd></div>
+                            <div><dt>Quando</dt><dd>Hoje, 18h às 19h</dd></div>
+                            <div><dt>Pagamento</dt><dd>Depois da aula</dd></div>
+                        </dl>
+                        <div class="ph-btn">Acompanhar ao vivo</div>
+                    </div>
+                </div>
+                <figcaption>Exemplo ilustrativo</figcaption>
             </figure>
         </div>
     </section>
 
-    <!-- ROI -->
-    <section class="section" id="roi-calculo">
+    <!-- faixa em movimento -->
+    <div class="strip-wrap" aria-hidden="true"><div class="strip">
+        <div class="strip-track">
+            <span>Musculação</span><span>Funcional</span><span>Emagrecimento</span><span>Hipertrofia</span><span>Mobilidade</span><span>Corrida</span><span>Lutas</span>
+            <span>Musculação</span><span>Funcional</span><span>Emagrecimento</span><span>Hipertrofia</span><span>Mobilidade</span><span>Corrida</span><span>Lutas</span>
+        </div>
+    </div></div>
+
+    <!-- ============ NÚMEROS ============ -->
+    <section class="section tight">
         <div class="wrap">
-            <div class="section-head">
-                <h2>Horário livre é treino perdido. Resolver custa só a aula.</h2>
-                <p>Rotina corrida e agenda cheia afastam você do treino. Com o Personow você pede a aula quando precisa e só paga depois que ela é feita.</p>
+            <ul class="stats">
+                <li><b>0</b><span>mensalidade e fidelidade</span></li>
+                <li><b>100&nbsp;m</b><span>check-in por GPS na aula</span></li>
+                <li><b>CREF</b><span>conferido antes de atender</span></li>
+                <li><b>Pix</b><span>ou cartão, só após o treino</span></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ============ COMO FUNCIONA ============ -->
+    <section class="section" id="como-funciona">
+        <div class="wrap">
+            <header class="head">
+                <p class="eyebrow">Como funciona</p>
+                <h2>Do pedido ao treino em 3 passos</h2>
+            </header>
+            <ol class="steps">
+                <li>
+                    <span class="n" aria-hidden="true">01</span>
+                    <div><h3>Peça a aula</h3><p>Escolha a modalidade, o dia, o horário e o local do treino.</p></div>
+                </li>
+                <li>
+                    <span class="n" aria-hidden="true">02</span>
+                    <div><h3>Um personal aceita</h3><p>Profissionais aprovados da sua região veem o pedido e aceitam. Você acompanha tudo ao vivo.</p></div>
+                </li>
+                <li>
+                    <span class="n" aria-hidden="true">03</span>
+                    <div><h3>Treine e pague depois</h3><p>Terminou a aula, você paga por Pix ou cartão e o comprovante sai na hora.</p></div>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ============ MODALIDADES ============ -->
+    <section class="section alt" id="modalidades">
+        <div class="wrap">
+            <header class="head">
+                <p class="eyebrow">Modalidades</p>
+                <h2>Treine do seu jeito</h2>
+                <p>Cada aula tem modalidade, dia e horário definidos por você.</p>
+            </header>
+            <ul class="mods">
+                <li><svg class="ic" aria-hidden="true"><use href="#i-barbell"/></svg><h3>Musculação</h3><p>Força, hipertrofia e técnica.</p></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-flame"/></svg><h3>Emagrecimento</h3><p>Queime gordura e ganhe fôlego.</p></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg><h3>Funcional</h3><p>Treino dinâmico, corpo inteiro.</p></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-pulse"/></svg><h3>Mobilidade</h3><p>Postura, pilates e yoga.</p></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-route"/></svg><h3>Corrida</h3><p>Endurance e preparo para provas.</p></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-glove"/></svg><h3>Lutas</h3><p>Técnica e condicionamento.</p></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-bars"/></svg><h3>Avaliação física</h3><p>Medidas e metas de evolução.</p></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-screen"/></svg><h3>Consultoria online</h3><p>Plano personalizado à distância.</p></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ============ POR QUE ============ -->
+    <section class="section" id="seguranca">
+        <div class="wrap">
+            <header class="head">
+                <p class="eyebrow">Confiança</p>
+                <h2>Treino sério, do início ao fim</h2>
+            </header>
+            <ul class="feats">
+                <li><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><div><h3>CREF verificado</h3><p>Todo personal é conferido pela equipe antes de ver o primeiro pedido.</p></div></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg><div><h3>Presença confirmada por GPS</h3><p>O check-in só vale com o personal a até 100 m do local da aula.</p></div></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-qr"/></svg><div><h3>Pagamento por QR Code</h3><p>Você escaneia, paga por Pix ou cartão e o valor é dividido na hora.</p></div></li>
+                <li><svg class="ic" aria-hidden="true"><use href="#i-receipt"/></svg><div><h3>Comprovante automático</h3><p>A nota da aula sai na hora, com código para conferir a autenticidade.</p></div></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ============ PARA PERSONAIS ============ -->
+    <section class="section alt" id="personal">
+        <div class="wrap">
+            <div class="panel">
+                <header class="head left">
+                    <p class="eyebrow">Para personal trainers</p>
+                    <h2>Sua agenda cheia, do seu jeito</h2>
+                    <p>Escolha as aulas que quer pegar, atenda perto de você e receba na carteira digital, com saque por Pix. Quanto mais aulas concluídas, mais você fica com cada uma.</p>
+                </header>
+                <ol class="levels" aria-label="Níveis do personal e a parte que fica com você em cada aula">
+                    <li class="lv-bronze"><span>Bronze</span><b>75%</b><i style="--w:75%"></i></li>
+                    <li class="lv-prata"><span>Prata</span><b>80%</b><i style="--w:80%"></i></li>
+                    <li class="lv-ouro"><span>Ouro</span><b>85%</b><i style="--w:85%"></i></li>
+                    <li class="lv-platina"><span>Platina</span><b>90%</b><i style="--w:90%"></i></li>
+                </ol>
+                <p class="fine">Percentuais padrão por nível; a plataforma pode ajustá-los. Exige CREF e 18 anos ou mais.</p>
+                <a href="personal.html?modo=criar" class="btn btn-blue">Quero atender <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </div>
+        </div>
+    </section>
 
-            <div class="roi-grid">
-                <div class="compare">
-                    <article class="compare-col bad">
-                        <h3>Sem o Personow</h3>
-                        <ul>
-                            <li>Dificuldade para achar um personal disponível no seu horário</li>
-                            <li>Mensalidades e pacotes com fidelidade</li>
-                            <li>Sem garantia de registro profissional do treinador</li>
-                        </ul>
-                    </article>
-                    <article class="compare-col good">
-                        <h3>Com o Personow</h3>
-                        <ul>
-                            <li>Personal aprovado da sua região aceita a aula que você pediu</li>
-                            <li>Sem mensalidade e sem fidelidade</li>
-                            <li>Pagamento só depois da aula, com comprovante automático</li>
-                        </ul>
-                    </article>
+    <!-- ============ ACADEMIAS ============ -->
+    <section class="section" id="academias">
+        <div class="wrap">
+            <div class="b2b">
+                <svg class="ic ic-lg" aria-hidden="true"><use href="#i-building"/></svg>
+                <div>
+                    <p class="eyebrow">Academias e estúdios</p>
+                    <h2>Acompanhe as aulas na sua academia</h2>
+                    <p>Painel para parceiros com aulas realizadas, fotos de auditoria e presença confirmada por GPS, em tempo real.</p>
                 </div>
+                <a href="parceiro.html" class="btn btn-line">Painel do parceiro</a>
+            </div>
+        </div>
+    </section>
 
+    <!-- ============ PREÇO ============ -->
+    <section class="section alt" id="preco">
+        <div class="wrap">
+            <div class="price-grid">
+                <header class="head left">
+                    <p class="eyebrow">Quanto custa</p>
+                    <h2>Sem mensalidade. Você paga a aula.</h2>
+                    <p>Nada de pacote nem fidelidade: pediu, treinou, pagou.</p>
+                </header>
                 <div class="calc" aria-labelledby="calc-title">
                     <h3 id="calc-title">Simule uma aula</h3>
-                    <label for="calc-valor">Duração da aula (horas)</label>
+                    <label for="calc-valor">Duração (horas)</label>
                     <input id="calc-valor" type="number" inputmode="decimal" min="0.5" max="3" step="0.5" value="1">
                     <p id="calc-erro" class="calc-erro" role="alert" hidden>Informe uma duração entre 0,5 e 3 horas.</p>
                     <dl class="calc-out">
                         <div class="row"><dt>Valor da aula</dt><dd id="calc-servico">R$&nbsp;100,00</dd></div>
                         <div class="row total"><dt>Você paga</dt><dd id="calc-total">R$&nbsp;100,00</dd></div>
                     </dl>
-                    <p class="calc-note">Valor padrão por aula de 0,5 a 3 horas (o valor pode mudar conforme as taxas vigentes). Pagamento só depois da aula, por Pix ou cartão. Detalhes nos Termos de Uso.</p>
+                    <p class="fine">Valor padrão por aula de 0,5 a 3 horas; pode mudar conforme as taxas vigentes. Pagamento só depois da aula. Detalhes nos Termos de Uso.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- COMO FUNCIONA -->
-    <section class="section alt" id="como-funciona">
+    <!-- ============ CTA FINAL ============ -->
+    <section class="final">
         <div class="wrap">
-            <div class="section-head">
-                <h2>Da aula ao comprovante em três passos</h2>
-            </div>
-            <ol class="steps">
-                <li>
-                    <span class="step-n">1</span>
-                    <div><h3>Você pede a aula</h3><p>Escolha a modalidade, o dia, o horário e o local.</p></div>
-                </li>
-                <li>
-                    <span class="step-n">2</span>
-                    <div><h3>Um personal aceita</h3><p>Personais registrados no CREF e aprovados da região veem o pedido e aceitam.</p></div>
-                </li>
-                <li>
-                    <span class="step-n">3</span>
-                    <div><h3>Aula feita, pagamento por QR Code</h3><p>Você escaneia o QR Code do personal e paga por Pix ou cartão. O valor é dividido na hora e o comprovante é emitido.</p></div>
-                </li>
-            </ol>
-        </div>
-    </section>
-
-    <!-- SOLUÇÕES -->
-    <section class="section" id="solucoes">
-        <div class="wrap">
-            <div class="section-head">
-                <h2>O que você pode treinar</h2>
-                <p>Escolha a modalidade ao pedir a aula. Cada aula tem modalidade, dia e horário definidos por você.</p>
-            </div>
-            <ul class="sol-grid">
-                <li>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                    <h3>Musculação</h3><p>Hipertrofia, força e técnica de execução.</p>
-                </li>
-                <li>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <h3>Emagrecimento e funcional</h3><p>Treinos dinâmicos para queimar gordura e ganhar condicionamento.</p>
-                </li>
-                <li>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                    <h3>Pilates e yoga</h3><p>Mobilidade, postura e consciência corporal.</p>
-                </li>
-                <li>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                    <h3>Corrida e lutas</h3><p>Endurance, técnica e preparo para provas ou artes marciais.</p>
-                </li>
-                <li>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <h3>Avaliação física</h3><p>Medidas e metas para acompanhar a sua evolução.</p>
-                </li>
-                <li>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    <h3>Consultoria online</h3><p>Plano de treino personalizado com acompanhamento à distância.</p>
-                </li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- QUEM ATENDEMOS + CTA -->
-    <section class="section tight">
-        <div class="wrap">
-            <p class="segments"><strong>Para quem é:</strong> alunos que querem treinar, personal trainers com CREF e academias e estúdios parceiros.</p>
-
-            <div class="cta">
-                <div>
-                    <h2>Treine no seu horário, do seu jeito</h2>
-                    <p>Peça uma aula agora e tenha um personal trainer registrado atendendo você.</p>
-                </div>
-                <a href="index.html" class="btn btn-gold">Entrar no app</a>
+            <h2>Bora treinar?</h2>
+            <p>Peça sua aula agora e tenha um personal trainer registrado atendendo você.</p>
+            <div class="hero-cta">
+                <a href="index.html?modo=criar" class="btn btn-blue">Criar conta de aluno <svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                <a href="index.html" class="btn btn-line">Já tenho conta</a>
             </div>
         </div>
     </section>
@@ -184,18 +262,24 @@
 
 <footer class="foot">
     <div class="wrap foot-in">
-        <span class="logo">Person<span>ow</span></span>
+        <a class="brand" href="landing.html" aria-label="Personow">
+            <img src="icons/icon-192.png" width="32" height="32" alt="" loading="lazy" decoding="async"><span>PERSON<b>OW</b></span>
+        </a>
         <nav aria-label="Rodapé">
             <a href="index.html">Área do aluno</a>
             <a href="personal.html">Área do personal</a>
+            <a href="parceiro.html">Parceiros</a>
+            <a href="verificar.html">Conferir comprovante</a>
             <a href="https://wa.me/551995350637" target="_blank" rel="noopener">Suporte no WhatsApp</a>
         </nav>
     </div>
 </footer>
 
-<a href="https://wa.me/551995350637" target="_blank" rel="noopener" class="wa" aria-label="Falar com o suporte pelo WhatsApp">
-    <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-</a>
+<!-- barra fixa no celular: aparece depois do topo da página -->
+<div class="dock" id="dock">
+    <a href="index.html?modo=criar" class="btn btn-blue">Quero treinar</a>
+    <a href="https://wa.me/551995350637" target="_blank" rel="noopener" class="dock-wa" aria-label="Falar com o suporte pelo WhatsApp"><svg class="ic" aria-hidden="true"><use href="#i-wa"/></svg></a>
+</div>
 
 <script src="landing.js" defer></script>
 </body>

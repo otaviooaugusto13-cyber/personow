@@ -23,7 +23,7 @@
 .donut small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); }
 .rank-linha { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
 .rank-linha .pos { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--surface-2); }
-.rank-linha:nth-child(1) .pos { background: var(--ouro); color: #1a1400; } .rank-linha:nth-child(2) .pos { background: var(--prata); color: #111; } .rank-linha:nth-child(3) .pos { background: var(--bronze); color: #111; }
+.rank-linha:nth-child(1) .pos { background: var(--ouro); color: #FFFFFF; } .rank-linha:nth-child(2) .pos { background: var(--prata); color: #111; } .rank-linha:nth-child(3) .pos { background: var(--bronze); color: #111; }
 .score { font-weight: 800; font-size: 16px; text-align: right; } .score small { display: block; font-size: 10.5px; font-weight: 500; color: var(--muted); }
 .galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 .foto-card { border: 1px solid var(--glass-line); border-radius: 14px; overflow: hidden; background: var(--surface); cursor: zoom-in; text-align: left; padding: 0; color: inherit; font: inherit; }

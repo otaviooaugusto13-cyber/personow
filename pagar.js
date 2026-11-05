@@ -1,6 +1,6 @@
 import { doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { auth, db, googleProvider, chamarFuncao, contaDeTeste } from "./firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { auth, db, chamarFuncao, contaDeTeste, entrarComGoogle, concluirLoginGoogle, mensagemErroAuth } from "./firebase.js";
 import { calcularPreco, visaoAluno, brl, fmtData, estaPago } from "./core.js";
 import { $, iniciarTema, registrarSW } from "./ui.js";
 iniciarTema(); registrarSW();
@@ -46,7 +46,8 @@ onAuthStateChanged(auth, async (user) => {
   } catch (e) { console.error(e); mostrar(""); aviso("Não foi possível carregar a aula."); }
 });
 
-$("btn-entrar").onclick = () => signInWithPopup(auth, googleProvider).catch((e) => aviso("Não foi possível entrar (" + (e.code || "erro") + ")."));
+$("btn-entrar").onclick = () => entrarComGoogle().catch((e) => { const m = mensagemErroAuth(e); if (m) aviso(m); });
+concluirLoginGoogle().then(({ erro }) => { const m = erro && mensagemErroAuth(erro); if (m) aviso(m); });
 
 $("btn-pagar-teste").onclick = async () => {
   const b = $("btn-pagar-teste"); b.disabled = true; b.innerHTML = '<span class="spinner"></span> Simulando…'; $("msg").hidden = true;

@@ -1,0 +1,13 @@
+/* Estilos dos módulos de app (extrato, níveis, formação, suporte, comprovante). Usa os tokens do Personow + componentes.css. */
+.mod-lista .linha strong { font-size: 14px; } .mod-lista .linha .valor { font-weight: 800; white-space: nowrap; }
+.nivel-selo { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 20px; }
+.nivel-bronze { color: #cd7f32; } .nivel-prata { color: #c0c8d4; } .nivel-ouro { color: #f5c542; } .nivel-platina { color: #7dd3fc; }
+.conquistas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.conquista { text-align: center; padding: 12px 6px; border-radius: var(--radius-sm); background: var(--surface-2); border: 1px solid var(--line); font-size: 11.5px; opacity: .45; filter: grayscale(1); }
+.conquista.ok { opacity: 1; filter: none; border-color: var(--accent); } .conquista .i { display: block; font-size: 26px; margin-bottom: 4px; }
+.opcoes-prova { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 14px; }
+.opcoes-prova label { display: flex; gap: 10px; align-items: center; padding: 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); cursor: pointer; }
+.opcoes-prova input { accent-color: var(--accent); width: 18px; height: 18px; }
+.opcoes-prova label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.chamado-msg { padding: 10px 12px; border-radius: 14px; margin: 6px 0; max-width: 88%; font-size: 14px; line-height: 1.45; background: var(--surface-2); }
+.chamado-msg.equipe { background: var(--accent-soft); margin-left: auto; } .chamado-msg small { display: block; color: var(--muted); font-size: 11px; margin-bottom: 2px; }
