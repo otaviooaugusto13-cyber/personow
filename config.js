@@ -67,17 +67,17 @@ export const NOME_SUPORTE = "Suporte TI";        // nome que o usuário vê nas 
 // ---- Firebase (chave pública por natureza; a segurança vem das regras do Firestore) ----
 // PREENCHA com o app Web do SEU projeto Firebase do Personow (Console → Configurações do projeto → Seus apps → Config).
 // Enquanto houver "COLE_AQUI", o app avisa na tela de login em vez de falhar sem explicação.
-const PROJETO_FIREBASE = "COLE_AQUI_O_PROJECT_ID";
+const PROJETO_FIREBASE = "app-diego-e0591";
 const _hostApp = typeof location !== "undefined" && /^([\w-]+\.)*onrender\.com$/.test(location.hostname) ? location.host : null;
 export const FIREBASE_CONFIG = {
-    apiKey: "COLE_AQUI_A_API_KEY",
+    apiKey: "AIzaSyA2PVDpo4X3G8ok_Mk5MU1WeRUaxwIhEpg",
     // signInWithRedirect: o domínio de autenticação precisa ser o MESMO do site (senão Chrome/Safari bloqueiam o armazenamento entre sites e o login "volta vazio").
     // No Render o servidor repassa /__/auth/* ao Firebase (server/lib/auth-proxy.js), então usamos o próprio host do site.
     authDomain: _hostApp || `${PROJETO_FIREBASE}.firebaseapp.com`,
     projectId: PROJETO_FIREBASE,
     storageBucket: `${PROJETO_FIREBASE}.firebasestorage.app`,
-    messagingSenderId: "COLE_AQUI",
-    appId: "COLE_AQUI"
+    messagingSenderId: "69109305372",
+    appId: "1:69109305372:web:5139a52f1342671c520fd9"
 };
 export const FIREBASE_CONFIGURADO = ![FIREBASE_CONFIG.apiKey, FIREBASE_CONFIG.projectId, FIREBASE_CONFIG.appId].some((v) => String(v).startsWith("COLE_AQUI"));
 
