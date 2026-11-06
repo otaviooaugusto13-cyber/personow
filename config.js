@@ -41,6 +41,9 @@ export const CREF_REGEX = /^\d{4,6}-[GP]\/[A-Z]{2}$/;   // ex.: 012345-G/SP (o a
 export const UFS = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
 
 // ---- Aulas por localização -------------------------------
+// Google Maps (mapa da tela inicial do aluno). Chave da "Maps JavaScript API": no Google Cloud, restrinja por REFERRER HTTP ao(s) domínio(s) do app
+// e só à API "Maps JavaScript API" (chave de navegador é pública por natureza — a restrição é a proteção). Vazia = usa o mapa gratuito OpenStreetMap.
+export const GOOGLE_MAPS_KEY = "";
 export const RAIO_KM_AULAS = 20;                   // "Perto de mim": só aulas até 20 km da posição do personal
 export const LOCAL_MAX_IDADE_MS = 120_000;           // posição em cache aceita por até 2 min (economiza bateria)
 export const LOCAL_MOVIMENTO_MIN_KM = 0.2;           // só recalcula o ranking se o personal andou mais que 200 m

@@ -14,13 +14,14 @@ function cabecalhos({ extraConnect = [] } = {}) {
     "frame-ancestors 'none'",
     "form-action 'self'",
     // sem 'unsafe-inline' em scripts: todo JS do app é arquivo externo
-    "script-src 'self' https://www.gstatic.com https://apis.google.com https://cdnjs.cloudflare.com https://sdk.mercadopago.com https://www.youtube.com",
+    "script-src 'self' https://www.gstatic.com https://apis.google.com https://cdnjs.cloudflare.com https://maps.googleapis.com https://sdk.mercadopago.com https://www.youtube.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
     "font-src 'self' https://fonts.gstatic.com",
-    // mapa do aluno: Leaflet 1.9.4 (cdnjs, já liberado em script-src) + tiles do OpenStreetMap (sem chave de API)
-    "img-src 'self' data: blob: https://*.googleusercontent.com https://i.ytimg.com https://tile.openstreetmap.org",
+    // mapa do aluno: Google Maps JS API (maps.googleapis.com / maps.gstatic.com; fontes e estilos já liberados) + plano B Leaflet 1.9.4 (cdnjs) com tiles do OpenStreetMap
+    "worker-src 'self' blob:",
+    "img-src 'self' data: blob: https://*.googleusercontent.com https://i.ytimg.com https://maps.gstatic.com https://maps.googleapis.com https://tile.openstreetmap.org",
     "media-src 'self' https: blob:",
-    `connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://api.mercadopago.com https://cdnjs.cloudflare.com https://tile.openstreetmap.org ${extraConnect.join(" ")}`.trim(),
+    `connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://api.mercadopago.com https://maps.googleapis.com https://cdnjs.cloudflare.com https://tile.openstreetmap.org ${extraConnect.join(" ")}`.trim(),
     `frame-src 'self' https://accounts.google.com https://*.firebaseapp.com https://www.youtube-nocookie.com https://www.youtube.com https://*.mercadopago.com https://*.mercadopago.com.br ${origemTesteEneagrama()}`.trim(),
     "upgrade-insecure-requests"
   ].join("; ");

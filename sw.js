@@ -1,5 +1,5 @@
 // Service worker: o app abre mesmo com internet ruim. Dados (Firestore) nunca são cacheados aqui.
-const VERSAO = "personow-v14";
+const VERSAO = "personow-v15";
 const BASE = ["./", "index.html", "personal.html", "/painel-aluno", "/painel-personal", "entrada.js", "pagar.html", "nota.html", "nota.css", "login-cena.css", "verificar.html", "verificar.js", "landing.html", "style.css", "style-landing.css", "config.js", "core.js", "ui.js", "firebase.js", "acesso.js", "recado.js", "script-aluno.js", "script-personal.js", "pagar.js", "nota.js", "landing.js", "manifest.json", "icons/icon-192.png", "taxas.js", "geo.js", "perfil-inteligente.js", "cursos.js", "suporte.js", "push.js", "parceiro.html", "style-jogo.css", "style-b2b.css", "camera.js", "gamificacao-ui.js", "personal-jogo.js", "aluno-jogo.js", "parceiro.js", "parceiro-ui.js", "mapa-aluno.js", "style-mapa.css"];
 // allSettled: se um arquivo faltar, o resto continua sendo guardado (antes, um 404 derrubava a instalação inteira).
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(VERSAO).then((c) => Promise.allSettled(BASE.map((u) => c.add(u)))).then(() => self.skipWaiting())); });

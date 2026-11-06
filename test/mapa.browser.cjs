@@ -33,6 +33,19 @@ const LEAFLET_MOCK = `(() => {
     DomEvent: { stopPropagation: (e) => e?.originalEvent?.stopPropagation?.() } };
 })();`;
 
+// Google Maps SIMULADO: Map, OverlayView (marcadores HTML), LatLng/LatLngBounds, importLibrary e o callback do carregamento assíncrono.
+const GOOGLE_MOCK = (authFalha) => `(() => {
+  class OverlayView { setMap(m) { if (m) { this._m = m; (window.__gp = window.__gp || new Set()).add(this); this.onAdd(); this.draw(); } else { this.onRemove(); window.__gp?.delete(this); } } getPanes() { return { overlayMouseTarget: window.__gel }; }
+    getProjection() { return { fromLatLngToDivPixel: () => ({ x: 60 + [...window.__gp].indexOf(this) * 70, y: 150 }), fromLatLngToContainerPixel: () => ({ x: 100, y: 100 }) }; } }
+  class LatLng { constructor(a, b) { this.lat = a; this.lng = b; } }
+  class LatLngBounds { constructor() { this.p = []; } extend(p) { this.p.push(p); } }
+  class GMap { constructor(el, o) { const d = document.createElement("div"); d.className = "gm-style"; d.style.cssText = "position:absolute;inset:0"; el.appendChild(d); window.__gel = d; window.__gmap = this; this.opts = o; this.ls = {}; d.addEventListener("click", () => this.ls.click?.()); }
+    addListener(t, f) { this.ls[t] = f; } setCenter(c) { this.c = c; } setZoom(z) { this.z = z; } getZoom() { return this.z || 14; } fitBounds(b, p) { this.fitted = b; this.pad = p; } setOptions(o) { Object.assign(this.opts, o); } panBy() {} }
+  window.google = { maps: { importLibrary: async () => ({ Map: GMap }), OverlayView, LatLng, LatLngBounds, event: { addListenerOnce() {}, trigger() {} } } };
+  window.__pmGoogleInit?.();
+  ${authFalha ? "setTimeout(() => window.gm_authFailure?.(), 60);" : ""}
+})();`;
+
 const P = (id, nome, lat, lng, extra = {}) => ({ id, nome, foto: "", ratingMedia: 4.8, ratingQtd: 12, modalidades: ["Musculação"], lat, lng, distanciaKm: 1.6, ...extra });
 
 (async () => {
@@ -40,9 +53,9 @@ const P = (id, nome, lat, lng, extra = {}) => ({ id, nome, foto: "", ratingMedia
   const browser = await chromium.launch(); let falhas = 0;
   const ok = (c, m) => { if (!c) { falhas++; console.log("  ✗", m); } else console.log("  ✓", m); };
 
-  async function abrir({ largura = 390, loc = { lat: -22.4358, lng: -46.8216, cidade: "Itapira", uf: "SP" }, personais = [], leaflet = "mock", falhaApi = false, teste = false } = {}) {
+  async function abrir({ largura = 390, loc = { lat: -22.4358, lng: -46.8216, cidade: "Itapira", uf: "SP" }, personais = [], leaflet = "mock", falhaApi = false, teste = false, google = null } = {}) {   // google: null (sem chave) | "mock" | "authfail" | "bloqueado"
     const ctx = await browser.newContext({ viewport: { width: largura, height: 800 }, hasTouch: true, isMobile: true });
-    const page = await ctx.newPage(), erros = [], chamadas = [];
+    const page = await ctx.newPage(), erros = [], chamadas = [], urlsGoogle = [];
     page.on("pageerror", (e) => erros.push(e.message));
     page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|net::ERR/.test(m.text())) erros.push(m.text()); });
     await page.exposeFunction("__api", (nome, corpo, metodo) => {
@@ -57,6 +70,8 @@ const P = (id, nome, lat, lng, extra = {}) => ({ id, nome, foto: "", ratingMedia
     await page.route("**/*", (route) => {
       const u = route.request().url(), m = /firebasejs\/10\.8\.0\/(firebase-[a-z]+\.js)/.exec(u);
       if (m) return route.fulfill({ contentType: "text/javascript", body: stubs[m[1]] || "" });
+      if (/\/config\.js$/.test(u) && u.startsWith(base) && google) return route.fulfill({ contentType: "text/javascript", body: fs.readFileSync(path.join(ROOT, "config.js"), "utf8").replace('GOOGLE_MAPS_KEY = ""', 'GOOGLE_MAPS_KEY = "TESTE"') });
+      if (/maps\.googleapis\.com\/maps\/api\/js/.test(u)) { urlsGoogle.push(u); return google === "bloqueado" ? route.abort() : route.fulfill({ contentType: "text/javascript", body: GOOGLE_MOCK(google === "authfail") }); }
       if (/\/firebase\.js$/.test(u) && u.startsWith(base)) return route.fulfill({ contentType: "text/javascript", body: FIREBASE_STUB });
       if (/cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4\/leaflet\.js$/.test(u)) return leaflet === "mock" ? route.fulfill({ contentType: "text/javascript", body: LEAFLET_MOCK }) : route.abort();
       if (/cdnjs\.cloudflare\.com\/ajax\/libs\/leaflet\/1\.9\.4\/leaflet\.css$/.test(u)) return route.fulfill({ contentType: "text/css", body: ".leaflet-container{overflow:hidden}" });
@@ -66,7 +81,7 @@ const P = (id, nome, lat, lng, extra = {}) => ({ id, nome, foto: "", ratingMedia
     const store = { "alunos/ana": { uid: "ana", nomeCompleto: "Ana", ...(loc ? { localizacao: loc } : {}) }, "personais/leo": { uid: "leo", nome: "Leo", status: "ativo" } };
     await page.addInitScript((f) => { window.__fake = { store: f.store, log: [], user: f.user, teste: f.teste }; }, { store, teste, user: { uid: "ana", displayName: "Ana Souza", email: "ana@x.com", emailVerified: true, photoURL: "" } });
     await page.goto(base + "/index.html"); await page.waitForTimeout(900);
-    return { page, erros, chamadas, ctx };
+    return { page, erros, chamadas, ctx, urlsGoogle };
   }
   const semScrollX = (page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
 
@@ -80,13 +95,26 @@ const P = (id, nome, lat, lng, extra = {}) => ({ id, nome, foto: "", ratingMedia
   ok(await page.locator("#mapa-vazio").isHidden() && await page.locator("#mapa-aviso").isHidden(), "sem aviso de vazio nem de localização");
   ok(chamadas.some((c) => c.nome === "personais/online" && c.metodo === "GET"), "consulta GET /personais/online");
   ok(await page.evaluate(() => window.__tiles.u.startsWith("https://tile.openstreetmap.org/")), "tiles do OpenStreetMap");
-  if (process.env.SHOT) await page.screenshot({ path: process.env.SHOT + "-home.png" });
+  const tela = await page.evaluate(() => { const t = document.getElementById("tab-home").getBoundingClientRect(), n = document.querySelector(".bottom-nav").getBoundingClientRect(), m = document.getElementById("mapa-personais").getBoundingClientRect(); return { topo: Math.round(t.top), base: Math.round(t.bottom), navTopo: Math.round(n.top), larg: Math.round(t.width), mapaH: Math.round(m.height), vh: innerHeight, vw: innerWidth }; });
+  ok(tela.topo === 0 && Math.abs(tela.base - tela.navTopo) <= 2 && tela.larg === tela.vw, "a tela inicial é o mapa em TELA CHEIA " + JSON.stringify(tela));
+  ok(tela.mapaH >= tela.vh - 120, "mapa ocupa a altura toda (" + tela.mapaH + " de " + tela.vh + ")");
+  ok(await page.evaluate(() => ["nome-home", "aviso-cartao", "rep-aluno-home", "lista-personais"].every((i) => document.getElementById(i)?.closest("#sheet-inicio") && !document.getElementById(i).closest("#tab-home"))), "saudação, avisos, reputação e lista foram para a sheet Resumo (mesmos ids)");
+  const acoes = await page.evaluate(() => ["#btn-relampago", "#btn-agendar"].map((s) => { const r = document.querySelector(s).getBoundingClientRect(); return [s, Math.round(r.width), Math.round(r.height), Math.round(r.bottom)]; }));
+  ok(acoes.every(([, w, h, b]) => w >= 44 && h >= 44 && b <= tela.base - 20), "ações flutuantes visíveis, ≥ 44 px e acima da logo/atribuição do mapa " + JSON.stringify(acoes));
+  await page.evaluate(() => document.querySelectorAll("#sheet-inicio .banner").forEach((b) => { b.hidden = true; })); await page.waitForTimeout(100);
+  ok(await page.locator("#mapa-pendencias").isHidden(), "sem aviso pendente: sem bolinha no ☰");
+  await page.evaluate(() => { document.getElementById("aviso-cartao").hidden = false; }); await page.waitForTimeout(100);
+  ok(await page.locator("#mapa-pendencias").isVisible(), "aviso pendente: bolinha azul no ☰");
+  await page.locator("#btn-resumo").click();
+  ok(await page.locator("#sheet-inicio").evaluate((e) => e.classList.contains("active")) && await page.locator("#sheet-inicio #aviso-cartao").isVisible(), "☰ abre o Resumo com o aviso");
+  await page.locator('#sheet-inicio [data-fechar="sheet-inicio"]').click(); await page.waitForTimeout(350);
+  if (process.env.SHOT) { await page.screenshot({ path: process.env.SHOT + "-home.png" }); await page.evaluate(() => document.body.classList.remove("light-theme")); await page.waitForTimeout(200); await page.screenshot({ path: process.env.SHOT + "-home-escuro.png" }); await page.evaluate(() => document.body.classList.add("light-theme")); }
   await page.locator(".pm-pin").first().click();
   if (process.env.SHOT) await page.screenshot({ path: process.env.SHOT + "-cartao.png" });
   ok(await page.locator("#mapa-cartao").isVisible(), "tocar no marcador abre o cartão");
   const cart = await page.locator("#mapa-cartao").textContent();
   ok(/Carla Souza/.test(cart) && /4,8/.test(cart) && /Musculação/.test(cart) && /≈/.test(cart), "cartão: nome, nota, modalidade e distância → " + cart.replace(/\s+/g, " ").trim());
-  const alvos = await page.evaluate(() => ["#mapa-cartao .btn", ".pm-fechar", "#btn-agendar", "#btn-relampago"].map((s) => { const r = document.querySelector(s).getBoundingClientRect(); return [s, Math.round(r.width), Math.round(r.height)]; }));
+  const alvos = await page.evaluate(() => ["#mapa-cartao .btn", ".pm-fechar"].map((s) => { const r = document.querySelector(s).getBoundingClientRect(); return [s, Math.round(r.width), Math.round(r.height)]; }));
   ok(alvos.every(([, w, h]) => w >= 44 && h >= 44), "alvos de toque ≥ 44 px " + JSON.stringify(alvos));
   await page.locator("#mapa-cartao .pm-chamar").click();
   ok(await page.locator("#sheet-agendar").evaluate((e) => e.classList.contains("active")), "\"Chamar este personal\" abre a sheet Agendar aula");
@@ -141,15 +169,43 @@ const P = (id, nome, lat, lng, extra = {}) => ({ id, nome, foto: "", ratingMedia
   ok(chamadas.filter((c) => c.nome === "personais/online").length > antes, "voltou a ficar visível: consulta na hora");
   await page.close();
 
+  console.log("GOOGLE MAPS (simulado)");
+  let urls;
+  ({ page, erros, urlsGoogle: urls } = await abrir({ google: "mock", personais: [P("p1", "Carla Souza", -22.44, -46.81), P("p2", "Rafa", -22.43, -46.83)] }));
+  ok(urls.length === 1 && /key=TESTE/.test(urls[0]) && /loading=async/.test(urls[0]) && /v=quarterly/.test(urls[0]) && /callback=__pmGoogleInit/.test(urls[0]), "carrega a API do Google com a chave, carregamento assíncrono e versão fixa (quarterly) → " + (urls[0] || "").replace(/^https:\/\/maps\.googleapis\.com/, ""));
+  ok(await page.locator(".pm-gpin.pm-pin").count() === 2 && await page.locator(".pm-gpin.pm-eu").count() === 1 && await page.locator(".leaflet-container").count() === 0, "Google: 2 marcadores de personal + 1 do aluno, sem Leaflet");
+  const og = await page.evaluate(() => { const o = window.__gmap.opts, off = (f) => o.styles.some((x) => x.featureType === f && (x.elementType || "all") === "all" && x.stylers[0].visibility === "off"); return { ui: o.disableDefaultUI, ci: o.clickableIcons, gh: o.gestureHandling, poi: off("poi"), transit: off("transit"), fundo: o.backgroundColor, zoomCtl: o.zoomControl }; });
+  ok(og.ui === true && og.ci === false && og.gh === "greedy" && og.poi && og.transit && og.zoomCtl === false, "estilo clean (sem controles, sem POI/trânsito, fundo grafite, gestos livres) " + JSON.stringify(og));
+  ok(await page.evaluate(() => window.__gmap.fitted?.p?.length === 3 && window.__gmap.pad.top >= 90 && window.__gmap.pad.bottom >= 140), "enquadra aluno + personais deixando folga para o contador e as ações");
+  ok((await page.locator("#mapa-contador").textContent()).trim() === "2 personais ativos agora", "contador no Google");
+  await page.locator(".pm-gpin.pm-pin").first().click();
+  ok(await page.locator("#mapa-cartao").isVisible() && /Carla Souza/.test(await page.locator("#mapa-cartao").textContent()) && await page.locator("#tab-home").evaluate((e) => e.classList.contains("pm-card-aberto")) && await page.locator("#btn-agendar").isHidden(), "marcador do Google abre o cartão e esconde as ações");
+  await page.locator("#mapa-cartao .pm-chamar").click();
+  ok(await page.locator("#sheet-agendar").evaluate((e) => e.classList.contains("active")) && (await page.locator("#nome-preferido").textContent()) === "Carla Souza", "Google: \"Chamar este personal\" abre Agendar aula com o preferido");
+  for (const [claro, cor] of [[false, "#14171B"], [true, "#F4F5F7"]]) {
+    await page.evaluate((c) => { document.body.classList.toggle("light-theme", c); document.dispatchEvent(new Event("visibilitychange")); }, claro); await page.waitForTimeout(400);
+    ok(await page.evaluate((x) => window.__gmap.opts.backgroundColor === x, cor), `tema ${claro ? "claro" : "escuro"}: o estilo do mapa acompanha (${cor})`);
+  }
+  ok(erros.length === 0, "Google: sem erros de JS " + JSON.stringify(erros));
+  await page.close();
+
+  ({ page, erros } = await abrir({ google: "authfail", personais: [P("p1", "Carla", -22.44, -46.81)] })); await page.waitForTimeout(500);
+  ok(await page.locator(".leaflet-container").count() === 1 && await page.locator(".leaflet-marker-icon.pm-pin").count() === 1 && await page.locator(".gm-style").count() === 0, "Google recusa a chave (gm_authFailure): cai no Leaflet/OSM com os marcadores");
+  ok(erros.length === 0, "troca de provedor sem erros " + JSON.stringify(erros));
+  await page.close();
+  ({ page, erros } = await abrir({ google: "bloqueado", personais: [P("p1", "Carla", -22.44, -46.81)] }));
+  ok(await page.locator(".leaflet-marker-icon.pm-pin").count() === 1, "Google fora do ar/bloqueado: usa Leaflet/OSM");
+  await page.close();
+
   console.log("LAYOUT (360 / 390 / 430 px)");
   for (const w of [360, 390, 430]) {
     ({ page } = await abrir({ largura: w, personais: [P("p1", "Carla Souza", -22.44, -46.81)] }));
     const m = await page.evaluate(() => { const r = document.getElementById("mapa-personais").getBoundingClientRect(); return { h: Math.round(r.height), w: Math.round(r.width), vh: innerHeight }; });
     ok(await semScrollX(page), `${w}px: sem scroll horizontal`);
-    ok(m.h >= 300 && Math.abs(m.h - m.vh * 0.58) <= 4, `${w}px: mapa com ${m.h}px de altura (~58% de ${m.vh})`);
-    await page.locator(".pm-pin").first().click(); await page.locator("#btn-agendar").scrollIntoViewIfNeeded();
+    ok(m.h >= m.vh - 120, `${w}px: mapa em tela cheia (${m.h}px de ${m.vh})`);
+    await page.locator(".pm-pin").first().click();
     ok(await semScrollX(page), `${w}px: sem scroll horizontal com o cartão aberto`);
-    await page.locator("#btn-agendar").click(); ok(await semScrollX(page), `${w}px: sem scroll horizontal com a sheet aberta`);
+    await page.locator(".pm-fechar").click(); await page.locator("#btn-agendar").click(); ok(await semScrollX(page), `${w}px: sem scroll horizontal com a sheet aberta`);
     await page.close();
   }
   console.log("TEMA CLARO e movimento reduzido");

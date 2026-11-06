@@ -234,7 +234,7 @@ function definirPreferido(id, nome) {
     if (preferido) abrirAgendar();
 }
 /** O formulário de pedido por modalidade/horário (antes o card "Solicitar personal" da tela inicial) vive numa sheet. */
-function abrirAgendar() { $("p-data").min = hojeLocal(); if (!$("p-data").value || $("p-data").value < hojeLocal()) $("p-data").value = hojeLocal(); atualizarSplit(); abrir("sheet-agendar"); }
+function abrirAgendar() { $("p-data").min = hojeLocal(); if (!$("p-data").value || $("p-data").value < hojeLocal()) $("p-data").value = hojeLocal(); atualizarSplit(); fechar("sheet-inicio"); abrir("sheet-agendar"); }
 $("btn-agendar").addEventListener("click", abrirAgendar);
 $("rm-preferido").addEventListener("click", () => definirPreferido(""));
 

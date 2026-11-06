@@ -172,12 +172,15 @@ t("CSP: Leaflet (cdnjs) e tiles do OSM liberados em script/style/img/connect; se
   const dir = (n) => (csp.split("; ").find((d) => d.startsWith(n + " ")) || "").split(" ");
   assert.ok(dir("script-src").includes("https://cdnjs.cloudflare.com")); assert.ok(dir("style-src").includes("https://cdnjs.cloudflare.com"));
   assert.ok(dir("img-src").includes("https://tile.openstreetmap.org")); assert.ok(dir("connect-src").includes("https://tile.openstreetmap.org"));
+  // Google Maps (mapa principal): API no script-src, tiles/ícones no img-src, workers em blob:, chamadas em connect-src
+  assert.ok(dir("script-src").includes("https://maps.googleapis.com")); assert.ok(dir("img-src").includes("https://maps.gstatic.com") && dir("img-src").includes("https://maps.googleapis.com"));
+  assert.ok(dir("connect-src").includes("https://maps.googleapis.com")); assert.ok(dir("worker-src").includes("blob:") && !dir("worker-src").includes("*"));
   assert.ok(!dir("script-src").includes("'unsafe-inline'") && !csp.includes("'unsafe-eval'")); assert.ok(!/(^| )\*( |;|$)/.test(csp), "sem curinga *");
 });
 
 t("paridade navegador×servidor: raio do mapa = RAIO_KM_AULAS; sw.js não cacheia /personais/ e a versão subiu", async () => {
   const cfg = fs.readFileSync(path.join(__dirname, "../config.js"), "utf8"); assert.equal(Number(/RAIO_KM_AULAS\s*=\s*(\d+)/.exec(cfg)[1]), C.MAPA.RAIO_KM);
-  const sw = fs.readFileSync(path.join(__dirname, "../sw.js"), "utf8"); assert.ok(sw.includes("personais\\/")); assert.ok(Number(/personow-v(\d+)/.exec(sw)[1]) >= 14); assert.ok(sw.includes("mapa-aluno.js"));
+  const sw = fs.readFileSync(path.join(__dirname, "../sw.js"), "utf8"); assert.ok(sw.includes("personais\\/")); assert.ok(Number(/personow-v(\d+)/.exec(sw)[1]) >= 15); assert.ok(sw.includes("mapa-aluno.js"));
 });
 
 (async () => {

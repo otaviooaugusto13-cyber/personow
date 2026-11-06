@@ -60,41 +60,14 @@
 <div id="screen-main" class="screen main-app-screen">
 
     <!-- INÍCIO -->
-    <section id="tab-home" class="tab-content active">
-        <div class="page-head">
-            <div><h2>Olá, <span id="nome-home" class="highlight">aluno</span> 👋</h2><p>Bora treinar? A gente encontra seu personal.</p></div>
-            <div class="avatar" id="avatar-home">A</div>
-        </div>
-
-        <div id="aviso-fiscal" class="banner mb" hidden>
-            <span class="ico">🧾</span>
-            <div><strong>Complete os dados da empresa</strong><br><span class="muted small">A nota sai em nome da sua empresa. Falta CNPJ/CPF e razão social.</span><br><a href="#" data-abrir="sheet-fiscal">Completar agora ›</a></div>
-        </div>
-
-        <div id="aviso-cartao" class="banner red mb" hidden>
-            <span class="ico">💳</span>
-            <div><strong>Cadastre um cartão de crédito</strong><br><span class="muted small">É obrigatório ter um cartão válido para solicitar e pagar serviços.</span><br><a href="#" data-abrir="sheet-cartao">Cadastrar cartão ›</a></div>
-        </div>
-
-        <div id="aviso-local" class="banner red mb" hidden>
-            <span class="ico">📍</span>
-            <div><strong>Defina a localização do aluno</strong><br><span class="muted small">O personal só faz o check-in a até 100 m dela. Sem isso não dá para pedir personal.</span><br><a href="#" data-abrir="sheet-local">Definir agora ›</a></div>
-        </div>
-
-        <div class="glass-card mb" id="rep-aluno-home" role="button" tabindex="0" data-abrir="sheet-rep-aluno"></div>
-
-        <div id="card-proximo" class="card flat mb" hidden></div>
-
-        <!-- Mapa dos personais online agora (montado por mapa-aluno.js). O formulário "Solicitar personal" agora está na sheet "Agendar aula". -->
-        <div class="card gold pm-card" id="card-mapa" aria-label="Personais online perto de você"></div>
+    <section id="tab-home" class="tab-content tab-mapa active">
+        <!-- A tela inicial É o mapa (montado por mapa-aluno.js). Saudação, avisos, reputação, próxima aula e lista de personais ficam na sheet "Resumo" (botão ☰ no mapa). -->
+        <div id="card-mapa" class="pm-full" aria-label="Personais online perto de você"></div>
 
         <div class="pm-acoes">
             <button class="btn btn-relampago" id="btn-relampago" type="button" style="background:linear-gradient(90deg,#ff4d6d,#ff9f43);color:#fff;border:0;font-weight:800">⚡ Chamado relâmpago</button>
             <button class="btn btn-primary" id="btn-agendar" type="button">📅 Agendar aula</button>
         </div>
-
-        <div class="section-title">Personais disponíveis</div>
-        <div id="lista-personais" class="stack"></div>
     </section>
 
     <!-- AULAS -->
@@ -255,6 +228,37 @@
     <div class="star-input" id="av-stars" role="radiogroup" aria-label="Nota"></div>
     <div class="field"><label for="av-texto">Comentário (opcional)</label><textarea id="av-texto" rows="3" maxlength="300" placeholder="Pontual, caprichoso, organizou tudo…"></textarea></div>
     <button class="btn btn-primary" id="btn-enviar-av">Enviar avaliação</button>
+</div></div>
+
+<!-- RESUMO: o que antes ficava na tela inicial (saudação, avisos de cadastro, reputação, próxima aula, lista de personais). Mesmos ids. -->
+<div id="sheet-inicio" class="app-overlay" aria-hidden="true"><div class="sheet"><div class="grab"></div>
+    <div class="sub-head"><h2>Resumo</h2><button class="icon-btn" data-fechar="sheet-inicio" aria-label="Fechar">✕</button></div>
+        <div class="page-head">
+            <div><h2>Olá, <span id="nome-home" class="highlight">aluno</span> 👋</h2><p>Bora treinar? A gente encontra seu personal.</p></div>
+            <div class="avatar" id="avatar-home">A</div>
+        </div>
+
+        <div id="aviso-fiscal" class="banner mb" hidden>
+            <span class="ico">🧾</span>
+            <div><strong>Complete os dados da empresa</strong><br><span class="muted small">A nota sai em nome da sua empresa. Falta CNPJ/CPF e razão social.</span><br><a href="#" data-abrir="sheet-fiscal">Completar agora ›</a></div>
+        </div>
+
+        <div id="aviso-cartao" class="banner red mb" hidden>
+            <span class="ico">💳</span>
+            <div><strong>Cadastre um cartão de crédito</strong><br><span class="muted small">É obrigatório ter um cartão válido para solicitar e pagar serviços.</span><br><a href="#" data-abrir="sheet-cartao">Cadastrar cartão ›</a></div>
+        </div>
+
+        <div id="aviso-local" class="banner red mb" hidden>
+            <span class="ico">📍</span>
+            <div><strong>Defina a localização do aluno</strong><br><span class="muted small">O personal só faz o check-in a até 100 m dela. Sem isso não dá para pedir personal.</span><br><a href="#" data-abrir="sheet-local">Definir agora ›</a></div>
+        </div>
+
+        <div class="glass-card mb" id="rep-aluno-home" role="button" tabindex="0" data-abrir="sheet-rep-aluno"></div>
+
+        <div id="card-proximo" class="card flat mb" hidden></div>
+
+        <div class="section-title">Personais disponíveis</div>
+        <div id="lista-personais" class="stack"></div>
 </div></div>
 
 <!-- AGENDAR AULA: o formulário que antes era o card "Solicitar personal" da tela inicial (mesmos ids: modalidade-grid, p-local, p-data, p-entrada, p-saida, btn-enviar…) -->
