@@ -172,7 +172,13 @@ module.exports = (app, x) => {
   // ================= presença =================
   /** Batimento do app. Verificação LOCAL do token (sem ida ao Auth): é a rota mais frequente da plataforma e só alimenta um contador. */
   app.post("/presenca/ping", async (req, res, next) => { try { req.usuario = await auth.autenticarLeve(req); next(); } catch (e) { next(e); } }, limitar({ janelaMs: 60_000, max: 8, nome: "ping", porUsuario: true }),
-    (req, res) => res.json({ ok: true, contado: presenca.ping(req.usuario.uid, req.usuario.role) }));
+    (req, res) => {
+      const contado = presenca.ping(req.usuario.uid, req.usuario.role); let posicao = false;
+      // Personal com o painel aberto também manda a posição atual (aparece no mapa do aluno, arredondada). Posição inválida/imprecisa é ignorada: o ping vale igual.
+      const b = req.body || {};
+      if (req.usuario.role === "personal" && b.lat !== undefined && !(Number.isFinite(b.precisao) && b.precisao > C.MAPA.PRECISAO_MAX_M)) { try { posicao = presenca.pingPosicao(req.usuario.uid, b); } catch { posicao = false; } }
+      res.json({ ok: true, contado, posicao });
+    });
 
   // ================= perfil do solicitante (aluno/personal) — tudo numa tela, para atender o chamado =================
   // CPF sai SÓ mascarado; documento de aluno, telefone e e-mail aparecem porque o atendimento precisa confirmar a identidade. A consulta é auditada.

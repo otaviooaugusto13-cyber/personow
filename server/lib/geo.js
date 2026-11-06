@@ -13,6 +13,16 @@ function distanciaM(a, b) {
   return 2 * RAIO_TERRA_M * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 const numero = (x) => (typeof x === "number" && Number.isFinite(x) ? x : null);
+/**
+ * Arredonda um ponto para o CENTRO da célula de uma grade de `grade` metros (privacidade: o personal aparece "por perto", nunca no ponto exato).
+ * Determinístico (mesma célula → mesmo ponto), então ninguém consegue refinar a posição repetindo a consulta. Erro máximo ≈ grade·0,7.
+ */
+function aproximar(p, grade = 300) {
+  const M_POR_GRAU = 111_320, passoLat = grade / M_POR_GRAU;
+  const iLat = Math.floor(p.lat / passoLat), latC = (iLat + 0.5) * passoLat;
+  const passoLng = grade / (M_POR_GRAU * Math.max(0.05, Math.cos(rad(latC)))), iLng = Math.floor(p.lng / passoLng);
+  return { lat: Math.round(latC * 1e5) / 1e5, lng: Math.round((iLng + 0.5) * passoLng * 1e5) / 1e5 };
+}
 /** Valida {lat,lng} (números reais dentro do globo, não 0/0). */
 function coordenadas(o, campo = "localização") {
   const lat = numero(o?.lat), lng = numero(o?.lng);
@@ -39,4 +49,4 @@ function avaliarPresenca({ fix, local, raioM = C.GEO.RAIO_METROS }) {
   if (d > raioM) return { ok: false, codigo: "fora-do-raio", mensagem: `Você está a ${d} m do aluno. Para iniciar é preciso estar a até ${raioM} m.`, ...base };
   return { ok: true, ...base };
 }
-module.exports = { distanciaM, coordenadas, lerFix, avaliarPresenca };
+module.exports = { distanciaM, aproximar, coordenadas, lerFix, avaliarPresenca };

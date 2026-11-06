@@ -13,6 +13,7 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="style-jogo.css">
+    <link rel="stylesheet" href="style-mapa.css">
 </head>
 <body>
 
@@ -84,38 +85,12 @@
 
         <div id="card-proximo" class="card flat mb" hidden></div>
 
-        <button class="btn btn-relampago mb" id="btn-relampago" type="button" style="width:100%;background:linear-gradient(90deg,#ff4d6d,#ff9f43);color:#fff;border:0;font-weight:800">⚡ Chamado relâmpago</button>
+        <!-- Mapa dos personais online agora (montado por mapa-aluno.js). O formulário "Solicitar personal" agora está na sheet "Agendar aula". -->
+        <div class="card gold pm-card" id="card-mapa" aria-label="Personais online perto de você"></div>
 
-        <div class="card gold" id="form-aula">
-            <div class="row between mb"><h3>🛒 Solicitar personal</h3><span class="badge green">Pague só depois</span></div>
-
-            <div id="banner-preferido" class="banner mb" hidden><span class="ico">⭐</span><div class="grow">Aula direcionado a <strong id="nome-preferido"></strong>. Outros personais também poderão aceitar se ele não puder.</div><button class="icon-btn" id="rm-preferido" aria-label="Remover preferência">✕</button></div>
-
-            <span class="lbl">1. Qual modalidade?</span>
-            <div class="chips mt" id="modalidade-grid" role="radiogroup" aria-label="Modalidade"></div>
-
-            <div class="field mt"><label for="p-local">2. Onde? <small>(nome e endereço do aluno)</small></label>
-                <input id="p-local" type="text" placeholder="Ex: Mercado Central — Rua das Flores, 120" autocomplete="street-address" maxlength="160">
-                <span class="msg-erro" id="e-local"></span></div>
-            <div class="row between small" style="margin:-4px 0 10px"><span class="muted" id="loc-status">📍 Localização não definida</span><a href="#" data-abrir="sheet-local">Alterar</a></div>
-            <div class="field" id="campo-parceiro" hidden><label for="p-parceiro">Parceiro/indústria atendida <small>(opcional)</small></label><select id="p-parceiro"><option value="">Nenhuma</option></select></div>
-            <div class="field"><label for="p-data">Dia do serviço</label><input id="p-data" type="date"><span class="msg-erro" id="e-data"></span></div>
-            <div class="grid-2">
-                <div class="field"><label for="p-entrada">Entrada</label><input id="p-entrada" type="time" value="08:00"></div>
-                <div class="field"><label for="p-saida">Saída</label><input id="p-saida" type="time" value="12:00"><span class="msg-erro" id="e-saida"></span></div>
-            </div>
-
-            <p class="muted small" id="dica-valor" style="margin:-4px 0 10px"></p>
-
-            <div class="split-card" id="split-card" hidden>
-                <div class="linha"><span>Duração da aula</span><strong id="sc-horas">—</strong></div>
-                <div class="linha"><span>Valor do serviço</span><strong id="sc-valor">—</strong></div>
-                <div class="linha total"><span>Você paga</span><strong id="sc-total">—</strong></div>
-            </div>
-            <span class="msg-erro" id="e-valor"></span>
-
-            <button class="btn btn-primary" id="btn-enviar">🚀 Solicitar personais na região</button>
-            <p class="muted small center mt">Aulas de até 6 horas. O pagamento é feito depois, pelo app. A nota é gerada automaticamente.</p>
+        <div class="pm-acoes">
+            <button class="btn btn-relampago" id="btn-relampago" type="button" style="background:linear-gradient(90deg,#ff4d6d,#ff9f43);color:#fff;border:0;font-weight:800">⚡ Chamado relâmpago</button>
+            <button class="btn btn-primary" id="btn-agendar" type="button">📅 Agendar aula</button>
         </div>
 
         <div class="section-title">Personais disponíveis</div>
@@ -184,6 +159,7 @@
             <div class="sw-row"><span>Modo claro</span><label class="theme-switch"><input type="checkbox" id="theme-toggle" aria-label="Modo claro"><span class="slider"></span></label></div>
             <button class="btn btn-ghost btn-instalar" hidden id="btn-instalar" style="margin-top:12px">📲 Instalar o app no celular</button>
         </div>
+        <button class="btn btn-ghost mb" id="btn-teste-online" hidden>🧪 Simular personais online no mapa</button>
         <button class="btn btn-ghost mb" id="btn-teste-reset" hidden>🧪 Zerar dados de teste</button>
         <button class="btn btn-danger" id="btn-sair">Sair da conta</button>
     </section>
@@ -279,6 +255,43 @@
     <div class="star-input" id="av-stars" role="radiogroup" aria-label="Nota"></div>
     <div class="field"><label for="av-texto">Comentário (opcional)</label><textarea id="av-texto" rows="3" maxlength="300" placeholder="Pontual, caprichoso, organizou tudo…"></textarea></div>
     <button class="btn btn-primary" id="btn-enviar-av">Enviar avaliação</button>
+</div></div>
+
+<!-- AGENDAR AULA: o formulário que antes era o card "Solicitar personal" da tela inicial (mesmos ids: modalidade-grid, p-local, p-data, p-entrada, p-saida, btn-enviar…) -->
+<div id="sheet-agendar" class="app-overlay" aria-hidden="true"><div class="sheet"><div class="grab"></div>
+    <div class="sub-head"><h2>📅 Agendar aula</h2><button class="icon-btn" data-fechar="sheet-agendar" aria-label="Fechar">✕</button></div>
+    <div id="form-aula">
+        <p class="mb"><span class="badge green">Pague só depois</span></p>
+
+
+            <div id="banner-preferido" class="banner mb" hidden><span class="ico">⭐</span><div class="grow">Aula direcionado a <strong id="nome-preferido"></strong>. Outros personais também poderão aceitar se ele não puder.</div><button class="icon-btn" id="rm-preferido" aria-label="Remover preferência">✕</button></div>
+
+            <span class="lbl">1. Qual modalidade?</span>
+            <div class="chips mt" id="modalidade-grid" role="radiogroup" aria-label="Modalidade"></div>
+
+            <div class="field mt"><label for="p-local">2. Onde? <small>(nome e endereço do aluno)</small></label>
+                <input id="p-local" type="text" placeholder="Ex: Mercado Central — Rua das Flores, 120" autocomplete="street-address" maxlength="160">
+                <span class="msg-erro" id="e-local"></span></div>
+            <div class="row between small" style="margin:-4px 0 10px"><span class="muted" id="loc-status">📍 Localização não definida</span><a href="#" data-abrir="sheet-local">Alterar</a></div>
+            <div class="field" id="campo-parceiro" hidden><label for="p-parceiro">Parceiro/indústria atendida <small>(opcional)</small></label><select id="p-parceiro"><option value="">Nenhuma</option></select></div>
+            <div class="field"><label for="p-data">Dia do serviço</label><input id="p-data" type="date"><span class="msg-erro" id="e-data"></span></div>
+            <div class="grid-2">
+                <div class="field"><label for="p-entrada">Entrada</label><input id="p-entrada" type="time" value="08:00"></div>
+                <div class="field"><label for="p-saida">Saída</label><input id="p-saida" type="time" value="12:00"><span class="msg-erro" id="e-saida"></span></div>
+            </div>
+
+            <p class="muted small" id="dica-valor" style="margin:-4px 0 10px"></p>
+
+            <div class="split-card" id="split-card" hidden>
+                <div class="linha"><span>Duração da aula</span><strong id="sc-horas">—</strong></div>
+                <div class="linha"><span>Valor do serviço</span><strong id="sc-valor">—</strong></div>
+                <div class="linha total"><span>Você paga</span><strong id="sc-total">—</strong></div>
+            </div>
+            <span class="msg-erro" id="e-valor"></span>
+
+            <button class="btn btn-primary" id="btn-enviar">🚀 Solicitar personais na região</button>
+            <p class="muted small center mt">Aulas de até 6 horas. O pagamento é feito depois, pelo app. A nota é gerada automaticamente.</p>
+    </div>
 </div></div>
 
 <script type="module" src="script-aluno.js"></script>

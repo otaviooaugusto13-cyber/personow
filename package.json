@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node test/split.test.js && node test/perfil.test.js && node test/backend.test.cjs && node test/ti.test.cjs && node test/jogo.test.cjs && node test/eneagrama.test.js",
+    "test": "node test/split.test.js && node test/perfil.test.js && node test/backend.test.cjs && node test/ti.test.cjs && node test/jogo.test.cjs && node test/mapa.test.cjs && node test/eneagrama.test.js",
     "start": "node server/server.js",
     "dev": "node server/server.js",
     "gerar-chaves": "node scripts/gerar-chaves.js",

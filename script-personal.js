@@ -11,7 +11,7 @@ import { ligarLoginEmail } from "./login-email.js";
 import { ligarSeletorDeModo, modoSalvo, gravarModo } from "./entrada.js";
 import { pintarRecado } from "./recado.js";
 import { iniciarSuporte, pararSuporte } from "./suporte.js";
-import "./presenca.js";                       // contador de usuários online (painel de TI)
+import { compartilharPosicao } from "./presenca.js";   // contador de usuários online (painel de TI) + posição aproximada para o mapa do aluno
 import { ativarPush, desativarPush } from "./push.js";
 import { RAIO_KM_AULAS, LOCAL_MOVIMENTO_MIN_KM, ENEAGRAMA_TESTE_URL, ENEAGRAMA_TESTE_ORIGEM, WHATSAPP_SUPORTE, IDADE_MINIMA, NIVEIS } from "./config.js";
 import { iniciarTaxas } from "./taxas.js";
@@ -83,14 +83,14 @@ $("btn-login-teste").addEventListener("click", async () => {
     try { await loginDeTeste("personal"); } catch (e) { console.error(e); erro("Não foi possível entrar no modo de teste."); b.disabled = false; }
 });
 getRedirectResult(auth).catch((e) => { const m = msgAuth(e); if (m) erro(m); });
-const sair = async () => { clearInterval(repTimer); pararPosicao(); esconderBanido(); rep = null; offUn?.(); aulasUn?.(); chatUn?.(); pararPings(); pararHab(); pararDeAcompanhar(); pos = null; posFonte = ""; await desativarPush(); pararSuporte(); await sairDaConta(); };
+const sair = async () => { compartilharPosicao(false); clearInterval(repTimer); pararPosicao(); esconderBanido(); rep = null; offUn?.(); aulasUn?.(); chatUn?.(); pararPings(); pararHab(); pararDeAcompanhar(); pos = null; posFonte = ""; await desativarPush(); pararSuporte(); await sairDaConta(); };
 $("btn-sair").addEventListener("click", async () => { if (confirm("Deseja sair do portal?")) await sair(); });
 $("btn-cadastro-sair").addEventListener("click", sair);
 
 const tela = (id) => document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
 onAuthStateChanged(auth, async (u) => {
     usuario = u;
-    if (!u) { clearInterval(repTimer); pararPosicao(); pub = {}; priv = {}; hab = { habilitado: false, pendencias: [], treinamento: { concluidos: 0, total: 0, completo: false } }; offUn?.(); aulasUn?.(); pararPings(); pararHab(); habCats = null; pararDeAcompanhar(); pararSuporte(); tela("screen-login"); resetarLogin(); prim = { o: true, t: true }; return; }
+    if (!u) { compartilharPosicao(false); clearInterval(repTimer); pararPosicao(); pub = {}; priv = {}; hab = { habilitado: false, pendencias: [], treinamento: { concluidos: 0, total: 0, completo: false } }; offUn?.(); aulasUn?.(); pararPings(); pararHab(); habCats = null; pararDeAcompanhar(); pararSuporte(); tela("screen-login"); resetarLogin(); prim = { o: true, t: true }; return; }
     if (guardarEmailPendente(u, trocarConta)) return;                          // e-mail/senha ainda sem confirmação
     try { await entrar(u); } catch (e) { console.error(e); resetarLogin(); erro("Não foi possível carregar seu cadastro. Tente novamente."); }
 });
@@ -121,6 +121,7 @@ async function entrar(u) {
     $("btn-teste-reset").hidden = !(await contaDeTeste());
     montarModalidadesPrefs(); montarFormIA(); pintarPerfil(); escutar(); carregarCarteira(); carregarTreino(); carregarPerfilIA(); carregarHabCats();
     clearInterval(repTimer); repTimer = setInterval(() => { if (!document.hidden) carregarRep(); }, 90_000); manterPosicao();
+    compartilharPosicao(() => pub.status === "ativo");          // aparece no mapa dos alunos (posição aproximada) enquanto o painel está aberto; só aprovado
     if (abaOfertasAtiva()) iniciarGeo();
     window.scrollTo(0, 0);
 }

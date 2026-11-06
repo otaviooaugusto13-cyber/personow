@@ -114,6 +114,11 @@ module.exports = {
     MAX_PUSH: 200
   },
 
+  // ---- Mapa de personais online (painel do aluno) ----
+  // RAIO_KM espelha RAIO_KM_AULAS de ../../config.js (test/mapa.test.cjs confere). GRADE_M: a posição do personal é ARREDONDADA para o centro de
+  // uma grade de ~300 m ASSIM QUE CHEGA ao servidor — a posição exata nunca é guardada nem devolvida a ninguém.
+  MAPA: { RAIO_KM: 20, GRADE_M: 300, MAX_PONTOS: 40, PRECISAO_MAX_M: 2000 },
+
   // ---- Segurança ----
   AUTH_RECENTE_SEG: 300,       // operações sensíveis exigem login nos últimos 5 min
   ADMIN_EXIGE_MFA: ["1", "true"].includes(String(process.env.ADMIN_EXIGE_MFA || "").toLowerCase()),

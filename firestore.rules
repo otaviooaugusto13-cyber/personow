@@ -129,5 +129,12 @@ service cloud.firestore {
     match /presencas/{id}           { allow read, write: if false; }
     match /alertas_personal/{id}    { allow read, write: if false; }
     match /parceiros/{id}              { allow read, write: if false; }
+
+    // ---------- mapa de personais online (aluno) ----------
+    // A posição do personal NUNCA passa pelo Firestore do cliente: chega no ping de presença, é arredondada (~300 m) no servidor e só sai por GET /personais/online.
+    // `personais/{uid}` não tem campo de posição e o cliente não pode criá-lo (soMuda acima); `presenca_instancias` e `alertas_personal` são só do servidor.
+
+    // ---------- deny-by-default: qualquer coleção não listada acima é negada ----------
+    match /{document=**} { allow read, write: if false; }
   }
 }

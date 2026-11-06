@@ -68,7 +68,7 @@ function criarTI({ db, admin, FieldValue, Timestamp, V, auth }) {
   }
 
   /** Zera caches em memória (uso dos testes). */
-  const limparCaches = () => { metricas.limparCache(); chamados.invalidarCache(); presenca.limparCache(); presenca._mapa.clear(); for (const uid of [...operadores._cache.keys()]) operadores.invalidar(uid); };
+  const limparCaches = () => { metricas.limparCache(); chamados.invalidarCache(); presenca.limparCache(); presenca._mapa.clear(); presenca._pos.clear(); for (const uid of [...operadores._cache.keys()]) operadores.invalidar(uid); };
   return { auditoria, operadores, admins, metricas, chamados, presenca, tempoReal, bootstrapGestor, exigirTI, recente, auditar, atorDe, limparCaches, K };
 }
 module.exports = { criarTI };

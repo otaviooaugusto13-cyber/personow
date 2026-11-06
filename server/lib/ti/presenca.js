@@ -4,11 +4,14 @@
 //   Com 1 instância (Render) a leitura é só a memória local; com várias, o total continua certo (atraso máx. ≈ 20 s).
 const crypto = require("crypto");
 const K = require("./constantes");
+const G = require("../geo");
+const C = require("../config");
 
 const LETRA = { aluno: "l", personal: "p", admin: "a", ti: "t" };
 
 function criarPresenca({ db, Timestamp }) {
   const mapa = new Map();                      // uid → { l: letra, ts }
+  const pos = new Map();                       // uid do PERSONAL → { lat, lng, ts, fixo? } — posição JÁ ARREDONDADA (grade de ~300 m). A exata nunca é guardada.
   const instancia = crypto.randomBytes(4).toString("hex");
   const hash = (uid) => crypto.createHash("sha256").update(String(uid)).digest("base64url").slice(0, 10);
   let timer = null, cache = null;
@@ -22,9 +25,22 @@ function criarPresenca({ db, Timestamp }) {
   }
   const idsLocais = (agora = Date.now()) => { const ids = []; for (const [uid, p] of mapa) { if (agora - p.ts > K.PRESENCA_JANELA_MS) mapa.delete(uid); else ids.push(`${p.l}${hash(uid)}`); } return ids; };
 
+  /**
+   * Posição do personal (mapa do aluno). Chega no mesmo ping de presença; é arredondada AQUI, antes de qualquer armazenamento.
+   * Só vale enquanto o ping vale (janela de 75 s): fechou o app ou parou de enviar posição → sai do mapa.
+   */
+  function pingPosicao(uid, ponto, { fixo = false } = {}) {
+    if (!uid) return false;
+    const c = G.coordenadas(ponto, "posição do personal"), a = G.aproximar(c, C.MAPA.GRADE_M);
+    pos.set(uid, { lat: a.lat, lng: a.lng, ts: Date.now(), ...(fixo ? { fixo: true } : {}) }); return true;
+  }
+  const vivo = (p, agora) => p.fixo === true || agora - p.ts <= K.PRESENCA_JANELA_MS;
+  const posLocais = (agora = Date.now()) => { const o = []; for (const [uid, p] of pos) { if (!vivo(p, agora)) pos.delete(uid); else o.push({ uid, lat: p.lat, lng: p.lng, ts: p.fixo ? agora : p.ts }); } return o; };
+
   async function publicar() {
     const ids = idsLocais().slice(0, 50_000);
-    await db.collection("presenca_instancias").doc(instancia).set({ instancia, emMs: Date.now(), em: Timestamp.now(), ids });
+    // `pos`: só posições já arredondadas (nunca a exata); documento de uso exclusivo do servidor (firestore.rules: presenca_instancias = deny).
+    await db.collection("presenca_instancias").doc(instancia).set({ instancia, emMs: Date.now(), em: Timestamp.now(), ids, pos: posLocais().filter((p) => !pos.get(p.uid)?.fixo).slice(0, 1000).map((p) => ({ u: p.uid, la: p.lat, ln: p.lng, t: p.ts })) });
   }
   /** Liga a publicação periódica (chamar uma vez no boot do servidor). */
   function iniciar() { if (timer) return; timer = setInterval(() => publicar().catch((e) => console.warn("presença:", e.message)), 20_000); timer.unref?.(); }
@@ -45,6 +61,20 @@ function criarPresenca({ db, Timestamp }) {
     const v = { total: uniao.size, alunos: n.l, personais: n.p, admins: n.a, ti: n.t, atualizadoEm: new Date(agora).toISOString(), janelaSeg: K.PRESENCA_JANELA_MS / 1000 };
     cache = { t: agora, v }; return v;
   }
-  return { ping, contar, iniciar, parar, publicar, _mapa: mapa, _instancia: instancia, limparCache: () => { cache = null; } };
+  /** Personais com posição válida agora (união das instâncias). Cache de 5 s, como o contador. Devolve [{ uid, lat, lng }] — lat/lng JÁ arredondados. */
+  let cachePos = null;
+  async function posicoesPersonais() {
+    if (cachePos && Date.now() - cachePos.t < 5000) return cachePos.v;
+    const agora = Date.now(), uniao = new Map(posLocais(agora).map((p) => [p.uid, p]));
+    try {
+      const s = await db.collection("presenca_instancias").where("emMs", ">=", agora - 60_000).get();
+      for (const d of s.docs) {
+        const x = d.data(); if (x.instancia === instancia) continue;
+        for (const q of x.pos || []) { if (agora - q.t > K.PRESENCA_JANELA_MS || !Number.isFinite(q.la) || !Number.isFinite(q.ln)) continue; const a = uniao.get(q.u); if (!a || a.ts < q.t) uniao.set(q.u, { uid: q.u, lat: q.la, lng: q.ln, ts: q.t }); }
+      }
+    } catch (e) { console.warn("presença (posições de outras instâncias):", e.message); }
+    const v = [...uniao.values()].map(({ uid, lat, lng }) => ({ uid, lat, lng })); cachePos = { t: agora, v }; return v;
+  }
+  return { ping, pingPosicao, posicoesPersonais, contar, iniciar, parar, publicar, _mapa: mapa, _pos: pos, _instancia: instancia, limparCache: () => { cache = null; cachePos = null; } };
 }
 module.exports = { criarPresenca };

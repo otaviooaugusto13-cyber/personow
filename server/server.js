@@ -126,11 +126,11 @@ const jsonPadrao = express.json({ limit: C.BODY_LIMITE });
 app.use((req, res, next) => (req.path === "/checkout" ? next() : jsonPadrao(req, res, next)));   // /checkout tem parser próprio (foto do local da aula)
 app.use(Seg.protecaoCsrf(permitidas, { isentas: ["/webhookMP"] }));
 app.use(limitar({ janelaMs: 60_000, max: 240, nome: "global" }));
-app.use(/^\/(saude|cadastro|perfil|habilitacao|habilitacoes|treinamento|criar|aceitar|cancelar|desistir|avaliar|cartao|confirmar|webhook|carteira|aluno|admin|interno|aviso|teste|suporte|push|config\/taxas|ti\/|chamados|presenca|nota\/|checkin|checkout|reportar|auditar|execucao|reputacao|personal\/|parceiros|b2b)/, Seg.semCache);
+app.use(/^\/(saude|cadastro|perfil|habilitacao|habilitacoes|treinamento|criar|aceitar|cancelar|desistir|avaliar|cartao|confirmar|webhook|carteira|aluno|admin|interno|aviso|teste|suporte|push|config\/taxas|ti\/|chamados|presenca|nota\/|checkin|checkout|reportar|auditar|execucao|reputacao|personal\/|personais\/|parceiros|b2b)/, Seg.semCache);
 
 app.get("/saude", (req, res) => res.json({ ok: true }));
 
-for (const rota of ["conta", "treinamento", "categorias", "aulas", "pagamentos", "nota", "carteira", "taxas", "admin", "suporte", "ti", "execucao", "relampago", "reputacao", "b2b", "teste"]) require(`./rotas/${rota}`)(app, ctx);
+for (const rota of ["conta", "treinamento", "categorias", "aulas", "pagamentos", "nota", "carteira", "taxas", "admin", "suporte", "ti", "execucao", "relampago", "mapa", "reputacao", "b2b", "teste"]) require(`./rotas/${rota}`)(app, ctx);
 
 
 // ---------- Site estático (somente extensões permitidas; nada de código do servidor, regras ou segredos) ----------

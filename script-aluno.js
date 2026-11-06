@@ -15,6 +15,7 @@ import { ativarPush, desativarPush } from "./push.js";
 import { WHATSAPP_SUPORTE, MP_PUBLIC_KEY } from "./config.js";
 import { iniciarTaxas } from "./taxas.js";
 import { brl, calcularPreco, calcularAula, visaoAluno, validarAula, minutosEntre, esc, TAXAS, fmtData, fmtDataHora, hojeLocal, mascaraDoc, mascaraTelefone, docValido, soDigitos, estaPago, valorCentavos, MODALIDADES, textoTermos } from "./core.js";
+import { iniciarMapa } from "./mapa-aluno.js";
 import { iniciar as iniciarJogo, pintarReputacao, abrirLocal, abrirRelampago, abrirAuditoria, temLocal, carregarParceiros } from "./aluno-jogo.js";
 import { telaBanido, esconderBanido, animarPerdaVida } from "./gamificacao-ui.js";
 import { $, dialogo, toast, ok, erro, iniciarTema, alternarTema, ligarMascaras, abrir, fechar, skeleton, vazio, registrarSW, instalarApp, pedirPermissaoNotificacao, notificar, baixarCSV } from "./ui.js";
@@ -31,6 +32,8 @@ const baseSite = () => location.origin + location.pathname.replace(/[^/]*$/, "")
 iniciarTema(); registrarSW();
 iniciarJogo({ perfil: () => perfil, setLocal: (l) => { perfil.localizacao = l; pintarLocal(); }, temCartao: () => !!cartaoAluno, modalidade: () => modalidadeSel, recarregar: () => carregarRep() });
 ligarMascaras({ doc: mascaraDoc, tel: mascaraTelefone });
+// Mapa de personais online (tela inicial). "Chamar este personal" reaproveita o fluxo da aula direta: definirPreferido → sheet "Agendar aula".
+const mapa = iniciarMapa({ perfil: () => perfil, abrirLocal, chamar: (id, nome) => definirPreferido(id, nome) });
 
 // ---------- textos que dependem da regra de taxas (nunca desatualizam) ----------
 $("btn-whatsapp").href = `https://wa.me/${WHATSAPP_SUPORTE}`;
@@ -76,7 +79,7 @@ getRedirectResult(auth).catch((e) => { const m = msgAuth(e); if (m) erro(m); res
 $("btn-sair").addEventListener("click", async () => { if (confirm("Deseja sair da conta?")) { parar(); await desativarPush(); pararSuporte(); await sairDaConta(); } });
 
 const tela = (id) => document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
-function parar() { clearInterval(repTimer); esconderBanido(); rep = null; aulasUn?.(); promUn?.(); cartaoUn?.(); finUn?.(); chatUn?.(); aulasUn = promUn = cartaoUn = finUn = chatUn = null; primeira = true; statusAnt.clear(); fin.clear(); cartaoAluno = null; }
+function parar() { mapa.desligar(); clearInterval(repTimer); esconderBanido(); rep = null; aulasUn?.(); promUn?.(); cartaoUn?.(); finUn?.(); chatUn?.(); aulasUn = promUn = cartaoUn = finUn = chatUn = null; primeira = true; statusAnt.clear(); fin.clear(); cartaoAluno = null; }
 
 onAuthStateChanged(auth, async (u) => {
     usuario = u;
@@ -85,9 +88,9 @@ onAuthStateChanged(auth, async (u) => {
     let seguiu = false;
     try { seguiu = await carregarPerfil(u); } catch (e) { console.error(e); resetarLogin(); erro(e.code === "limite-requisicoes" || e.code === "termos-obrigatorios" || e.code === "dados-invalidos" ? e.message : "Não foi possível carregar seu cadastro. Tente novamente."); return; }   // reabilita o botão: antes ficava em "Abrindo o Google…" para sempre
     if (!seguiu) { resetarLogin(); return; }                                    // tela de aviso/falha já está na tela; a sessão continua de pé
-    ehTeste = await contaDeTeste(); $("btn-teste-reset").hidden = !ehTeste; $("cartao-teste-dica").hidden = !ehTeste;
+    ehTeste = await contaDeTeste(); $("btn-teste-reset").hidden = !ehTeste; $("btn-teste-online").hidden = !ehTeste; $("cartao-teste-dica").hidden = !ehTeste;
     pintarPerfil(); iniciarFormulario(); tela("screen-main"); escutar(); limparGuarda(); iniciarSuporte(u);
-    pintarLocal(); pintarRep(); clearInterval(repTimer); repTimer = setInterval(() => { if (!document.hidden) carregarRep(); }, 120_000);
+    pintarLocal(); pintarRep(); mapa.ligar(); clearInterval(repTimer); repTimer = setInterval(() => { if (!document.hidden) carregarRep(); }, 120_000);
     carregarParceiros().then((m) => { $("campo-parceiro").hidden = !m.length; $("p-parceiro").innerHTML = '<option value="">Nenhuma</option>' + m.map((x) => `<option value="${esc(x.id)}">${esc(x.nome)}</option>`).join(""); });
 });
 
@@ -105,6 +108,7 @@ const pintarRep = () => rep && !rep.banido && pintarReputacao(rep);
 function pintarLocal() {
     const l = perfil.localizacao; $("aviso-local").hidden = temLocal(perfil);
     $("loc-status").textContent = temLocal(perfil) ? `📍 ${l.cidade || "Local definido"}${l.uf ? "/" + l.uf : ""}` : "📍 Localização não definida";
+    mapa.aoMudarLocal();
 }
 /**
  * O perfil ativo vem do SERVIDOR (/sessao) para o portal aberto — nunca do navegador.
@@ -227,8 +231,11 @@ function atualizarSplit() {
 
 function definirPreferido(id, nome) {
     preferido = id || ""; $("banner-preferido").hidden = !preferido; $("nome-preferido").textContent = nome || "";
-    if (preferido) { irPara("tab-home"); $("form-aula").scrollIntoView({ behavior: "smooth", block: "start" }); }
+    if (preferido) abrirAgendar();
 }
+/** O formulário de pedido por modalidade/horário (antes o card "Solicitar personal" da tela inicial) vive numa sheet. */
+function abrirAgendar() { $("p-data").min = hojeLocal(); if (!$("p-data").value || $("p-data").value < hojeLocal()) $("p-data").value = hojeLocal(); atualizarSplit(); abrir("sheet-agendar"); }
+$("btn-agendar").addEventListener("click", abrirAgendar);
 $("rm-preferido").addEventListener("click", () => definirPreferido(""));
 
 $("btn-enviar").addEventListener("click", async () => {
@@ -247,7 +254,7 @@ $("btn-enviar").addEventListener("click", async () => {
     try {
         await chamarFuncao("criarAula", { aluno, data, entrada, saida, foco: modalidadeSel, personalPreferido: preferido || undefined, parceiroId: $("p-parceiro").value || undefined });   // o servidor valida tudo de novo
         ok("Aula enviado! Avisamos quando um personal aceitar.");
-        $("p-local").value = ""; definirPreferido(""); atualizarSplit();
+        $("p-local").value = ""; definirPreferido(""); atualizarSplit(); fechar("sheet-agendar");
         filtro = "ativos"; marcarFiltro(); irPara("tab-aulas");
         if (!(perfil.nomeCompleto && perfil.documento)) setTimeout(() => toast("Dica: complete seus dados para o recibo sair no seu nome."), 1800);
     } catch (err) {
@@ -266,7 +273,7 @@ function repetir(p) {
     modalidadeSel = p.foco || modalidadeSel; montarModalidades();
     $("p-local").value = p.aluno || ""; $("p-entrada").value = p.entrada || "08:00"; $("p-saida").value = p.saida || "12:00";
     $("p-data").value = hojeLocal(); atualizarSplit();
-    irPara("tab-home"); $("form-aula").scrollIntoView({ behavior: "smooth" }); toast("Dados copiados. Escolha o dia e envie.", "ok");
+    irPara("tab-home"); abrirAgendar(); toast("Dados copiados. Escolha o dia e envie.", "ok");
 }
 
 // ============================================================
@@ -476,6 +483,10 @@ $("btn-remover-cartao").addEventListener("click", async () => {
     if (!confirm("Remover o cartão? Sem cartão cadastrado não é possível solicitar nem pagar serviços.")) return;
     try { await chamarFuncao("cartao/remover"); toast("Cartão removido."); } catch (e) { erro("Não foi possível remover o cartão."); }
 });
+$("btn-teste-online").addEventListener("click", async () => {
+    try { const r = await chamarFuncao("teste/personais-online"); ok(`${r.personais} personais fictícios online perto de você.`); irPara("tab-home"); mapa.aoMudarLocal(); }
+    catch (e) { erro(e.code === "localizacao-obrigatoria" ? "Defina a localização do aluno primeiro." : "Não foi possível simular (só no modo de teste)."); }
+});
 $("btn-teste-reset").addEventListener("click", async () => {
     if (!confirm("Apagar as aulas, notas e o cartão das contas de teste?")) return;
     try { const r = await chamarFuncao("teste/resetar"); ok(`Dados de teste zerados (${r.aulasRemovidos} aula(s)).`); } catch (e) { erro("Não foi possível zerar os dados de teste."); }
@@ -488,6 +499,7 @@ function irPara(id) {
     document.querySelectorAll(".tab-content").forEach((t) => t.classList.toggle("active", t.id === id));
     document.querySelectorAll(".nav-item").forEach((i) => i.classList.toggle("active", i.dataset.tab === id));
     window.scrollTo(0, 0);
+    mapa.aoMudarAba();
 }
 $("bottom-nav").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) irPara(b.dataset.tab); });
 
