@@ -85,18 +85,6 @@ service cloud.firestore {
         || (ehPersonal() && treinado() && !banido() && resource.data.status == 'aberta'));
       allow write: if false;                                                            // criar/aceitar/cancelar/desistir/avaliar: só pelo servidor
 
-      match /mensagens/{mid} {
-        function aula() { return get(/databases/$(database)/documents/aulas/$(id)).data; }
-        function participante() { return logado() && (request.auth.uid == aula().uid || request.auth.uid == aula().get('personalUid', '')); }
-        allow read: if participante();
-        allow create: if participante()
-          && request.resource.data.keys().hasOnly(['de', 'texto', 'criadoEm'])
-          && request.resource.data.de == request.auth.uid
-          && request.resource.data.texto is string && request.resource.data.texto.size() > 0 && request.resource.data.texto.size() <= 500
-          && request.resource.data.criadoEm == request.time
-          && aula().status in ['aberta', 'aceita', 'paga'];
-        allow update, delete: if false;
-      }
     }
     match /aulas_financeiro/{id} { allow read: if logado() && resource.data.uid == request.auth.uid; allow write: if false; }
     match /notas/{id}                   { allow read: if logado() && (resource.data.alunoUid == request.auth.uid || ehAdmin()); allow write: if false; }

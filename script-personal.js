@@ -26,7 +26,7 @@ let usuario = null, pub = {}, priv = {}, hab = { habilitado: false, pendencias: 
 let ofertas = [], aulas = [], filtroModalidade = "", ordem = "match";
 let perfilIA = { experiencias: [], eneagrama: null, palavrasChave: [], bioAuto: true };
 let rep = null, repTimer = null;                 // reputação/gamificação
-let offUn = null, aulasUn = null, chatUn = null, chatAula = null, qrAtual = null;
+let offUn = null, aulasUn = null, qrAtual = null;
 let dataCal = new Date(), diaSel = "", prim = { o: true, t: true };
 const vistos = new Set(), statusAnt = new Map();
 
@@ -83,7 +83,7 @@ $("btn-login-teste").addEventListener("click", async () => {
     try { await loginDeTeste("personal"); } catch (e) { console.error(e); erro("Não foi possível entrar no modo de teste."); b.disabled = false; }
 });
 getRedirectResult(auth).catch((e) => { const m = msgAuth(e); if (m) erro(m); });
-const sair = async () => { compartilharPosicao(false); clearInterval(repTimer); pararPosicao(); esconderBanido(); rep = null; offUn?.(); aulasUn?.(); chatUn?.(); pararPings(); pararHab(); pararDeAcompanhar(); pos = null; posFonte = ""; await desativarPush(); pararSuporte(); await sairDaConta(); };
+const sair = async () => { compartilharPosicao(false); clearInterval(repTimer); pararPosicao(); esconderBanido(); rep = null; offUn?.(); aulasUn?.(); pararPings(); pararHab(); pararDeAcompanhar(); pos = null; posFonte = ""; await desativarPush(); pararSuporte(); await sairDaConta(); };
 $("btn-sair").addEventListener("click", async () => { if (confirm("Deseja sair do portal?")) await sair(); });
 $("btn-cadastro-sair").addEventListener("click", sair);
 
@@ -289,7 +289,7 @@ function escutar() {
 const valorFiltro = (x) => valorOferta(x) >= (pub.valorMin || 0);
 const valorOferta = (x) => rep?.nivel ? calcularPreco(rep.nivel.id, x.bonusCentavos || 0).personal : valorPersonal(x);   // oferta aberta: pelo nível de quem vai aceitar
 const meu = (t) => valorPersonal(t);   // líquido do personal: único valor exibido neste portal
-function renderTudo() { renderProximos(); renderAgenda(); renderCarteira(); renderCalendario(); renderConversas(); if (diaSel) renderDia(); }
+function renderTudo() { renderProximos(); renderAgenda(); renderCarteira(); renderCalendario(); if (diaSel) renderDia(); }
 
 // ---------- ofertas: geolocalização em tempo real, contadores por cidade, raio de 20 km e ranking ----------
 const CHAVE_CIDADE = chave("cidade_manual");
@@ -454,7 +454,6 @@ function cartaoAula(t) {
     else if (st === "aceita" && fase === "em_andamento") acoes.push(`<button class="btn btn-primary btn-sm" data-checkout="${t.id}">📸 Finalizar (foto)</button>`, `<button class="btn btn-ghost btn-sm" data-faltaaluno="${t.id}">Aluno ausente?</button>`);
     else if (st === "aceita") acoes.push(`<button class="btn btn-primary btn-sm" data-qr="${t.id}">💳 Cobrar (QR)</button>`, ...(exec ? [] : [`<button class="btn btn-danger btn-sm" data-desistir="${t.id}">Desistir</button>`]));
     const pill = fase === "em_andamento" ? '<span class="fase-pill andamento">Em andamento</span>' : fase === "executada" && !pago ? '<span class="fase-pill executada">Executado ✓</span>' : "";
-    if (!cancel) acoes.push(`<button class="btn btn-ghost btn-sm" data-chat="${t.id}">💬 Chat</button>`);
     const rot = cancel ? ["Cancelado", "red"] : pago ? ["Recebido", "green"] : ["Aguardando pagamento", "blue"];
     return `<article class="card aula ${cancel ? "cancelada" : ""}"><div class="topo"><div class="grow"><h4>${esc(t.aluno)}</h4><div class="meta">${t.tipo === "relampago" ? "⚡ " : ""}${fmtData(t.data)} · ${esc(t.entrada)}–${esc(t.saida)} · ${esc(t.foco)}</div>${pill}</div>
         <div class="center"><div class="valor">${brl(meu(t))}</div><span class="badge ${rot[1]}" style="margin-top:4px">${rot[0]}</span></div></div>
@@ -814,25 +813,6 @@ $("pv-enviar").addEventListener("click", async () => {
     } catch (e) { erro(e.message || "Não foi possível enviar a prova."); } finally { b.disabled = false; }
 });
 
-// ---------- chat ----------
-function renderConversas() {
-    const l = aulas.filter((t) => t.status !== "cancelada");
-    $("lista-conversas").innerHTML = l.length ? l.map((t) => `<div class="card conversa" data-chat="${t.id}" role="button" tabindex="0"><div class="avatar">${esc((t.aluno || "L")[0])}</div><div class="grow"><h4>${esc(t.aluno)}</h4><div class="muted small">${fmtData(t.data)} · ${esc(t.entrada)}–${esc(t.saida)}</div></div><span class="seta muted">›</span></div>`).join("") : vazio("💬", "Nenhuma conversa ainda", "Quando você aceitar uma aula, o chat com o aluno aparece aqui.");
-}
-function abrirChat(t) {
-    chatAula = t; $("chat-titulo").textContent = t.aluno; $("chat-box").innerHTML = skeleton(1); chatUn?.();
-    chatUn = onSnapshot(query(collection(db, "aulas", t.id, "mensagens"), orderBy("criadoEm")), (s) => {
-        const box = $("chat-box");
-        box.innerHTML = s.docs.length ? s.docs.map((d) => { const m = d.data(), eu = m.de === usuario.uid; return `<div class="msg ${eu ? "msg-me" : "msg-other"}">${esc(m.texto)}<small>${fmtDataHora(m.criadoEm)}</small></div>`; }).join("") : '<p class="muted small center" style="margin:auto">Diga olá 👋 e combine os detalhes.</p>';
-        box.scrollTop = box.scrollHeight;
-    }, () => { $("chat-box").innerHTML = '<p class="muted small center">Não foi possível carregar a conversa.</p>'; });
-    abrir("sheet-chat");
-}
-$("chat-form").addEventListener("submit", async (e) => {
-    e.preventDefault(); const t = $("chat-input").value.trim(); if (!t || !chatAula) return; $("chat-input").value = "";
-    try { await addDoc(collection(db, "aulas", chatAula.id, "mensagens"), { de: usuario.uid, texto: t, criadoEm: serverTimestamp() }); } catch (err) { erro("Mensagem não enviada."); $("chat-input").value = t; }
-});
-
 // ---------- formulários do menu ----------
 /** Só campos públicos (bio, cidade, preferências) vão direto ao Firestore; as regras impedem qualquer outro campo. */
 async function salvarPublico(dados, msg, sheet) {
@@ -989,7 +969,6 @@ document.addEventListener("click", async (e) => {
     let el;
     if ((el = g("data-aceitar"))) aceitar(el.dataset.aceitar, el);
     else if ((el = g("data-qr"))) { const t = aulas.find((x) => x.id === el.dataset.qr); if (t) abrirQR(t); }
-    else if ((el = g("data-chat"))) { const t = aulas.find((x) => x.id === el.dataset.chat); if (t) abrirChat(t); }
     else if ((el = g("data-desistir"))) {
         const t = aulas.find((x) => x.id === el.dataset.desistir); if (!t || !confirm(`Desistir da aula em ${t.aluno}? Ele volta para a fila de ofertas.${tardio(t) ? `\n\n⚠️ Faltam menos de ${rep?.regras?.cancelamentoTardioHoras || 12} h para o início: você receberá uma ADVERTÊNCIA (perde 1 vida) e uma multa.` : ""}`)) return;
         try { const r = await chamarFuncao("desistirAula", { aulaId: t.id }); ok("Você saiu da aula. Ele voltou para a fila."); if (r.infracao) { await carregarRep(); if (!rep.banido) animarPerdaVida(r.infracao); } } catch (err) { erro(err.code === "servico-em-andamento" ? "Você já fez check-in. Finalize o serviço ou reporte o aluno." : "Não foi possível desistir agora."); }

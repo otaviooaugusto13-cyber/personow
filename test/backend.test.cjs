@@ -749,79 +749,79 @@ const PERGUNTAS = [
   { texto: "Antes de repor, o que conferir?", opcoes: ["Etiqueta de preço correta", "A cor da caixa"], correta: 0 },
   { texto: "Como empilhar delicados?", opcoes: ["Em camadas baixas", "O mais alto possível", "Sob caixas pesadas"], correta: 0 }
 ];
-const conteudo = (over = {}) => ({ descricao: "Treinamento de Funcional", provedor: "youtube", videoRef: "abcdefghijk", duracaoSeg: 60, ativo: true, perguntas: PERGUNTAS.slice(0, 3), ...over });
-const publicar = async (cat = "funcional", over = {}) => ok(await chamar("PUT", `/admin/habilitacoes/categorias/${cat}`, { token: "adm", body: conteudo(over) }), "admin salva categoria");
+const conteudo = (over = {}) => ({ descricao: "Treinamento de Lutas", provedor: "youtube", videoRef: "abcdefghijk", duracaoSeg: 60, ativo: true, perguntas: PERGUNTAS.slice(0, 3), ...over });
+const publicar = async (cat = "lutas", over = {}) => ok(await chamar("PUT", `/admin/habilitacoes/categorias/${cat}`, { token: "adm", body: conteudo(over) }), "admin salva categoria");
 const HAB = (caminho, body, token = "prom1") => chamar("POST", `/habilitacoes/${caminho}`, { token, body });
 /** assiste ao vídeo de verdade: pings de 10 em 10 s com posição contígua, tocando */
-async function assistir(cat = "funcional", dur = 60) {
+async function assistir(cat = "lutas", dur = 60) {
   let r; for (let pos = 0; pos <= dur; pos += 10) { r = await HAB("ping", { categoria: cat, posicaoSeg: pos, tocando: true }); ok(r, "ping"); E.avancar(10_000); }
   r = await HAB("ping", { categoria: cat, posicaoSeg: dur, tocando: true }); ok(r); return r.json;
 }
 /** descobre as respostas certas lendo o gabarito DIRETO do banco (o personal nunca o vê) e mapeando para a ordem embaralhada */
-async function respostasCertas(perguntas, cat = "funcional") {
+async function respostasCertas(perguntas, cat = "lutas") {
   const c = await get("habilitacao_categorias", cat);
   return perguntas.map((q) => { const orig = c.perguntas.find((p) => p.id === q.id); return q.opcoes.indexOf(orig.opcoes[orig.correta]); });
 }
-const iniciarEAssistir = async (cat = "funcional", dur = 60) => { ok(await HAB("iniciar", { categoria: cat })); return assistir(cat, dur); };
+const iniciarEAssistir = async (cat = "lutas", dur = 60) => { ok(await HAB("iniciar", { categoria: cat })); return assistir(cat, dur); };
 
 t("admin cadastra conteúdo da categoria com validação; personal não", async () => {
-  falha(await chamar("PUT", "/admin/habilitacoes/categorias/funcional", { token: "prom1", body: conteudo() }), 403, "sem-permissao");
+  falha(await chamar("PUT", "/admin/habilitacoes/categorias/lutas", { token: "prom1", body: conteudo() }), 403, "sem-permissao");
   falha(await chamar("PUT", "/admin/habilitacoes/categorias/inexistente", { token: "adm", body: conteudo() }), 400, "dados-invalidos");
-  falha(await chamar("PUT", "/admin/habilitacoes/categorias/funcional", { token: "adm", body: conteudo({ perguntas: PERGUNTAS.slice(0, 2) }) }), 400, "dados-invalidos");          // mínimo 3
-  falha(await chamar("PUT", "/admin/habilitacoes/categorias/funcional", { token: "adm", body: conteudo({ perguntas: [...PERGUNTAS, PERGUNTAS[0]] }) }), 400, "dados-invalidos");   // máximo 4
-  falha(await chamar("PUT", "/admin/habilitacoes/categorias/funcional", { token: "adm", body: conteudo({ perguntas: [{ ...PERGUNTAS[0], correta: 9 }, PERGUNTAS[1], PERGUNTAS[2]] }) }), 400, "dados-invalidos");
-  falha(await chamar("PUT", "/admin/habilitacoes/categorias/funcional", { token: "adm", body: conteudo({ videoRef: "http://inseguro/v.mp4", provedor: "mp4" }) }), 400, "dados-invalidos");
-  await publicar("funcional"); const c = await get("habilitacao_categorias", "funcional"); assert.equal(c.perguntas.length, 3); assert.equal(c.perguntas[0].id, "q1");
-  const lista = await chamar("GET", "/admin/habilitacoes/categorias", { token: "adm" }); ok(lista); assert.equal(lista.json.length, 6); assert.equal(lista.json.find((x) => x.id === "funcional").pronta, true);
+  falha(await chamar("PUT", "/admin/habilitacoes/categorias/lutas", { token: "adm", body: conteudo({ perguntas: PERGUNTAS.slice(0, 2) }) }), 400, "dados-invalidos");          // mínimo 3
+  falha(await chamar("PUT", "/admin/habilitacoes/categorias/lutas", { token: "adm", body: conteudo({ perguntas: [...PERGUNTAS, PERGUNTAS[0]] }) }), 400, "dados-invalidos");   // máximo 4
+  falha(await chamar("PUT", "/admin/habilitacoes/categorias/lutas", { token: "adm", body: conteudo({ perguntas: [{ ...PERGUNTAS[0], correta: 9 }, PERGUNTAS[1], PERGUNTAS[2]] }) }), 400, "dados-invalidos");
+  falha(await chamar("PUT", "/admin/habilitacoes/categorias/lutas", { token: "adm", body: conteudo({ videoRef: "http://inseguro/v.mp4", provedor: "mp4" }) }), 400, "dados-invalidos");
+  await publicar("lutas"); const c = await get("habilitacao_categorias", "lutas"); assert.equal(c.perguntas.length, 3); assert.equal(c.perguntas[0].id, "q1");
+  const lista = await chamar("GET", "/admin/habilitacoes/categorias", { token: "adm" }); ok(lista); assert.equal(lista.json.length, 3); assert.equal(lista.json.find((x) => x.id === "lutas").pronta, true);
 });
 
 t("categoria sem vídeo/perguntas publicados: ninguém inicia (falha fechada) e o gabarito nunca aparece para o personal", async () => {
   await semear();
-  falha(await HAB("iniciar", { categoria: "endurance" }), 409, "categoria-indisponivel");
-  await publicar("funcional"); await publicar("endurance", { ativo: false }); falha(await HAB("iniciar", { categoria: "endurance" }), 409, "categoria-indisponivel");
-  const l = await chamar("GET", "/habilitacoes", { token: "prom1" }); ok(l); assert.equal(l.json.categorias.length, 6);
-  assert.equal(l.json.categorias.find((c) => c.id === "funcional").disponivel, true); assert.equal(l.json.categorias.find((c) => c.id === "endurance").disponivel, false);
+  falha(await HAB("iniciar", { categoria: "mentecorpo" }), 409, "categoria-indisponivel");
+  await publicar("lutas"); await publicar("mentecorpo", { ativo: false }); falha(await HAB("iniciar", { categoria: "mentecorpo" }), 409, "categoria-indisponivel");
+  const l = await chamar("GET", "/habilitacoes", { token: "prom1" }); ok(l); assert.equal(l.json.categorias.length, 3);
+  assert.equal(l.json.categorias.find((c) => c.id === "lutas").disponivel, true); assert.equal(l.json.categorias.find((c) => c.id === "mentecorpo").disponivel, false);
   assert.ok(!JSON.stringify(l.json).includes("\"correta\"") && !JSON.stringify(l.json).includes("videoRef") && !JSON.stringify(l.json).includes("perguntas"), "lista não pode vazar gabarito, perguntas nem vídeo");
   falha(await HAB("iniciar", { categoria: "padaria; drop" }), 400, "dados-invalidos");
 });
 
 t("fluxo completo: timer = duração + 3 s, vídeo até o fim, questionário sem gabarito, 100% habilita e libera o aceite da modalidade", async () => {
-  await semear({ treinado: true }); await publicar("funcional");
-  const sid = await aula({ foco: "Treino funcional" });
+  await semear({ treinado: true }); await publicar("lutas");
+  const sid = await aula({ foco: "Lutas e artes marciais" });
   falha(await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: sid } }), 403, "categoria-pendente");
-  const ini = await HAB("iniciar", { categoria: "funcional" }); ok(ini);
+  const ini = await HAB("iniciar", { categoria: "lutas" }); ok(ini);
   assert.equal(ini.json.restanteMs, 63_000, "timer = 60 s de vídeo + 3 s de margem"); assert.equal(ini.json.margemSeg, 3);
-  falha(await HAB("questionario", { categoria: "funcional" }), 409, "timer-pendente");               // portão fechado: nada de questionário no começo
-  let r = await assistir("funcional", 60);                                                           // ~70 s de relógio correm durante a reprodução real
+  falha(await HAB("questionario", { categoria: "lutas" }), 409, "timer-pendente");               // portão fechado: nada de questionário no começo
+  let r = await assistir("lutas", 60);                                                           // ~70 s de relógio correm durante a reprodução real
   assert.equal(r.videoOk, true); assert.equal(r.restanteMs, 0); assert.equal(r.liberado, true);
-  const q = await HAB("questionario", { categoria: "funcional" }); ok(q); assert.equal(q.json.perguntas.length, 3);
+  const q = await HAB("questionario", { categoria: "lutas" }); ok(q); assert.equal(q.json.perguntas.length, 3);
   assert.ok(q.json.perguntas.every((p) => Object.keys(p).sort().join() === "id,opcoes,texto"), "gabarito não sai do servidor (só id, texto e alternativas)");
-  const resp = await HAB("responder", { categoria: "funcional", respostas: await respostasCertas(q.json.perguntas) }); ok(resp);
-  assert.equal(resp.json.aprovado, true); assert.equal(resp.json.acertos, 3); assert.equal(resp.json.selo.elite, true); assert.equal(resp.json.selo.titulo, "Funcional");
-  const p = await get("personais", "prom1"); assert.ok(p.habilitacoes.funcional, "habilitação gravada no perfil"); assert.equal(p.habilitacoes.funcional.elite, true); assert.equal(p.habilitacoes.funcional.tentativas, 1);
-  ok(await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: sid } }));  // agora aceita a aula de Funcional
-  const lista = await chamar("GET", "/habilitacoes", { token: "prom1" }); assert.equal(lista.json.selos.some((s) => s.categoria === "funcional" && s.elite), true);
-  falha(await HAB("responder", { categoria: "funcional", respostas: [0, 0, 0] }), 409, "sem-avaliacao");   // tentativa única: não reenvia depois de aprovado
-  falha(await HAB("iniciar", { categoria: "funcional" }), 409, "ja-habilitado");
+  const resp = await HAB("responder", { categoria: "lutas", respostas: await respostasCertas(q.json.perguntas) }); ok(resp);
+  assert.equal(resp.json.aprovado, true); assert.equal(resp.json.acertos, 3); assert.equal(resp.json.selo.elite, true); assert.equal(resp.json.selo.titulo, "Lutas");
+  const p = await get("personais", "prom1"); assert.ok(p.habilitacoes.lutas, "habilitação gravada no perfil"); assert.equal(p.habilitacoes.lutas.elite, true); assert.equal(p.habilitacoes.lutas.tentativas, 1);
+  ok(await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: sid } }));  // agora aceita a aula de Lutas
+  const lista = await chamar("GET", "/habilitacoes", { token: "prom1" }); assert.equal(lista.json.selos.some((s) => s.categoria === "lutas" && s.elite), true);
+  falha(await HAB("responder", { categoria: "lutas", respostas: [0, 0, 0] }), 409, "sem-avaliacao");   // tentativa única: não reenvia depois de aprovado
+  falha(await HAB("iniciar", { categoria: "lutas" }), 409, "ja-habilitado");
 });
 
 t("anti-bypass: pular, pausar, adiantar relógio e declarar 'fim' não liberam o questionário", async () => {
-  await semear(); await publicar("funcional"); ok(await HAB("iniciar", { categoria: "funcional" }));
-  let r = await HAB("ping", { categoria: "funcional", posicaoSeg: 0, tocando: true }); ok(r);
-  E.avancar(10_000); r = await HAB("ping", { categoria: "funcional", posicaoSeg: 58, tocando: true }); assert.equal(r.json.validoSeg, 0, "pular para o fim não credita");
-  E.avancar(10_000); r = await HAB("ping", { categoria: "funcional", posicaoSeg: 10, tocando: false }); assert.equal(r.json.validoSeg, 0, "pausado não credita");
-  E.avancar(10_000); r = await HAB("ping", { categoria: "funcional", posicaoSeg: 20, tocando: false }); assert.equal(r.json.validoSeg, 0, "pausado → pausado não credita");
+  await semear(); await publicar("lutas"); ok(await HAB("iniciar", { categoria: "lutas" }));
+  let r = await HAB("ping", { categoria: "lutas", posicaoSeg: 0, tocando: true }); ok(r);
+  E.avancar(10_000); r = await HAB("ping", { categoria: "lutas", posicaoSeg: 58, tocando: true }); assert.equal(r.json.validoSeg, 0, "pular para o fim não credita");
+  E.avancar(10_000); r = await HAB("ping", { categoria: "lutas", posicaoSeg: 10, tocando: false }); assert.equal(r.json.validoSeg, 0, "pausado não credita");
+  E.avancar(10_000); r = await HAB("ping", { categoria: "lutas", posicaoSeg: 20, tocando: false }); assert.equal(r.json.validoSeg, 0, "pausado → pausado não credita");
   E.avancar(120_000);                                                                           // o timer do SERVIDOR já venceu (relógio, não o do navegador)...
-  falha(await HAB("questionario", { categoria: "funcional" }), 409, "video-incompleto");              // ...mas o vídeo não foi assistido
-  r = await HAB("ping", { categoria: "funcional", posicaoSeg: 60, tocando: true }); assert.ok(r.json.validoSeg < 5, "ping tardio só credita o tempo real decorrido (máx. 30 s por ping), nunca o vídeo todo");
-  falha(await HAB("questionario", { categoria: "funcional" }), 409, "video-incompleto");
-  falha(await HAB("responder", { categoria: "funcional", respostas: [0, 0, 0] }), 409, "sem-avaliacao");   // não dá para responder sem o questionário liberado
-  E.avancar(5000); falha(await HAB("ping", { categoria: "endurance", posicaoSeg: 0, tocando: true }), 409, "sessao-inexistente");
+  falha(await HAB("questionario", { categoria: "lutas" }), 409, "video-incompleto");              // ...mas o vídeo não foi assistido
+  r = await HAB("ping", { categoria: "lutas", posicaoSeg: 60, tocando: true }); assert.ok(r.json.validoSeg < 5, "ping tardio só credita o tempo real decorrido (máx. 30 s por ping), nunca o vídeo todo");
+  falha(await HAB("questionario", { categoria: "lutas" }), 409, "video-incompleto");
+  falha(await HAB("responder", { categoria: "lutas", respostas: [0, 0, 0] }), 409, "sem-avaliacao");   // não dá para responder sem o questionário liberado
+  E.avancar(5000); falha(await HAB("ping", { categoria: "mentecorpo", posicaoSeg: 0, tocando: true }), 409, "sessao-inexistente");
 });
 
 t("pausa e retomada: ping de play ancora a posição e o crédito segue o tempo real (sem perder nem ganhar)", async () => {
-  await semear(); await publicar("funcional"); ok(await HAB("iniciar", { categoria: "funcional" }));
-  const ping = (pos, tocando, evento = false) => HAB("ping", { categoria: "funcional", posicaoSeg: pos, tocando, evento });
+  await semear(); await publicar("lutas"); ok(await HAB("iniciar", { categoria: "lutas" }));
+  const ping = (pos, tocando, evento = false) => HAB("ping", { categoria: "lutas", posicaoSeg: pos, tocando, evento });
   E.avancar(7000); ok(await ping(0, true, true));                                                       // apertou play (âncora em 0)
   E.avancar(5000); let r = await ping(5, true); assert.equal(r.json.validoSeg, 5);
   E.avancar(2000); r = await ping(7, false, true); assert.equal(r.json.validoSeg, 7, "pausa credita o trecho já tocado");
@@ -832,55 +832,54 @@ t("pausa e retomada: ping de play ancora a posição e o crédito segue o tempo 
 });
 
 t("reprovou (<100%): feedback, sessão encerrada, e é obrigatório assistir de novo com o timer do zero; depois de refazer, não é 'elite'", async () => {
-  await semear(); await publicar("funcional"); await iniciarEAssistir("funcional");
-  let q = await HAB("questionario", { categoria: "funcional" }); ok(q);
+  await semear(); await publicar("lutas"); await iniciarEAssistir("lutas");
+  let q = await HAB("questionario", { categoria: "lutas" }); ok(q);
   const certas = await respostasCertas(q.json.perguntas), erradas = certas.map((c, i) => (i === 0 ? (c + 1) % q.json.perguntas[0].opcoes.length : c));   // erra só UMA
-  const r1 = await HAB("responder", { categoria: "funcional", respostas: erradas }); ok(r1);
+  const r1 = await HAB("responder", { categoria: "lutas", respostas: erradas }); ok(r1);
   assert.equal(r1.json.aprovado, false); assert.equal(r1.json.acertos, 2); assert.equal(r1.json.total, 3); assert.equal(r1.json.refazer, true);
-  assert.equal((await get("personais", "prom1")).habilitacoes?.funcional, undefined, "98% não habilita");
-  falha(await HAB("responder", { categoria: "funcional", respostas: certas }), 409, "sem-avaliacao");   // não reaproveita a mesma tentativa
-  falha(await HAB("questionario", { categoria: "funcional" }), 409, "sessao-encerrada");                // não revê o teste sem rever o vídeo
-  const nova = await HAB("iniciar", { categoria: "funcional" }); ok(nova);
+  assert.equal((await get("personais", "prom1")).habilitacoes?.lutas, undefined, "98% não habilita");
+  falha(await HAB("responder", { categoria: "lutas", respostas: certas }), 409, "sem-avaliacao");   // não reaproveita a mesma tentativa
+  falha(await HAB("questionario", { categoria: "lutas" }), 409, "sessao-encerrada");                // não revê o teste sem rever o vídeo
+  const nova = await HAB("iniciar", { categoria: "lutas" }); ok(nova);
   assert.equal(nova.json.validoSeg, 0, "vídeo do zero"); assert.equal(nova.json.restanteMs, 63_000, "timer inteiro do zero"); assert.equal(nova.json.reprovacoes, 1);
-  falha(await HAB("questionario", { categoria: "funcional" }), 409, "timer-pendente");
-  await assistir("funcional"); q = await HAB("questionario", { categoria: "funcional" }); ok(q);
-  const r2 = await HAB("responder", { categoria: "funcional", respostas: await respostasCertas(q.json.perguntas) }); ok(r2);
+  falha(await HAB("questionario", { categoria: "lutas" }), 409, "timer-pendente");
+  await assistir("lutas"); q = await HAB("questionario", { categoria: "lutas" }); ok(q);
+  const r2 = await HAB("responder", { categoria: "lutas", respostas: await respostasCertas(q.json.perguntas) }); ok(r2);
   assert.equal(r2.json.aprovado, true); assert.equal(r2.json.selo.elite, false, "aprovado só na 2ª tentativa: habilitado, sem selo de elite");
-  assert.equal((await get("personais", "prom1")).habilitacoes.funcional.tentativas, 2);
+  assert.equal((await get("personais", "prom1")).habilitacoes.lutas.tentativas, 2);
 });
 
 t("respostas inválidas não gastam a tentativa nem aprovam; questionário vence em 20 min", async () => {
-  await semear(); await publicar("funcional"); await iniciarEAssistir("funcional");
-  const q = await HAB("questionario", { categoria: "funcional" }); ok(q);
-  falha(await HAB("responder", { categoria: "funcional", respostas: [0, 0] }), 400, "dados-invalidos");          // faltou responder
-  falha(await HAB("responder", { categoria: "funcional", respostas: [0, 0, 99] }), 400, "dados-invalidos");
-  falha(await HAB("responder", { categoria: "funcional", respostas: "tudo certo" }), 400, "dados-invalidos");
-  falha(await HAB("responder", { categoria: "funcional", respostas: [0, 0, { $ne: 1 }] }), 400, "dados-invalidos");
-  const q2 = await HAB("questionario", { categoria: "funcional" }); ok(q2); assert.deepEqual(q2.json.perguntas, q.json.perguntas, "reabrir o app devolve o MESMO questionário");
-  E.avancar(21 * 60_000); falha(await HAB("responder", { categoria: "funcional", respostas: await respostasCertas(q.json.perguntas) }), 409, "quiz-expirado");
-  const nova = await HAB("iniciar", { categoria: "funcional" }); ok(nova); assert.equal(nova.json.validoSeg, 0);
+  await semear(); await publicar("lutas"); await iniciarEAssistir("lutas");
+  const q = await HAB("questionario", { categoria: "lutas" }); ok(q);
+  falha(await HAB("responder", { categoria: "lutas", respostas: [0, 0] }), 400, "dados-invalidos");          // faltou responder
+  falha(await HAB("responder", { categoria: "lutas", respostas: [0, 0, 99] }), 400, "dados-invalidos");
+  falha(await HAB("responder", { categoria: "lutas", respostas: "tudo certo" }), 400, "dados-invalidos");
+  falha(await HAB("responder", { categoria: "lutas", respostas: [0, 0, { $ne: 1 }] }), 400, "dados-invalidos");
+  const q2 = await HAB("questionario", { categoria: "lutas" }); ok(q2); assert.deepEqual(q2.json.perguntas, q.json.perguntas, "reabrir o app devolve o MESMO questionário");
+  E.avancar(21 * 60_000); falha(await HAB("responder", { categoria: "lutas", respostas: await respostasCertas(q.json.perguntas) }), 409, "quiz-expirado");
+  const nova = await HAB("iniciar", { categoria: "lutas" }); ok(nova); assert.equal(nova.json.validoSeg, 0);
 });
 
 t("conteúdo editado pelo admin invalida sessões em andamento; personal não forja habilitação pelo perfil", async () => {
-  await semear(); await publicar("funcional"); await iniciarEAssistir("funcional");
-  const q = await HAB("questionario", { categoria: "funcional" }); ok(q);
-  await publicar("funcional", { perguntas: PERGUNTAS.slice(1, 4) });                                         // admin troca as perguntas
-  falha(await HAB("responder", { categoria: "funcional", respostas: [0, 0, 0] }), 409, "conteudo-alterado");
-  ok(await chamar("PUT", "/perfil/personal/privado", { token: "prom1", body: { telefone: "(19) 91234-5678", habilitacoes: { funcional: { elite: true } } } }));
-  assert.equal((await get("personais", "prom1")).habilitacoes?.funcional, undefined, "mass assignment: habilitacoes só o servidor escreve");
-  falha(await chamar("POST", "/habilitacoes/iniciar", { token: "alunoA", body: { categoria: "funcional" } }), 403, "sem-permissao");
+  await semear(); await publicar("lutas"); await iniciarEAssistir("lutas");
+  const q = await HAB("questionario", { categoria: "lutas" }); ok(q);
+  await publicar("lutas", { perguntas: PERGUNTAS.slice(1, 4) });                                         // admin troca as perguntas
+  falha(await HAB("responder", { categoria: "lutas", respostas: [0, 0, 0] }), 409, "conteudo-alterado");
+  ok(await chamar("PUT", "/perfil/personal/privado", { token: "prom1", body: { telefone: "(19) 91234-5678", habilitacoes: { lutas: { elite: true } } } }));
+  assert.equal((await get("personais", "prom1")).habilitacoes?.lutas, undefined, "mass assignment: habilitacoes só o servidor escreve");
+  falha(await chamar("POST", "/habilitacoes/iniciar", { token: "alunoA", body: { categoria: "lutas" } }), 403, "sem-permissao");
   falha(await chamar("GET", "/habilitacoes", {}), 401);
 });
 
-t("aceite filtrado por categoria: só as modalidades em que está habilitado; Dança e Emagrecimento seguem Funcional", async () => {
+t("aceite filtrado por categoria: só as modalidades em que está habilitado (Yoga e Pilates seguem Mente e corpo)", async () => {
   await semear({ treinado: true });                                                                       // habilitado só em Musculação
-  const musc = await aula(), lutas = await aula({ foco: "Lutas e artes marciais", data: dia(3) }), pilates = await aula({ foco: "Pilates", data: dia(4) }), emag = await aula({ foco: "Emagrecimento", data: dia(5) });
-  for (const [sid, cat] of [[lutas, "lutas"], [pilates, "mentecorpo"]]) { const r = await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: sid } }); falha(r, 403, "categoria-pendente"); assert.equal(r.json.detalhe.categoria, cat); assert.equal((await get("aulas", sid)).status, "aberta"); }
+  const musc = await aula(), lutas = await aula({ foco: "Lutas e artes marciais", data: dia(3) }), pilates = await aula({ foco: "Pilates", data: dia(4) }), yoga = await aula({ foco: "Yoga", data: dia(5) });
+  for (const [sid, cat] of [[lutas, "lutas"], [pilates, "mentecorpo"], [yoga, "mentecorpo"]]) { const r = await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: sid } }); falha(r, 403, "categoria-pendente"); assert.equal(r.json.detalhe.categoria, cat); assert.equal((await get("aulas", sid)).status, "aberta"); }
   ok(await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: musc } }));
-  falha(await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: emag } }), 403, "categoria-pendente");   // "Emagrecimento" exige a categoria Funcional
-  await ctx.db.collection("personais").doc("prom1").set({ habilitacoes: { funcional: { em: new E.Timestamp(Date.now()), tentativas: 1, elite: true } } }, { merge: true });
-  ok(await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: emag } }));
-  const sit = await chamar("GET", "/habilitacao", { token: "prom1" }); assert.deepEqual(sit.json.categorias.sort(), ["funcional", "musculacao"]);
+  await ctx.db.collection("personais").doc("prom1").set({ habilitacoes: { mentecorpo: { em: new E.Timestamp(Date.now()), tentativas: 1, elite: true } } }, { merge: true });
+  ok(await chamar("POST", "/aceitarAula", { token: "prom1", body: { aulaId: yoga } }));
+  const sit = await chamar("GET", "/habilitacao", { token: "prom1" }); assert.deepEqual(sit.json.categorias.sort(), ["mentecorpo", "musculacao"]);
 });
 
 // ---------- Prova por módulo (perguntas/alternativas; correção só no servidor) ----------

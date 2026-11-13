@@ -47,7 +47,7 @@ module.exports = (app, x) => {
     if (!l || !Number.isFinite(l.lat)) throw new Falha(409, "Defina a localização do aluno primeiro.", "localizacao-obrigatoria");
     const sim = [
       { id: "teste-sim-1", nome: "Carla Simulada", especialidade: "Musculação", ratingMedia: 4.9, ratingQtd: 31, dLat: 0.006, dLng: 0.004 },
-      { id: "teste-sim-2", nome: "Rafael Simulado", especialidade: "Treino funcional", ratingMedia: 4.6, ratingQtd: 12, dLat: -0.012, dLng: 0.009 },
+      { id: "teste-sim-2", nome: "Rafael Simulado", especialidade: "Pilates", ratingMedia: 4.6, ratingQtd: 12, dLat: -0.012, dLng: 0.009 },
       { id: "teste-sim-3", nome: "Bia Simulada", especialidade: "Yoga", ratingMedia: 0, ratingQtd: 0, dLat: 0.02, dLng: -0.018 }
     ];
     for (const p of sim) {

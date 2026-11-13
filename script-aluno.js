@@ -25,7 +25,7 @@ let rep = null, repTimer = null;
 let usuario = null, perfil = {}, aulas = [], personais = [], cartaoAluno = null, ehTeste = false;
 const fin = new Map();   // valores que a ALUNO enxerga (valor + taxa fixa + total), por aula
 let filtro = "ativos", modalidadeSel = MODALIDADES[0].v, preferido = "", dataCal = new Date(), diaSel = "";
-let aulasUn = null, promUn = null, cartaoUn = null, finUn = null, chatUn = null, chatAula = null, avAula = null, avEstrelas = 0, primeira = true;
+let aulasUn = null, promUn = null, cartaoUn = null, finUn = null, avAula = null, avEstrelas = 0, primeira = true;
 const statusAnt = new Map();
 const baseSite = () => location.origin + location.pathname.replace(/[^/]*$/, "");
 
@@ -79,7 +79,7 @@ getRedirectResult(auth).catch((e) => { const m = msgAuth(e); if (m) erro(m); res
 $("btn-sair").addEventListener("click", async () => { if (confirm("Deseja sair da conta?")) { parar(); await desativarPush(); pararSuporte(); await sairDaConta(); } });
 
 const tela = (id) => document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === id));
-function parar() { mapa.desligar(); clearInterval(repTimer); esconderBanido(); rep = null; aulasUn?.(); promUn?.(); cartaoUn?.(); finUn?.(); chatUn?.(); aulasUn = promUn = cartaoUn = finUn = chatUn = null; primeira = true; statusAnt.clear(); fin.clear(); cartaoAluno = null; }
+function parar() { mapa.desligar(); clearInterval(repTimer); esconderBanido(); rep = null; aulasUn?.(); promUn?.(); cartaoUn?.(); finUn?.(); aulasUn = promUn = cartaoUn = finUn = null; primeira = true; statusAnt.clear(); fin.clear(); cartaoAluno = null; }
 
 onAuthStateChanged(auth, async (u) => {
     usuario = u;
@@ -197,7 +197,7 @@ const sp = (p) => {
     return visaoAluno(calcularPreco());
 };
 const ordemData = (a, b) => `${a.data}${a.entrada}`.localeCompare(`${b.data}${b.entrada}`);
-function renderTudo() { renderHome(); renderAulas(); renderCalendario(); diaSel ? renderDia() : renderAgenda(); renderCarteira(); renderConversas(); }
+function renderTudo() { renderHome(); renderAulas(); renderCalendario(); diaSel ? renderDia() : renderAgenda(); renderCarteira(); }
 
 // ============================================================
 // NOVO AULA
@@ -312,7 +312,6 @@ function cartao(p) {
     if (fase === "executada") acoes.push(`<button class="btn btn-ghost btn-sm" data-foto="${p.id}">🖼 ${p.auditoriaAluno ? "Ver foto" : "Ver foto e auditar"}</button>`);
     if (pago && p.notaId) acoes.push(`<a class="btn btn-primary btn-sm" href="nota.html?id=${encodeURIComponent(p.notaId)}">🧾 Ver nota</a>`);
     if (p.status === "paga" && !p.avaliacao) acoes.push(`<button class="btn btn-ghost btn-sm" data-avaliar="${p.id}">⭐ Avaliar</button>`);
-    if (p.personalUid && !cancel) acoes.push(`<button class="btn btn-ghost btn-sm" data-chat="${p.id}">💬 Chat</button>`);
     if (pago || cancel) acoes.push(`<button class="btn btn-ghost btn-sm" data-repetir="${p.id}">🔁 Repetir</button>`);
     if ((p.status === "aberta" || p.status === "aceita") && !fase) acoes.push(`<button class="btn btn-danger btn-sm" data-cancelar="${p.id}">Cancelar</button>`);
     return `<article class="card aula ${cancel ? "cancelada" : ""}"><div class="topo"><div class="grow"><h4>${esc(p.aluno)}</h4><div class="meta">${p.tipo === "relampago" ? "⚡ " : ""}${fmtData(p.data)} · ${esc(p.horario || "")} · ${esc(p.foco)}${p.bonusCentavos ? ` · bônus ${brl(p.bonusCentavos)}` : ""}</div>${pillF}${p.personalNome ? `<div class="meta">👷 ${esc(p.personalNome)}${p.avaliacao ? ` · <span class="stars">${"★".repeat(p.avaliacao.estrelas)}</span>` : ""}</div>` : ""}</div>
@@ -372,30 +371,6 @@ function renderCarteira() {
 $("btn-csv").addEventListener("click", async () => {
     if (!aulas.some(estaPago)) return toast("Ainda não há pagamentos para exportar.");
     try { await baixarCSVProtegido("aluno/exportar.csv", "personow-pagamentos.csv"); } catch (e) { erro(e.code === "limite-requisicoes" ? "Aguarde um instante e tente de novo." : "Não foi possível exportar agora."); }
-});
-
-// ============================================================
-// CHAT
-// ============================================================
-function renderConversas() {
-    const l = aulas.filter((p) => p.personalUid && p.status !== "cancelada").sort((a, b) => ordemData(b, a));
-    $("lista-conversas").innerHTML = l.length ? l.map((p) => `<div class="card conversa" data-chat="${p.id}" role="button" tabindex="0"><div class="avatar">${esc((p.personalNome || "P")[0].toUpperCase())}</div><div class="grow"><h4>${esc(p.personalNome || "Personal")}</h4><div class="muted small">${esc(p.aluno)} · ${fmtData(p.data)}</div></div><span class="seta muted">›</span></div>`).join("")
-        : vazio("💬", "Nenhuma conversa ainda", "Quando um personal aceitar sua aula, o chat com ele aparece aqui.");
-}
-function pararChat() { chatUn?.(); chatUn = null; chatAula = null; }
-function abrirChat(p) {
-    pararChat(); chatAula = p; $("chat-titulo").textContent = p.personalNome || "Personal"; $("chat-box").innerHTML = skeleton(1);
-    chatUn = onSnapshot(query(collection(db, "aulas", p.id, "mensagens"), orderBy("criadoEm")), (s) => {
-        const box = $("chat-box");
-        box.innerHTML = s.docs.length ? s.docs.map((d) => { const m = d.data(); return `<div class="msg ${m.de === usuario.uid ? "msg-me" : "msg-other"}">${esc(m.texto)}<small>${fmtDataHora(m.criadoEm)}</small></div>`; }).join("") : '<p class="muted small center" style="margin:auto">Diga olá 👋 e combine os detalhes da aula.</p>';
-        box.scrollTop = box.scrollHeight;
-    }, () => { $("chat-box").innerHTML = '<p class="muted small center">Não foi possível carregar a conversa.</p>'; });
-    abrir("sheet-chat");
-}
-$("chat-form").addEventListener("submit", async (e) => {
-    e.preventDefault(); const t = $("chat-input").value.trim(); if (!t || !chatAula) return; $("chat-input").value = "";
-    try { await addDoc(collection(db, "aulas", chatAula.id, "mensagens"), { de: usuario.uid, texto: t, criadoEm: serverTimestamp() }); }
-    catch (err) { console.error(err); erro("Mensagem não enviada."); $("chat-input").value = t; }
 });
 
 // ============================================================
@@ -507,11 +482,10 @@ document.addEventListener("click", async (e) => {
     const g = (a) => e.target.closest(`[${a}]`), achar = (id) => aulas.find((p) => p.id === id);
     let el;
     if ((el = g("data-abrir"))) { e.preventDefault(); abrir(el.dataset.abrir); }
-    else if ((el = g("data-fechar"))) { fechar(el.dataset.fechar); if (el.dataset.fechar === "sheet-chat") pararChat(); }
-    else if (e.target.classList?.contains("app-overlay")) { fechar(e.target.id); if (e.target.id === "sheet-chat") pararChat(); }
+    else if ((el = g("data-fechar"))) { fechar(el.dataset.fechar); }
+    else if (e.target.classList?.contains("app-overlay")) { fechar(e.target.id); }
     else if ((el = g("data-ir"))) irPara(el.dataset.ir);
     else if ((el = g("data-chamar"))) definirPreferido(el.dataset.chamar, el.dataset.nome);
-    else if ((el = g("data-chat"))) { const p = achar(el.dataset.chat); if (p) abrirChat(p); }
     else if ((el = g("data-avaliar"))) { const p = achar(el.dataset.avaliar); if (p) abrirAvaliacao(p); }
     else if ((el = g("data-repetir"))) { const p = achar(el.dataset.repetir); if (p) repetir(p); }
     else if ((el = g("data-cancelar"))) {
@@ -527,6 +501,5 @@ document.addEventListener("click", async (e) => {
     else if (g("btn-relampago") || e.target.closest("#btn-relampago")) abrirRelampago();
 });
 document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") pararChat();
     if ((e.key === "Enter" || e.key === " ") && e.target.matches?.("[role=button]")) { e.preventDefault(); e.target.click(); }
 });

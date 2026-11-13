@@ -554,7 +554,7 @@ $("c-rodar").addEventListener("click", seguro(() => conciliar(false))); $("c-rod
 
 // ---------- treinamento (categorias + prova) ----------
 // Modelo do servidor: obrigatório (≠ false) = "habilitacao" (Personow, sequencial, libera as aulas); o resto são cursos opcionais por categoria.
-// As habilitações por MODALIDADE (Musculação, Funcional, Corrida, Mente e corpo, Lutas, Consultoria) têm aba própria: "Habilitações".
+// As habilitações por MODALIDADE (Musculação, Mente e corpo, Lutas) têm aba própria: "Habilitações".
 const CATS = [["habilitacao", "Habilitação Personow"], ["tecnica", "Técnica de treino"], ["saude", "Saúde e prevenção de lesões"], ["atendimento", "Atendimento e postura"], ["seguranca", "Segurança e primeiros socorros"], ["carreira", "Carreira e finanças"], ["geral", "Outros cursos"]];
 const obrigM = (m) => m.obrigatorio !== false;
 const catM = (m) => (obrigM(m) ? "habilitacao" : CATS.some(([k]) => k === m.categoria) && m.categoria !== "habilitacao" ? m.categoria : "geral");

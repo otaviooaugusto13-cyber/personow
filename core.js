@@ -174,28 +174,18 @@ export const valorCentavos = (p) => (p.valorCentavos ? p.valorCentavos : reaisPa
 // ---------- Modalidades de aula (usado por aluno e personal) ----------
 export const MODALIDADES = [
     { v: "Musculação", ico: "🏋️", label: "Musculação" },
-    { v: "Treino funcional", ico: "🔥", label: "Funcional" },
-    { v: "Emagrecimento", ico: "⚖️", label: "Emagrecimento" },
-    { v: "Corrida e endurance", ico: "🏃", label: "Corrida" },
     { v: "Pilates", ico: "🤸", label: "Pilates" },
     { v: "Yoga", ico: "🧘", label: "Yoga" },
-    { v: "Lutas e artes marciais", ico: "🥊", label: "Lutas" },
-    { v: "Dança e ritmos", ico: "💃", label: "Dança" },
-    { v: "Reabilitação e pós-lesão", ico: "🩹", label: "Reabilitação" },
-    { v: "Consultoria de treino online", ico: "💻", label: "Consultoria online" },
-    { v: "Avaliação física", ico: "📏", label: "Avaliação física" }
+    { v: "Lutas e artes marciais", ico: "🥊", label: "Lutas" }
 ];
 
 // ---------- Habilitação por categoria (espelho de server/lib/config.js; test/split.test.js confere) ----------
 // O servidor é quem decide (aceitarAula). Aqui só serve para a interface mostrar cadeado/selo sem ir à rede.
 export const CATEGORIAS = {
-    musculacao: { titulo: "Musculação", ico: "🏋️" }, funcional: { titulo: "Funcional", ico: "🔥" }, endurance: { titulo: "Corrida e endurance", ico: "🏃" },
-    mentecorpo: { titulo: "Mente e corpo", ico: "🧘" }, lutas: { titulo: "Lutas", ico: "🥊" }, consultoria: { titulo: "Consultoria", ico: "💻" }
+    musculacao: { titulo: "Musculação", ico: "🏋️" }, mentecorpo: { titulo: "Mente e corpo", ico: "🧘" }, lutas: { titulo: "Lutas", ico: "🥊" }
 };
 export const MODALIDADE_CATEGORIA = {
-    "Musculação": "musculacao", "Treino funcional": "funcional", "Corrida e endurance": "endurance", "Pilates": "mentecorpo", "Yoga": "mentecorpo",
-    "Lutas e artes marciais": "lutas", "Consultoria de treino online": "consultoria",
-    "Emagrecimento": "funcional", "Dança e ritmos": "funcional", "Reabilitação e pós-lesão": "mentecorpo", "Avaliação física": "consultoria"
+    "Musculação": "musculacao", "Pilates": "mentecorpo", "Yoga": "mentecorpo", "Lutas e artes marciais": "lutas"
 };
 export const categoriaDaModalidade = (foco) => MODALIDADE_CATEGORIA[foco] || null;
 

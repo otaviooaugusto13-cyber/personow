@@ -10,23 +10,17 @@ module.exports = {
   EMPRESA: { razaoSocial: "PERSONOW INTERMEDIAÇÃO DE SERVIÇOS LTDA", cnpj: "00.000.000/0001-00", cidade: "Itapira / SP", email: "otaviooaugusto13@gmail.com" },
 
   // ---- Modalidades de aula (espelho de MODALIDADES em ../../core.js; test/split.test.js confere) ----
-  MODALIDADES: ["Musculação", "Treino funcional", "Emagrecimento", "Corrida e endurance", "Pilates", "Yoga", "Lutas e artes marciais", "Dança e ritmos", "Reabilitação e pós-lesão", "Consultoria de treino online", "Avaliação física"],
+  MODALIDADES: ["Musculação", "Pilates", "Yoga", "Lutas e artes marciais"],
 
   // ---- Habilitação por categoria (vídeo + questionário 100%) ----
   // Cada MODALIDADE de aula exige a habilitação da sua categoria. Espelho em ../../core.js (CATEGORIAS / MODALIDADE_CATEGORIA); test/split.test.js confere.
   CATEGORIAS: {
     musculacao:  { titulo: "Musculação",          ico: "🏋️" },
-    funcional:   { titulo: "Funcional",           ico: "🔥" },
-    endurance:   { titulo: "Corrida e endurance", ico: "🏃" },
     mentecorpo:  { titulo: "Mente e corpo",       ico: "🧘" },
-    lutas:       { titulo: "Lutas",               ico: "🥊" },
-    consultoria: { titulo: "Consultoria",         ico: "💻" }
+    lutas:       { titulo: "Lutas",               ico: "🥊" }
   },
   MODALIDADE_CATEGORIA: {
-    "Musculação": "musculacao", "Treino funcional": "funcional", "Corrida e endurance": "endurance", "Pilates": "mentecorpo", "Yoga": "mentecorpo",
-    "Lutas e artes marciais": "lutas", "Consultoria de treino online": "consultoria",
-    // modalidades sem categoria própria herdam a mais próxima: DECISÃO DE NEGÓCIO. Trocar aqui se preferir outro enquadramento.
-    "Emagrecimento": "funcional", "Dança e ritmos": "funcional", "Reabilitação e pós-lesão": "mentecorpo", "Avaliação física": "consultoria"
+    "Musculação": "musculacao", "Pilates": "mentecorpo", "Yoga": "mentecorpo", "Lutas e artes marciais": "lutas"
   },
   HAB_MARGEM_SEG: 3,            // timer = duração do vídeo + 3 s
   HAB_FOLGA_SEG: 10,            // distância máxima entre a posição do vídeo e o trecho já validado para continuar creditando
@@ -37,8 +31,7 @@ module.exports = {
 
   // ---- Perfil inteligente (espelho de AREAS_EXPERIENCIA em ../../perfil-inteligente.js; test/perfil.test.js confere) ----
   AREAS_EXPERIENCIA: [
-    "Musculação / Hipertrofia", "Emagrecimento", "Treino funcional", "Corrida e endurance", "Pilates", "Yoga",
-    "Lutas e artes marciais", "Dança e ritmos", "Reabilitação e pós-lesão", "Gestantes e idosos", "Preparação esportiva", "Consultoria online"
+    "Musculação / Hipertrofia", "Pilates", "Yoga", "Lutas e artes marciais", "Gestantes e idosos", "Preparação esportiva"
   ],
   ENEAGRAMA_INSTINTOS: ["SP", "SX", "SO"],
   PERFIL_MAX_EXPERIENCIAS: 8,
@@ -48,7 +41,7 @@ module.exports = {
   CURSO_CATEGORIAS: ["habilitacao", "tecnica", "saude", "atendimento", "seguranca", "carreira", "geral"],
 
   // Rótulo exibido no app para cada modalidade (espelho de MODALIDADES[].label em ../../core.js; test/split.test.js confere).
-  MODALIDADES_ROTULO: { "Treino funcional": "Funcional", "Corrida e endurance": "Corrida", "Lutas e artes marciais": "Lutas", "Dança e ritmos": "Dança", "Reabilitação e pós-lesão": "Reabilitação", "Consultoria de treino online": "Consultoria online" },
+  MODALIDADES_ROTULO: { "Lutas e artes marciais": "Lutas" },
 
   // ---- Idade e registro profissional ----
   // Personal trainer é profissão regulamentada (Lei 9.696/1998): o registro no CREF exige formação superior, então o cadastro é só para maiores de 18.

@@ -11,7 +11,7 @@ import { RAIO_KM } from "./geo.js";
 const S = ["Musculação", "Treino funcional", "Corrida e endurance", "Pilates", "Lutas e artes marciais", "Consultoria de treino online"];
 // Modalidades sem coluna própria nas matrizes herdam a mais parecida (mesmo enquadramento de MODALIDADE_CATEGORIA no servidor).
 // DECISÃO DE PRODUTO: é só heurística de sugestão de aulas; revise com a equipe.
-export const MODALIDADE_PROXY = { "Emagrecimento": "Treino funcional", "Dança e ritmos": "Treino funcional", "Yoga": "Pilates", "Reabilitação e pós-lesão": "Pilates", "Avaliação física": "Consultoria de treino online" };
+export const MODALIDADE_PROXY = { "Yoga": "Pilates" };
 const colModalidade = (modalidade) => S.indexOf(MODALIDADE_PROXY[modalidade] || modalidade);
 const NOME_CURTO = Object.fromEntries(MODALIDADES.map((s) => [s.v, s.label.toLowerCase()]));
 
@@ -21,17 +21,11 @@ const NOME_CURTO = Object.fromEntries(MODALIDADES.map((s) => [s.v, s.label.toLow
 // ============================================================
 export const AREAS = [
     { v: "Musculação / Hipertrofia", ico: "🏋️", nome: "musculação", tags: ["musculação", "hipertrofia", "força"], entrega: "treinos de força bem periodizados, com técnica segura e progressão de carga", rel: [1, .6, .3, .2, .3, .6] },
-    { v: "Emagrecimento", ico: "⚖️", nome: "emagrecimento", tags: ["emagrecimento", "condicionamento", "reeducação alimentar"], entrega: "planos de emagrecimento sustentáveis, com acompanhamento de perto", rel: [.7, .9, .6, .3, .4, .6] },
-    { v: "Treino funcional", ico: "🔥", nome: "treino funcional", tags: ["funcional", "mobilidade", "condicionamento"], entrega: "treinos funcionais dinâmicos, que melhoram o movimento do dia a dia", rel: [.7, 1, .5, .4, .5, .5] },
-    { v: "Corrida e endurance", ico: "🏃", nome: "corrida", tags: ["corrida", "endurance", "provas"], entrega: "planilhas de corrida progressivas, da primeira prova à evolução de pace", rel: [.3, .5, 1, .2, .3, .5] },
     { v: "Pilates", ico: "🤸", nome: "pilates", tags: ["pilates", "postura", "core"], entrega: "aulas de pilates focadas em postura, controle e consciência corporal", rel: [.3, .5, .2, 1, .2, .4] },
     { v: "Yoga", ico: "🧘", nome: "yoga", tags: ["yoga", "flexibilidade", "respiração"], entrega: "práticas de yoga para flexibilidade, respiração e equilíbrio", rel: [.2, .4, .3, .9, .2, .4] },
     { v: "Lutas e artes marciais", ico: "🥊", nome: "lutas", tags: ["lutas", "artes marciais", "condicionamento"], entrega: "aulas de luta com técnica, disciplina e muito condicionamento", rel: [.4, .6, .5, .2, 1, .3] },
-    { v: "Dança e ritmos", ico: "💃", nome: "dança", tags: ["dança", "ritmos", "coordenação"], entrega: "aulas de dança animadas, com coordenação e gasto calórico", rel: [.2, .6, .4, .4, .3, .3] },
-    { v: "Reabilitação e pós-lesão", ico: "🩹", nome: "reabilitação", tags: ["reabilitação", "pós-lesão", "prevenção de lesões"], entrega: "retorno seguro ao treino, respeitando limites e prevenindo novas lesões", rel: [.5, .5, .3, .8, .2, .5] },
     { v: "Gestantes e idosos", ico: "🌿", nome: "gestantes e idosos", tags: ["gestantes", "idosos", "saúde"], entrega: "treinos adaptados e seguros para gestantes e idosos", rel: [.4, .5, .3, .8, .1, .4] },
-    { v: "Preparação esportiva", ico: "🏅", nome: "preparação esportiva", tags: ["preparação esportiva", "performance", "atletas"], entrega: "preparação física voltada a performance e competição", rel: [.7, .8, .8, .3, .6, .5] },
-    { v: "Consultoria online", ico: "💻", nome: "consultoria online", tags: ["consultoria online", "planilha de treino", "acompanhamento remoto"], entrega: "planilhas e acompanhamento remoto claros, com ajustes frequentes", rel: [.5, .5, .5, .4, .3, 1] }
+    { v: "Preparação esportiva", ico: "🏅", nome: "preparação esportiva", tags: ["preparação esportiva", "performance", "atletas"], entrega: "preparação física voltada a performance e competição", rel: [.7, .8, .8, .3, .6, .5] }
 ];
 export const AREA = Object.fromEntries(AREAS.map((a) => [a.v, a]));
 export const AREAS_VALIDAS = AREAS.map((a) => a.v);
