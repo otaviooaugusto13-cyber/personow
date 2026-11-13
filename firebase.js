@@ -31,7 +31,7 @@ async function tokenAtual(forcar = false) {
     return auth.currentUser.getIdToken(forcar);
 }
 /** Mensagem legível quando o servidor não manda `erro` no corpo (antes virava só "falha"). */
-const MSG_STATUS = { 400: "Aula inválido.", 401: "Sua sessão terminou. Entre novamente.", 403: "Você não tem permissão para esta ação.", 404: "Recurso não encontrado.", 429: "Muitas tentativas. Aguarde um instante.", 500: "Erro interno do servidor. Tente de novo." };
+const MSG_STATUS = { 400: "Dados inválidos.", 401: "Sua sessão terminou. Entre novamente.", 403: "Você não tem permissão para esta ação.", 404: "Recurso não encontrado.", 429: "Muitas tentativas. Aguarde um instante.", 500: "Erro interno do servidor. Tente de novo." };
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**

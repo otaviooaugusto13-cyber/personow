@@ -1,0 +1,234 @@
+diff -ruN orig/admin.html personow-main/admin.html
+--- orig/admin.html	2026-11-12 23:36:06.287521348 +0000
++++ personow-main/admin.html	2026-11-12 23:47:26.750478882 +0000
+@@ -276,7 +276,7 @@
+               <div class="ax-grow"><h2>Taxas da plataforma</h2><p class="ax-xs ax-mut" id="tx-meta">Carregando…</p></div>
+               <span class="ax-badge" id="tx-estado">—</span>
+             </div>
+-            <p class="ax-xs ax-mut ax-mt">Vale na hora para os <strong>próximos aulas</strong>. Aulas já criados mantêm o valor que o aluno e o personal viram. O servidor valida tudo de novo.</p>
++            <p class="ax-xs ax-mut ax-mt">Vale na hora para as <strong>próximas aulas</strong>. Aulas já criadas mantêm o valor que o aluno e o personal viram. O servidor valida tudo de novo.</p>
+             <div class="ax-grid ax-g2 ax-mt tx-grid">
+               <div><label class="ax-lbl" for="tx-preco">Aula paga pelo aluno</label><div class="tx-in"><span>R$</span><input class="ax-in" id="tx-preco" inputmode="numeric" autocomplete="off" placeholder="0,00"></div></div>
+               <div><label class="ax-lbl" for="tx-comissao">Comissão da plataforma <span id="tx-pct-com"></span></label><div class="tx-in"><span>R$</span><input class="ax-in" id="tx-comissao" inputmode="numeric" autocomplete="off" placeholder="0,00"></div></div>
+diff -ruN orig/admin.js personow-main/admin.js
+--- orig/admin.js	2026-11-12 23:36:06.287536570 +0000
++++ personow-main/admin.js	2026-11-13 04:33:14.702164538 +0000
+@@ -55,7 +55,7 @@
+     ["Conferir CPF", "Olá, tudo bem? O CPF informado no seu cadastro não confere. Fale com o suporte pelo WhatsApp informando o CPF correto para a gente corrigir e liberar seu acesso."],
+     ["Conferir nascimento", "Olá! A data de nascimento do seu cadastro não confere com seu documento. Fale com o suporte pelo WhatsApp para corrigirmos e liberar seu acesso."],
+     ["CREF pendente", "Olá! Para liberar seu acesso falta informar o número do seu CREF. Complete essa etapa em Meus dados ou fale com o suporte pelo WhatsApp."],
+-    ["Treinamento", "Olá! Para liberar as aulas falta concluir o capacitação Personow. Assim que terminar, é só nos avisar."],
++    ["Treinamento", "Olá! Para liberar as aulas falta concluir a capacitação Personow. Assim que terminar, é só nos avisar."],
+     ["Só um oi", "Oi, tudo bem? Passando para falar do seu cadastro no Personow. Pode nos responder pelo WhatsApp?"]
+ ];
+ function pedir({ titulo, texto = "", rotulo = "", min = 0, ok = "Confirmar", perigo = false, modelos = false, senha = false }) {
+@@ -817,7 +817,7 @@
+     const b = $("tx-salvar"), html = b.innerHTML; b.disabled = true; b.textContent = "Salvando…";
+     try {
+         const r = await sensivel(() => chamarFuncao("admin/taxas", { ...f, versao: a.versao }, "PUT"));
+-        aplicarRespostaTaxas(r); toast("Taxas atualizadas. Já valem para os próximos aulas.", "ok");
++        aplicarRespostaTaxas(r); toast("Taxas atualizadas. Já valem para as próximas aulas.", "ok");
+     } catch (e) {
+         if (e.code === "taxas-desatualizadas") { await carregarTaxas(); toast(e.message, "err", 12000); } else throw e;
+     } finally { b.innerHTML = html; renderTaxas(); }
+diff -ruN orig/firebase.js personow-main/firebase.js
+--- orig/firebase.js	2026-11-12 23:36:06.287628586 +0000
++++ personow-main/firebase.js	2026-11-12 23:47:26.751541726 +0000
+@@ -31,7 +31,7 @@
+     return auth.currentUser.getIdToken(forcar);
+ }
+ /** Mensagem legível quando o servidor não manda `erro` no corpo (antes virava só "falha"). */
+-const MSG_STATUS = { 400: "Aula inválido.", 401: "Sua sessão terminou. Entre novamente.", 403: "Você não tem permissão para esta ação.", 404: "Recurso não encontrado.", 429: "Muitas tentativas. Aguarde um instante.", 500: "Erro interno do servidor. Tente de novo." };
++const MSG_STATUS = { 400: "Dados inválidos.", 401: "Sua sessão terminou. Entre novamente.", 403: "Você não tem permissão para esta ação.", 404: "Recurso não encontrado.", 429: "Muitas tentativas. Aguarde um instante.", 500: "Erro interno do servidor. Tente de novo." };
+ const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+ 
+ /**
+diff -ruN orig/personal.html personow-main/personal.html
+--- orig/personal.html	2026-11-12 23:36:06.288139289 +0000
++++ personow-main/personal.html	2026-11-13 04:33:14.704913845 +0000
+@@ -90,7 +90,7 @@
+             <div class="stat"><span>Sua avaliação</span><h3 id="i-rating">—</h3></div>
+         </div>
+ 
+-        <div class="section-title">Próximos aulas</div>
++        <div class="section-title">Próximas aulas</div>
+         <div id="lista-proximos" class="stack"></div>
+     </section>
+ 
+@@ -283,7 +283,7 @@
+     <div class="sub-head"><h2>Ajuda e suporte</h2><button class="icon-btn" data-fechar="sheet-ajuda" aria-label="Fechar">✕</button></div>
+     <div class="card mb"><h4 class="highlight mb">Como você recebe</h4><p class="small muted" id="ajuda-split"></p></div>
+     <div class="card mb"><h4 class="highlight mb">Passo a passo</h4>
+-        <p class="small muted" style="line-height:1.7">1. Complete seus dados e cadastre a chave Pix.<br>2. Assista aos vídeos do capacitação Personow.<br>3. Aguarde a aprovação do cadastro.<br>4. Aceite aulas em Ofertas.<br>5. No local (até 100 m do aluno), faça o check-in. Ao terminar, tire a foto do local da aula e finalize.<br>6. Depois de finalizado, toque em “Cobrar” e mostre o QR Code para o aluno.<br>7. O valor cai na Carteira e, após a carência, você saca por Pix.<br></p></div>
++        <p class="small muted" style="line-height:1.7">1. Complete seus dados e cadastre a chave Pix.<br>2. Assista aos vídeos da capacitação Personow.<br>3. Aguarde a aprovação do cadastro.<br>4. Aceite aulas em Ofertas.<br>5. No local (até 100 m do aluno), faça o check-in. Ao terminar, tire a foto do local da aula e finalize.<br>6. Depois de finalizado, toque em “Cobrar” e mostre o QR Code para o aluno.<br>7. O valor cai na Carteira e, após a carência, você saca por Pix.<br></p></div>
+     <a class="btn btn-green" id="ajuda-zap" href="#" target="_blank" rel="noopener">Falar no WhatsApp</a>
+ </div></div>
+ 
+diff -ruN orig/script-aluno.js personow-main/script-aluno.js
+--- orig/script-aluno.js	2026-11-12 23:36:06.288217880 +0000
++++ personow-main/script-aluno.js	2026-11-13 04:33:14.706505492 +0000
+@@ -324,7 +324,7 @@
+     let l = aulas.slice();
+     if (filtro === "ativos") l = l.filter((p) => p.status === "aberta" || p.status === "aceita").sort(ordemData);
+     else { if (filtro === "pagos") l = l.filter(estaPago); l.sort((a, b) => ordemData(b, a)); }
+-    $("lista-aulas").innerHTML = l.length ? l.map(cartao).join("") : vazio("📋", filtro === "pagos" ? "Nenhum pagamento ainda" : "Nenhum aula por aqui", filtro === "pagos" ? "As aulas pagas e suas notas aparecem aqui." : "Faça seu primeira aula na aba Início.", filtro === "pagos" ? "" : '<button class="btn btn-primary" data-ir="tab-home">Solicitar personal</button>');
++    $("lista-aulas").innerHTML = l.length ? l.map(cartao).join("") : vazio("📋", filtro === "pagos" ? "Nenhum pagamento ainda" : "Nenhum aula por aqui", filtro === "pagos" ? "As aulas pagas e suas notas aparecem aqui." : "Faça sua primeira aula na aba Início.", filtro === "pagos" ? "" : '<button class="btn btn-primary" data-ir="tab-home">Solicitar personal</button>');
+ }
+ 
+ // ============================================================
+diff -ruN orig/script-personal.js personow-main/script-personal.js
+--- orig/script-personal.js	2026-11-12 23:36:06.288237625 +0000
++++ personow-main/script-personal.js	2026-11-13 04:33:14.708289529 +0000
+@@ -40,7 +40,7 @@
+ function textosTaxas() {
+     const pct = (id) => String(Math.round(calcularPreco(id).pct * 10) / 10).replace(".", ",");   // comissão do nível sobre a aula vigente
+     $("benef-split").textContent = `Taxa de ${pct("bronze")}% no Bronze, caindo até ${pct("platina")}% no Platina — quanto mais chamados, mais você ganha. Aula de ${brl(TAXAS.precoCentavos)} (aulas de ${TAXAS.horasMin} a ${TAXAS.horasMax} horas), sem mensalidade`;
+-    $("ajuda-split").textContent = `A aula é de ${brl(TAXAS.precoCentavos)} e a taxa da plataforma depende do seu nível: ${NIVEIS.map((n) => `${n.nome} ${pct(n.id)}% (a partir de ${n.minConcluidos} chamados)`).join(", ")}. O valor entra na carteira depois do pagamento do aluno, fica alguns dias em carência e depois você saca por Pix. Cada aula tem de ${TAXAS.horasMin} a ${TAXAS.horasMax} horas, com até ${TAXAS.maxSemana} aulas por semana na mesmo aluno. Faça check-in a até 100 m do aluno e finalize com a foto do local da aula. Desistir ou faltar em cima da hora gera advertência e multa; com 3 advertências a conta é bloqueada. Sem concluir chamados por 2 meses, o nível cai. Para aceitar aulas é preciso concluir o capacitação Personow.`;
++    $("ajuda-split").textContent = `A aula é de ${brl(TAXAS.precoCentavos)} e a taxa da plataforma depende do seu nível: ${NIVEIS.map((n) => `${n.nome} ${pct(n.id)}% (a partir de ${n.minConcluidos} chamados)`).join(", ")}. O valor entra na carteira depois do pagamento do aluno, fica alguns dias em carência e depois você saca por Pix. Cada aula tem de ${TAXAS.horasMin} a ${TAXAS.horasMax} horas, com até ${TAXAS.maxSemana} aulas por semana na mesmo aluno. Faça check-in a até 100 m do aluno e finalize com a foto do local da aula. Desistir ou faltar em cima da hora gera advertência e multa; com 3 advertências a conta é bloqueada. Sem concluir chamados por 2 meses, o nível cai. Para aceitar aulas é preciso concluir a capacitação Personow.`;
+ $("nota-taxa-mp").textContent = "Pagamentos estornados ou contestados pelo aluno são descontados da carteira.";
+ $("termos-texto").innerHTML = textoTermos("personal");
+ }
+@@ -55,7 +55,7 @@
+ const msgAuth = mensagemErroAuth;   // firebase.js: mensagens em português para todos os erros de login
+ const TXT_LOGIN = {
+     entrar: { titulo: "Entrar na minha conta", sub: "Entre com a sua conta Google ou com e-mail e senha.", botao: "Entrar com Google" },
+-    criar: { titulo: "Comece a pegar aulas", sub: refRecebido() ? "🎁 Você foi convidado por um personal. Cadastre-se e faça seu primeira aula!" : "Cadastro rápido com Google ou e-mail. Depois de aprovado (com conferência do CREF), você vê as aulas da região.", botao: "Criar conta com Google" }
++    criar: { titulo: "Comece a pegar aulas", sub: refRecebido() ? "🎁 Você foi convidado por um personal. Cadastre-se e faça sua primeira aula!" : "Cadastro rápido com Google ou e-mail. Depois de aprovado (com conferência do CREF), você vê as aulas da região.", botao: "Criar conta com Google" }
+ };
+ let emailUI = null;
+ const seletor = ligarSeletorDeModo({ textos: TXT_LOGIN, aoMudar: (m) => emailUI?.atualizarModo(m) });
+@@ -222,7 +222,7 @@
+ const ativo = () => pub.status === "ativo";
+ const habilitado = () => hab.habilitado === true;
+ const nomeProm = () => pub.nome || usuario.displayName || "Personal";
+-const PENDENCIA = { aprovacao: "aguardar a aprovação do cadastro", nascimento: "informar a data de nascimento", "idade-minima": `ter ${IDADE_MINIMA} anos ou mais`, cref: "informar o número do CREF", treinamento: "concluir o capacitação Personow" };
++const PENDENCIA = { aprovacao: "aguardar a aprovação do cadastro", nascimento: "informar a data de nascimento", "idade-minima": `ter ${IDADE_MINIMA} anos ou mais`, cref: "informar o número do CREF", treinamento: "concluir a capacitação Personow" };
+ const textoPendencias = () => (hab.pendencias || []).map((p) => PENDENCIA[p] || p).join(", ");
+ 
+ // ---------- perfil + onboarding ----------
+@@ -236,7 +236,7 @@
+     $("sub-home").textContent = habilitado() ? "Tudo pronto para pegar aulas." : `Para liberar as aulas: ${textoPendencias() || "aguarde"}.`;
+     $("i-rating").innerHTML = pub.ratingQtd ? `<span class="stars" style="font-size:20px">★</span> ${pub.ratingMedia.toFixed(1)} <small class="muted" style="font-size:12px">(${pub.ratingQtd})</small>` : "—";
+     $("link-indicar").value = `${baseSite()}personal.html?ref=${pub.refCode || ""}`;
+-    $("indicar-txt").textContent = `Mande seu link para um amigo personal. Quando ele concluir o primeira aula, você ganha um bônus de indicação. Depois disso, tudo segue o padrão normal.`;
++    $("indicar-txt").textContent = `Mande seu link para um amigo personal. Quando ele concluir a primeira aula, você ganha um bônus de indicação. Depois disso, tudo segue o padrão normal.`;
+     const t = hab.treinamento || { concluidos: 0, total: 0, completo: false };
+     const itens = [
+         { ok: true, t: "Cadastro criado" },
+@@ -436,7 +436,7 @@
+     try { await chamarFuncao("aceitarAula", { aulaId: id }); ok("Aula aceita! Ele já está na sua escala."); fechar("sheet-oferta"); irPara("tab-agenda"); carregarRep(); }
+     catch (e) {
+         console.error(e);
+-        const m = { "limite-semanal": e.message, "aula-indisponivel": e.message, "conflito-horario": e.message, exclusivo: e.message, "personal-inativo": "Seu cadastro ainda não foi aprovado.", "treinamento-pendente": "Conclua o capacitação Personow para aceitar aulas.", "idade-nao-verificada": "Informe sua data de nascimento para continuar.", "cref-pendente": "Informe o número do seu CREF para continuar.", "categoria-pendente": e.message, "aula-expirado": "Este chamado relâmpago expirou.", "conta-banida": "Sua conta está bloqueada." }[e.code];
++        const m = { "limite-semanal": e.message, "aula-indisponivel": e.message, "conflito-horario": e.message, exclusivo: e.message, "personal-inativo": "Seu cadastro ainda não foi aprovado.", "treinamento-pendente": "Conclua a capacitação Personow para aceitar aulas.", "idade-nao-verificada": "Informe sua data de nascimento para continuar.", "cref-pendente": "Informe o número do seu CREF para continuar.", "categoria-pendente": e.message, "aula-expirado": "Este chamado relâmpago expirou.", "conta-banida": "Sua conta está bloqueada." }[e.code];
+         erro(m || "Não foi possível aceitar a aula. Tente de novo.");
+         if (["treinamento-pendente", "personal-inativo", "idade-nao-verificada", "cref-pendente"].includes(e.code)) { await carregarHabilitacao(); pintarPerfil(); renderOfertas(); }
+         if (e.code === "categoria-pendente") await carregarHabCats();
+diff -ruN orig/sw.js personow-main/sw.js
+--- orig/sw.js	2026-11-12 23:36:06.289110096 +0000
++++ personow-main/sw.js	2026-11-12 23:47:26.752291740 +0000
+@@ -1,5 +1,5 @@
+ // Service worker: o app abre mesmo com internet ruim. Dados (Firestore) nunca são cacheados aqui.
+-const VERSAO = "personow-v15";
++const VERSAO = "personow-v16";
+ const BASE = ["./", "index.html", "personal.html", "/painel-aluno", "/painel-personal", "entrada.js", "pagar.html", "nota.html", "nota.css", "login-cena.css", "verificar.html", "verificar.js", "landing.html", "style.css", "style-landing.css", "config.js", "core.js", "ui.js", "firebase.js", "acesso.js", "recado.js", "script-aluno.js", "script-personal.js", "pagar.js", "nota.js", "landing.js", "manifest.json", "icons/icon-192.png", "taxas.js", "geo.js", "perfil-inteligente.js", "cursos.js", "suporte.js", "push.js", "parceiro.html", "style-jogo.css", "style-b2b.css", "camera.js", "gamificacao-ui.js", "personal-jogo.js", "aluno-jogo.js", "parceiro.js", "parceiro-ui.js", "mapa-aluno.js", "style-mapa.css"];
+ // allSettled: se um arquivo faltar, o resto continua sendo guardado (antes, um 404 derrubava a instalação inteira).
+ self.addEventListener("install", (e) => { e.waitUntil(caches.open(VERSAO).then((c) => Promise.allSettled(BASE.map((u) => c.add(u)))).then(() => self.skipWaiting())); });
+diff -ruN orig/test/e2e.browser.cjs personow-main/test/e2e.browser.cjs
+--- orig/test/e2e.browser.cjs	2026-11-12 23:36:06.289199010 +0000
++++ personow-main/test/e2e.browser.cjs	2026-11-12 23:42:53.456877107 +0000
+@@ -23,10 +23,14 @@
+       const m = /firebasejs\/10\.8\.0\/(firebase-[a-z]+\.js)/.exec(u);
+       if (m) return route.fulfill({ contentType: "text/javascript", body: stubs[m[1]] });
+       if (/googleapis\.com\/maps|cdnjs\.cloudflare/.test(u)) return route.fulfill({ contentType: "text/javascript", body: "" });
++      if (u.startsWith(base) && new URL(u).pathname === "/sessao") {   // contrato de acesso.js: o servidor decide o perfil ativo do portal
++        let portal = "aluno"; try { portal = JSON.parse(route.request().postData() || "{}").portal || portal; } catch {}
++        return route.fulfill({ contentType: "application/json", body: JSON.stringify({ estado: "ok", role: portal, perfis: [portal] }) });
++      }
+       if (u.startsWith(base)) return route.continue();
+       return route.abort();
+     });
+-    await page.addInitScript((f) => { window.__fake = { store: {}, log: [], ...f }; }, fake);
++    await page.addInitScript((f) => { window.__fake = { store: {}, log: [], ...f }; if (window.__fake.user) { window.__fake.user.getIdToken = async () => "tok"; window.__fake.user.emailVerified = true; } }, fake);
+     await page.goto(base + "/" + pagina + extra);
+     await page.waitForTimeout(500);
+     return { page, erros, ctx };
+@@ -43,10 +47,10 @@
+   const store = {
+     "personais/leo": { uid: "leo", nome: "Leo Personal", status: "ativo", especialidade: "Hipertrofia", cref: "123-G/SP", valorMin: 70, ratingMedia: 4.8, ratingQtd: 12, bio: "<img src=x onerror=window.__xss=1>" },
+     "personais/rui": { uid: "rui", nome: "Rui", status: "pendente" },
+-    ["aulas/a1"]: { alunoUid: "ana", status: "aberta", local: "<b>Smart</b> Fit", data: dia(3), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Funcional", valorCentavos: 8000, criadoEm: null },
+-    ["aulas/a2"]: { alunoUid: "ana", status: "aceita", personalUid: "leo", personalNome: "Leo Personal", local: "Academia X", data: dia(4), entrada: "09:00", saida: "10:00", horario: "09:00–10:00", foco: "Hipertrofia", valorCentavos: 10000 },
+-    ["aulas/a3"]: { alunoUid: "ana", status: "paga", personalUid: "leo", personalNome: "Leo Personal", local: "Academia Y", data: dia(-2), entrada: "08:00", saida: "09:00", horario: "08:00–09:00", foco: "Corrida", valorCentavos: 6000, reciboId: "r1", reciboNumero: 1 },
+-    ["aulas/a4"]: { alunoUid: "outro", status: "aberta", local: "NÃO DEVE APARECER", data: dia(1), entrada: "10:00", saida: "11:00", horario: "x", foco: "Funcional", valorCentavos: 8000 }
++    ["aulas/a1"]: { uid: "ana", status: "aberta", local: "<b>Smart</b> Fit", data: dia(3), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Funcional", valorCentavos: 8000, criadoEm: null },
++    ["aulas/a2"]: { uid: "ana", status: "aceita", personalUid: "leo", personalNome: "Leo Personal", local: "Academia X", data: dia(4), entrada: "09:00", saida: "10:00", horario: "09:00–10:00", foco: "Hipertrofia", valorCentavos: 10000 },
++    ["aulas/a3"]: { uid: "ana", status: "paga", personalUid: "leo", personalNome: "Leo Personal", local: "Academia Y", data: dia(-2), entrada: "08:00", saida: "09:00", horario: "08:00–09:00", foco: "Corrida", valorCentavos: 6000, reciboId: "r1", reciboNumero: 1 },
++    ["aulas/a4"]: { uid: "outro", status: "aberta", local: "NÃO DEVE APARECER", data: dia(1), entrada: "10:00", saida: "11:00", horario: "x", foco: "Funcional", valorCentavos: 8000 }
+   };
+   ({ page, erros } = await abrir("index.html", { user: ana, store }));
+   ok(await page.locator("#screen-main").evaluate((e) => e.classList.contains("active")), "entra no app");
+@@ -112,12 +116,12 @@
+   const sp = {
+     "personais/leo": { uid: "leo", nome: "Leo Personal", status: "ativo", mpConectado: true, valorMin: 60, cref: "123-G/SP" },
+     "personais_privado/leo": { cpf: "52998224725", telefone: "(19) 99999-0000" },
+-    "aulas/o1": { alunoUid: "x", alunoNome: "Bia", status: "aberta", local: "Smart Fit", data: dia(2), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Funcional", valorCentavos: 8000, valorPersonalCentavos: 6800 },
+-    "aulas/o2": { alunoUid: "x", alunoNome: "Caio", status: "aberta", local: "Choque", data: dia(5), entrada: "09:30", saida: "10:30", horario: "x", foco: "Corrida", valorCentavos: 8000, valorPersonalCentavos: 6800 },
+-    "aulas/o3": { alunoUid: "x", alunoNome: "Dani", status: "aberta", local: "Barato", data: dia(2), entrada: "15:00", saida: "16:00", horario: "x", foco: "Funcional", valorCentavos: 4000, valorPersonalCentavos: 3400 },
+-    "aulas/o4": { alunoUid: "x", alunoNome: "Edu", status: "aberta", local: "Reservado p/ outro", data: dia(2), entrada: "17:00", saida: "18:00", horario: "x", foco: "Funcional", valorCentavos: 9000, valorPersonalCentavos: 7650, personalPreferidoUid: "rui", exclusivoAte: { __ms: Date.now() + 3e5 } },
+-    "aulas/m1": { alunoUid: "y", alunoNome: "Fê", status: "aceita", personalUid: "leo", local: "Minha aula", data: dia(5), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Hipertrofia", valorCentavos: 10000, valorPersonalCentavos: 8500 },
+-    "aulas/m2": { alunoUid: "z", alunoNome: "Gui", status: "paga", personalUid: "leo", local: "Paga", data: dia(-3), entrada: "08:00", saida: "09:00", horario: "x", foco: "Corrida", valorCentavos: 10000, valorPersonalCentavos: 8500 }
++    "aulas/o1": { uid: "x", alunoNome: "Bia", status: "aberta", local: "Smart Fit", data: dia(2), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Funcional", valorCentavos: 8000, valorPersonalCentavos: 6800 },
++    "aulas/o2": { uid: "x", alunoNome: "Caio", status: "aberta", local: "Choque", data: dia(5), entrada: "09:30", saida: "10:30", horario: "x", foco: "Corrida", valorCentavos: 8000, valorPersonalCentavos: 6800 },
++    "aulas/o3": { uid: "x", alunoNome: "Dani", status: "aberta", local: "Barato", data: dia(2), entrada: "15:00", saida: "16:00", horario: "x", foco: "Funcional", valorCentavos: 4000, valorPersonalCentavos: 3400 },
++    "aulas/o4": { uid: "x", alunoNome: "Edu", status: "aberta", local: "Reservado p/ outro", data: dia(2), entrada: "17:00", saida: "18:00", horario: "x", foco: "Funcional", valorCentavos: 9000, valorPersonalCentavos: 7650, personalPreferidoUid: "rui", exclusivoAte: { __ms: Date.now() + 3e5 } },
++    "aulas/m1": { uid: "y", alunoNome: "Fê", status: "aceita", personalUid: "leo", local: "Minha aula", data: dia(5), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Hipertrofia", valorCentavos: 10000, valorPersonalCentavos: 8500 },
++    "aulas/m2": { uid: "z", alunoNome: "Gui", status: "paga", personalUid: "leo", local: "Paga", data: dia(-3), entrada: "08:00", saida: "09:00", horario: "x", foco: "Corrida", valorCentavos: 10000, valorPersonalCentavos: 8500 }
+   };
+   ({ page, erros } = await abrir("personal.html", { user: leo, store: sp, negar: () => false }));
+   ok(await page.locator("#screen-dashboard").evaluate((e) => e.classList.contains("active")), "entra no painel");
+@@ -160,7 +164,7 @@
+   ok(await page.locator("#estado-ok").isVisible(), "aula já paga mostra confirmação");
+   ok((await page.locator("#link-recibo").getAttribute("href")) === "recibo.html?id=r1", "link do recibo certo");
+   await page.context().close();
+-  const st2 = { ...store, "recibos/r1": { numeroFmt: "000001", serie: "A1", alunoUid: "ana", aluno: { nome: "Ana", email: "ana@x.com" }, personal: { nome: "Leo", cref: "123-G/SP", documentoMascarado: "***.982.247-**" }, servico: { descricao: "Aula de personal trainer — Corrida", local: "Academia Y", data: dia(-2), horario: "08:00–09:00" }, valores: { valor: 6000, taxaFixa: 0, total: 6000 }, pagamento: { metodo: "pix", mpPaymentId: "999" }, emitidoEm: { toDate: () => new Date() } } };
++  const st2 = { ...store, "recibos/r1": { numeroFmt: "000001", serie: "A1", uid: "ana", aluno: { nome: "Ana", email: "ana@x.com" }, personal: { nome: "Leo", cref: "123-G/SP", documentoMascarado: "***.982.247-**" }, servico: { descricao: "Aula de personal trainer — Corrida", local: "Academia Y", data: dia(-2), horario: "08:00–09:00" }, valores: { valor: 6000, taxaFixa: 0, total: 6000 }, pagamento: { metodo: "pix", mpPaymentId: "999" }, emitidoEm: { toDate: () => new Date() } } };
+   ({ page, erros } = await abrir("recibo.html", { user: ana, store: st2 }, "?id=r1"));
+   ok(await page.locator("#recibo").isVisible(), "recibo.html renderiza");
+   const rt = await page.locator("#recibo").textContent();
+diff -ruN orig/test/e2e.stubs.cjs personow-main/test/e2e.stubs.cjs
+--- orig/test/e2e.stubs.cjs	2026-11-12 23:36:06.289208754 +0000
++++ personow-main/test/e2e.stubs.cjs	2026-11-12 23:48:51.613354794 +0000
+@@ -9,11 +9,24 @@
+ export const signInWithRedirect = async () => {};
+ export const getRedirectResult = async () => null;
+ export const signOut = async () => { window.__fake.user = null; };
++export const initializeAuth = () => getAuth();
++export const setPersistence = async () => {};
++export const browserLocalPersistence = {}, indexedDBLocalPersistence = {}, browserSessionPersistence = {}, browserPopupRedirectResolver = {};
++export const signInWithCustomToken = async () => ({ user: window.__fake.user });
++export const createUserWithEmailAndPassword = async () => ({ user: window.__fake.user });
++export const signInWithEmailAndPassword = async () => ({ user: window.__fake.user });
++export const sendEmailVerification = async () => {};
++export const sendPasswordResetEmail = async () => {};
++export const updateProfile = async () => {};
++export class EmailAuthProvider { static credential() { return {}; } }
++export const reauthenticateWithCredential = async () => ({ user: window.__fake.user });
++export const reauthenticateWithPopup = async () => ({ user: window.__fake.user });
+ `;
+ const FS = `
+ const S = () => window.__fake.store;
+ const mk = (path) => ({ __path: path, id: path.split("/").pop() });
+ export const connectFirestoreEmulator = () => {};
++export const getCountFromServer = async () => ({ data: () => ({ count: 0 }) });
+ export const getFirestore = () => ({});
+ export const serverTimestamp = () => ({ __ts: true, toDate: () => new Date() });
+ export const deleteField = () => ({ __del: true });
+@@ -21,6 +34,7 @@
+ export const doc = (_d, ...p) => mk(p.join("/"));
+ export const where = (f, op, v) => ({ f, v });
+ export const orderBy = () => ({});
++export const limit = () => ({});
+ export const query = (c, ...fs) => ({ __col: c.__col, filtros: fs.filter((x) => x.f) });
+ const lista = (q) => Object.entries(S()).filter(([k]) => k.startsWith(q.__col + "/") && !k.slice(q.__col.length + 1).includes("/") && q.filtros.every(({ f, v }) => S()[k][f] === v));
+ const rev = (d) => JSON.parse(JSON.stringify(d ?? null), (k, v) => (v && typeof v === "object" && v.__ms !== undefined ? { __ms: v.__ms, toMillis: () => v.__ms } : v));

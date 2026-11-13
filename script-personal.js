@@ -40,7 +40,7 @@ $("ajuda-zap").href = `https://api.whatsapp.com/send?phone=${WHATSAPP_SUPORTE}&t
 function textosTaxas() {
     const pct = (id) => String(Math.round(calcularPreco(id).pct * 10) / 10).replace(".", ",");   // comissão do nível sobre a aula vigente
     $("benef-split").textContent = `Taxa de ${pct("bronze")}% no Bronze, caindo até ${pct("platina")}% no Platina — quanto mais chamados, mais você ganha. Aula de ${brl(TAXAS.precoCentavos)} (aulas de ${TAXAS.horasMin} a ${TAXAS.horasMax} horas), sem mensalidade`;
-    $("ajuda-split").textContent = `A aula é de ${brl(TAXAS.precoCentavos)} e a taxa da plataforma depende do seu nível: ${NIVEIS.map((n) => `${n.nome} ${pct(n.id)}% (a partir de ${n.minConcluidos} chamados)`).join(", ")}. O valor entra na carteira depois do pagamento do aluno, fica alguns dias em carência e depois você saca por Pix. Cada aula tem de ${TAXAS.horasMin} a ${TAXAS.horasMax} horas, com até ${TAXAS.maxSemana} aulas por semana na mesmo aluno. Faça check-in a até 100 m do aluno e finalize com a foto do local da aula. Desistir ou faltar em cima da hora gera advertência e multa; com 3 advertências a conta é bloqueada. Sem concluir chamados por 2 meses, o nível cai. Para aceitar aulas é preciso concluir o capacitação Personow.`;
+    $("ajuda-split").textContent = `A aula é de ${brl(TAXAS.precoCentavos)} e a taxa da plataforma depende do seu nível: ${NIVEIS.map((n) => `${n.nome} ${pct(n.id)}% (a partir de ${n.minConcluidos} chamados)`).join(", ")}. O valor entra na carteira depois do pagamento do aluno, fica alguns dias em carência e depois você saca por Pix. Cada aula tem de ${TAXAS.horasMin} a ${TAXAS.horasMax} horas, com até ${TAXAS.maxSemana} aulas por semana na mesmo aluno. Faça check-in a até 100 m do aluno e finalize com a foto do local da aula. Desistir ou faltar em cima da hora gera advertência e multa; com 3 advertências a conta é bloqueada. Sem concluir chamados por 2 meses, o nível cai. Para aceitar aulas é preciso concluir a capacitação Personow.`;
 $("nota-taxa-mp").textContent = "Pagamentos estornados ou contestados pelo aluno são descontados da carteira.";
 $("termos-texto").innerHTML = textoTermos("personal");
 }
@@ -55,7 +55,7 @@ const refRecebido = () => { try { return localStorage.getItem(chave("ref")) || "
 const msgAuth = mensagemErroAuth;   // firebase.js: mensagens em português para todos os erros de login
 const TXT_LOGIN = {
     entrar: { titulo: "Entrar na minha conta", sub: "Entre com a sua conta Google ou com e-mail e senha.", botao: "Entrar com Google" },
-    criar: { titulo: "Comece a pegar aulas", sub: refRecebido() ? "🎁 Você foi convidado por um personal. Cadastre-se e faça seu primeira aula!" : "Cadastro rápido com Google ou e-mail. Depois de aprovado (com conferência do CREF), você vê as aulas da região.", botao: "Criar conta com Google" }
+    criar: { titulo: "Comece a pegar aulas", sub: refRecebido() ? "🎁 Você foi convidado por um personal. Cadastre-se e faça sua primeira aula!" : "Cadastro rápido com Google ou e-mail. Depois de aprovado (com conferência do CREF), você vê as aulas da região.", botao: "Criar conta com Google" }
 };
 let emailUI = null;
 const seletor = ligarSeletorDeModo({ textos: TXT_LOGIN, aoMudar: (m) => emailUI?.atualizarModo(m) });
@@ -222,7 +222,7 @@ $("btn-cadastrar").addEventListener("click", async () => {
 const ativo = () => pub.status === "ativo";
 const habilitado = () => hab.habilitado === true;
 const nomeProm = () => pub.nome || usuario.displayName || "Personal";
-const PENDENCIA = { aprovacao: "aguardar a aprovação do cadastro", nascimento: "informar a data de nascimento", "idade-minima": `ter ${IDADE_MINIMA} anos ou mais`, cref: "informar o número do CREF", treinamento: "concluir o capacitação Personow" };
+const PENDENCIA = { aprovacao: "aguardar a aprovação do cadastro", nascimento: "informar a data de nascimento", "idade-minima": `ter ${IDADE_MINIMA} anos ou mais`, cref: "informar o número do CREF", treinamento: "concluir a capacitação Personow" };
 const textoPendencias = () => (hab.pendencias || []).map((p) => PENDENCIA[p] || p).join(", ");
 
 // ---------- perfil + onboarding ----------
@@ -236,7 +236,7 @@ function pintarPerfil() {
     $("sub-home").textContent = habilitado() ? "Tudo pronto para pegar aulas." : `Para liberar as aulas: ${textoPendencias() || "aguarde"}.`;
     $("i-rating").innerHTML = pub.ratingQtd ? `<span class="stars" style="font-size:20px">★</span> ${pub.ratingMedia.toFixed(1)} <small class="muted" style="font-size:12px">(${pub.ratingQtd})</small>` : "—";
     $("link-indicar").value = `${baseSite()}personal.html?ref=${pub.refCode || ""}`;
-    $("indicar-txt").textContent = `Mande seu link para um amigo personal. Quando ele concluir o primeira aula, você ganha um bônus de indicação. Depois disso, tudo segue o padrão normal.`;
+    $("indicar-txt").textContent = `Mande seu link para um amigo personal. Quando ele concluir a primeira aula, você ganha um bônus de indicação. Depois disso, tudo segue o padrão normal.`;
     const t = hab.treinamento || { concluidos: 0, total: 0, completo: false };
     const itens = [
         { ok: true, t: "Cadastro criado" },
@@ -436,7 +436,7 @@ async function aceitar(id, b) {
     try { await chamarFuncao("aceitarAula", { aulaId: id }); ok("Aula aceita! Ele já está na sua escala."); fechar("sheet-oferta"); irPara("tab-agenda"); carregarRep(); }
     catch (e) {
         console.error(e);
-        const m = { "limite-semanal": e.message, "aula-indisponivel": e.message, "conflito-horario": e.message, exclusivo: e.message, "personal-inativo": "Seu cadastro ainda não foi aprovado.", "treinamento-pendente": "Conclua o capacitação Personow para aceitar aulas.", "idade-nao-verificada": "Informe sua data de nascimento para continuar.", "cref-pendente": "Informe o número do seu CREF para continuar.", "categoria-pendente": e.message, "aula-expirado": "Este chamado relâmpago expirou.", "conta-banida": "Sua conta está bloqueada." }[e.code];
+        const m = { "limite-semanal": e.message, "aula-indisponivel": e.message, "conflito-horario": e.message, exclusivo: e.message, "personal-inativo": "Seu cadastro ainda não foi aprovado.", "treinamento-pendente": "Conclua a capacitação Personow para aceitar aulas.", "idade-nao-verificada": "Informe sua data de nascimento para continuar.", "cref-pendente": "Informe o número do seu CREF para continuar.", "categoria-pendente": e.message, "aula-expirado": "Este chamado relâmpago expirou.", "conta-banida": "Sua conta está bloqueada." }[e.code];
         erro(m || "Não foi possível aceitar a aula. Tente de novo.");
         if (["treinamento-pendente", "personal-inativo", "idade-nao-verificada", "cref-pendente"].includes(e.code)) { await carregarHabilitacao(); pintarPerfil(); renderOfertas(); }
         if (e.code === "categoria-pendente") await carregarHabCats();

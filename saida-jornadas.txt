@@ -1,0 +1,96 @@
+
+■ ALUNO ok — celular 390px
+  url final: /index.html  | navegações: 1
+  telas ativas: ["screen-main"] | overflow-x: false (390px)
+  texto: ☰ Defina sua localização Defina sua localização Assim mostramos só os personais perto de você. 📍 Definir minha localização Não foi possível carregar o mapa agora. Mostra
+  erros JS: []
+  console: ["mapa (Leaflet): leaflet ausente"]
+  HTTP≥400: ["GET /teste/status 404","POST /presenca/ping 404","GET /parceiros 404"]
+
+■ ALUNO ok — desktop 1280px
+  url final: /index.html  | navegações: 1
+  telas ativas: ["screen-main"] | overflow-x: false (1280px)
+  texto: ☰ Defina sua localização Defina sua localização Assim mostramos só os personais perto de você. 📍 Definir minha localização Não foi possível carregar o mapa agora. Mostra
+  erros JS: []
+  console: ["mapa (Leaflet): leaflet ausente"]
+  HTTP≥400: ["GET /teste/status 404","POST /presenca/ping 404","GET /parceiros 404"]
+
+■ ALUNO deslogado
+  url final: /index.html  | navegações: 1
+  telas ativas: ["screen-login"] | overflow-x: false (390px)
+  texto: PERSONOW Treino personalizado sob demanda Sou aluno Sou personal Entrar na minha conta Criar nova conta Entrar na minha conta Entre com a sua conta Google ou com e-mail e
+  erros JS: []
+  console: []
+  HTTP≥400: ["GET /config/taxas 404","GET /teste/status 404"]
+
+■ RESTRIÇÃO: conta de PERSONAL abre o painel do aluno
+  url final: /painel-personal  | navegações: 2
+  telas ativas: ["screen-acesso"] | overflow-x: false (390px)
+  texto: PERSONOW Esta conta é de outro tipo de acesso A conta leo@x.com não tem cadastro de personal; ela é de outro tipo de acesso. Escolha como quer continuar. Para atuar també
+  erros JS: []
+  console: []
+  HTTP≥400: ["GET /teste/status 404","POST /presenca/ping 404","GET /saude 404"]
+
+■ RESTRIÇÃO: aluno banido (403 em /reputacao)
+  url final: /index.html  | navegações: 1
+  telas ativas: ["screen-login"] | overflow-x: false (390px)
+  texto: PERSONOW Treino personalizado sob demanda Sou aluno Sou personal Entrar na minha conta Criar nova conta Entrar na minha conta Entre com a sua conta Google ou com e-mail e
+  erros JS: []
+  console: []
+  HTTP≥400: ["GET /config/taxas 404","GET /teste/status 404","POST /presenca/ping 404","GET /reputacao 403"]
+
+■ RESILIÊNCIA: servidor 500 em /sessao
+  url final: /index.html  | navegações: 1
+  telas ativas: ["screen-acesso"] | overflow-x: false (390px)
+  texto: PERSONOW Não conseguimos verificar sua conta Pode ser a conexão ou uma instabilidade momentânea. Sua conta não foi alterada — tente novamente. Tentar de novoSair e usar o
+  erros JS: []
+  console: ["Error: erro interno\n    at chamarFuncao (http://localhost:38099/firebase.js:62:40)\n    at async resolverAcesso (http://localhost:38099/acess"]
+  HTTP≥400: ["GET /config/taxas 404","GET /teste/status 404","POST /sessao 500","POST /presenca/ping 404"]
+
+■ PERSONAL ok — celular
+  url final: /personal.html  | navegações: 1
+  telas ativas: ["screen-dashboard"] | overflow-x: false (390px)
+  texto: Olá, Leo 👋 Para liberar as aulas: informar a data de nascimento, concluir o capacitação Personow. L 🥉 Bronze Taxa 25% · 0 chamados 3 de 3 vidas Falta pouco para liberar
+  erros JS: []
+  console: ["Error: sem rota\n    at chamarFuncao (http://localhost:38099/firebase.js:62:40)\n    at async carregarTreino (http://localhost:38099/script-pe"]
+  HTTP≥400: ["GET /saude 404","GET /teste/status 404","POST /presenca/ping 404","GET /treinamento 404"]
+
+■ PERSONAL bloqueado pelo admin
+  url final: /personal.html  | navegações: 1
+  telas ativas: ["screen-acesso"] | overflow-x: false (390px)
+  texto: PERSONOW Acesso não liberado para esta conta Documento inválido Falar com o suporte no WhatsApp Entrar com outra conta Google
+  erros JS: []
+  console: []
+  HTTP≥400: ["GET /saude 404","GET /teste/status 404","POST /presenca/ping 404"]
+
+■ RESTRIÇÃO: aluno abre o painel do personal
+  url final: /painel-aluno  | navegações: 2
+  telas ativas: ["screen-acesso"] | overflow-x: false (390px)
+  texto: PERSONOW Esta conta é de outro tipo de acesso A conta ana@x.com não tem cadastro de aluno; ela é de outro tipo de acesso. Escolha como quer continuar. Para atuar também c
+  erros JS: []
+  console: []
+  HTTP≥400: ["GET /saude 404","GET /teste/status 404","POST /presenca/ping 404"]
+
+■ PARCEIRO (painel B2B) ok
+  url final: /parceiro.html  | navegações: 1
+  telas ativas: ["screen-espera"] | overflow-x: false (390px)
+  texto: PERSONOW Painel para parceiros e indústrias Acesso ainda não liberado Sua conta ainda não está vinculada a um parceiro. Peça à equipe do Personow para vincular o e-mail p
+  erros JS: []
+  console: []
+  HTTP≥400: []
+
+■ ADMIN ok — desktop
+  url final: /admin.html  | navegações: 1
+  telas ativas: [] | overflow-x: false (1280px)
+  texto: Personow SERVER CLUSTER ATENDIMENTO MONITORAMENTO · SUPORTE · TEMPO REAL Painel administrativo Acesso restrito à equipe. Todas as ações são registradas. E-mail corporativ
+  erros JS: []
+  console: []
+  HTTP≥400: ["POST /presenca/ping 404"]
+
+■ RESTRIÇÃO: aluno abre o painel admin
+  url final: /admin.html  | navegações: 1
+  telas ativas: [] | overflow-x: false (1280px)
+  texto: Personow SERVER CLUSTER ATENDIMENTO MONITORAMENTO · SUPORTE · TEMPO REAL Painel administrativo Acesso restrito à equipe. Todas as ações são registradas. E-mail corporativ
+  erros JS: []
+  console: []
+  HTTP≥400: ["POST /presenca/ping 404"]

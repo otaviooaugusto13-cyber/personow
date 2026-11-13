@@ -23,10 +23,14 @@ const dia = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
       const m = /firebasejs\/10\.8\.0\/(firebase-[a-z]+\.js)/.exec(u);
       if (m) return route.fulfill({ contentType: "text/javascript", body: stubs[m[1]] });
       if (/googleapis\.com\/maps|cdnjs\.cloudflare/.test(u)) return route.fulfill({ contentType: "text/javascript", body: "" });
+      if (u.startsWith(base) && new URL(u).pathname === "/sessao") {   // contrato de acesso.js: o servidor decide o perfil ativo do portal
+        let portal = "aluno"; try { portal = JSON.parse(route.request().postData() || "{}").portal || portal; } catch {}
+        return route.fulfill({ contentType: "application/json", body: JSON.stringify({ estado: "ok", role: portal, perfis: [portal] }) });
+      }
       if (u.startsWith(base)) return route.continue();
       return route.abort();
     });
-    await page.addInitScript((f) => { window.__fake = { store: {}, log: [], ...f }; }, fake);
+    await page.addInitScript((f) => { window.__fake = { store: {}, log: [], ...f }; if (window.__fake.user) { window.__fake.user.getIdToken = async () => "tok"; window.__fake.user.emailVerified = true; } }, fake);
     await page.goto(base + "/" + pagina + extra);
     await page.waitForTimeout(500);
     return { page, erros, ctx };
@@ -43,10 +47,10 @@ const dia = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
   const store = {
     "personais/leo": { uid: "leo", nome: "Leo Personal", status: "ativo", especialidade: "Hipertrofia", cref: "123-G/SP", valorMin: 70, ratingMedia: 4.8, ratingQtd: 12, bio: "<img src=x onerror=window.__xss=1>" },
     "personais/rui": { uid: "rui", nome: "Rui", status: "pendente" },
-    ["aulas/a1"]: { alunoUid: "ana", status: "aberta", local: "<b>Smart</b> Fit", data: dia(3), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Funcional", valorCentavos: 8000, criadoEm: null },
-    ["aulas/a2"]: { alunoUid: "ana", status: "aceita", personalUid: "leo", personalNome: "Leo Personal", local: "Academia X", data: dia(4), entrada: "09:00", saida: "10:00", horario: "09:00–10:00", foco: "Hipertrofia", valorCentavos: 10000 },
-    ["aulas/a3"]: { alunoUid: "ana", status: "paga", personalUid: "leo", personalNome: "Leo Personal", local: "Academia Y", data: dia(-2), entrada: "08:00", saida: "09:00", horario: "08:00–09:00", foco: "Corrida", valorCentavos: 6000, reciboId: "r1", reciboNumero: 1 },
-    ["aulas/a4"]: { alunoUid: "outro", status: "aberta", local: "NÃO DEVE APARECER", data: dia(1), entrada: "10:00", saida: "11:00", horario: "x", foco: "Funcional", valorCentavos: 8000 }
+    ["aulas/a1"]: { uid: "ana", status: "aberta", local: "<b>Smart</b> Fit", data: dia(3), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Funcional", valorCentavos: 8000, criadoEm: null },
+    ["aulas/a2"]: { uid: "ana", status: "aceita", personalUid: "leo", personalNome: "Leo Personal", local: "Academia X", data: dia(4), entrada: "09:00", saida: "10:00", horario: "09:00–10:00", foco: "Hipertrofia", valorCentavos: 10000 },
+    ["aulas/a3"]: { uid: "ana", status: "paga", personalUid: "leo", personalNome: "Leo Personal", local: "Academia Y", data: dia(-2), entrada: "08:00", saida: "09:00", horario: "08:00–09:00", foco: "Corrida", valorCentavos: 6000, reciboId: "r1", reciboNumero: 1 },
+    ["aulas/a4"]: { uid: "outro", status: "aberta", local: "NÃO DEVE APARECER", data: dia(1), entrada: "10:00", saida: "11:00", horario: "x", foco: "Funcional", valorCentavos: 8000 }
   };
   ({ page, erros } = await abrir("index.html", { user: ana, store }));
   ok(await page.locator("#screen-main").evaluate((e) => e.classList.contains("active")), "entra no app");
@@ -112,12 +116,12 @@ const dia = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
   const sp = {
     "personais/leo": { uid: "leo", nome: "Leo Personal", status: "ativo", mpConectado: true, valorMin: 60, cref: "123-G/SP" },
     "personais_privado/leo": { cpf: "52998224725", telefone: "(19) 99999-0000" },
-    "aulas/o1": { alunoUid: "x", alunoNome: "Bia", status: "aberta", local: "Smart Fit", data: dia(2), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Funcional", valorCentavos: 8000, valorPersonalCentavos: 6800 },
-    "aulas/o2": { alunoUid: "x", alunoNome: "Caio", status: "aberta", local: "Choque", data: dia(5), entrada: "09:30", saida: "10:30", horario: "x", foco: "Corrida", valorCentavos: 8000, valorPersonalCentavos: 6800 },
-    "aulas/o3": { alunoUid: "x", alunoNome: "Dani", status: "aberta", local: "Barato", data: dia(2), entrada: "15:00", saida: "16:00", horario: "x", foco: "Funcional", valorCentavos: 4000, valorPersonalCentavos: 3400 },
-    "aulas/o4": { alunoUid: "x", alunoNome: "Edu", status: "aberta", local: "Reservado p/ outro", data: dia(2), entrada: "17:00", saida: "18:00", horario: "x", foco: "Funcional", valorCentavos: 9000, valorPersonalCentavos: 7650, personalPreferidoUid: "rui", exclusivoAte: { __ms: Date.now() + 3e5 } },
-    "aulas/m1": { alunoUid: "y", alunoNome: "Fê", status: "aceita", personalUid: "leo", local: "Minha aula", data: dia(5), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Hipertrofia", valorCentavos: 10000, valorPersonalCentavos: 8500 },
-    "aulas/m2": { alunoUid: "z", alunoNome: "Gui", status: "paga", personalUid: "leo", local: "Paga", data: dia(-3), entrada: "08:00", saida: "09:00", horario: "x", foco: "Corrida", valorCentavos: 10000, valorPersonalCentavos: 8500 }
+    "aulas/o1": { uid: "x", alunoNome: "Bia", status: "aberta", local: "Smart Fit", data: dia(2), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Funcional", valorCentavos: 8000, valorPersonalCentavos: 6800 },
+    "aulas/o2": { uid: "x", alunoNome: "Caio", status: "aberta", local: "Choque", data: dia(5), entrada: "09:30", saida: "10:30", horario: "x", foco: "Corrida", valorCentavos: 8000, valorPersonalCentavos: 6800 },
+    "aulas/o3": { uid: "x", alunoNome: "Dani", status: "aberta", local: "Barato", data: dia(2), entrada: "15:00", saida: "16:00", horario: "x", foco: "Funcional", valorCentavos: 4000, valorPersonalCentavos: 3400 },
+    "aulas/o4": { uid: "x", alunoNome: "Edu", status: "aberta", local: "Reservado p/ outro", data: dia(2), entrada: "17:00", saida: "18:00", horario: "x", foco: "Funcional", valorCentavos: 9000, valorPersonalCentavos: 7650, personalPreferidoUid: "rui", exclusivoAte: { __ms: Date.now() + 3e5 } },
+    "aulas/m1": { uid: "y", alunoNome: "Fê", status: "aceita", personalUid: "leo", local: "Minha aula", data: dia(5), entrada: "10:00", saida: "11:00", horario: "10:00–11:00", foco: "Hipertrofia", valorCentavos: 10000, valorPersonalCentavos: 8500 },
+    "aulas/m2": { uid: "z", alunoNome: "Gui", status: "paga", personalUid: "leo", local: "Paga", data: dia(-3), entrada: "08:00", saida: "09:00", horario: "x", foco: "Corrida", valorCentavos: 10000, valorPersonalCentavos: 8500 }
   };
   ({ page, erros } = await abrir("personal.html", { user: leo, store: sp, negar: () => false }));
   ok(await page.locator("#screen-dashboard").evaluate((e) => e.classList.contains("active")), "entra no painel");
@@ -160,7 +164,7 @@ const dia = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
   ok(await page.locator("#estado-ok").isVisible(), "aula já paga mostra confirmação");
   ok((await page.locator("#link-recibo").getAttribute("href")) === "recibo.html?id=r1", "link do recibo certo");
   await page.context().close();
-  const st2 = { ...store, "recibos/r1": { numeroFmt: "000001", serie: "A1", alunoUid: "ana", aluno: { nome: "Ana", email: "ana@x.com" }, personal: { nome: "Leo", cref: "123-G/SP", documentoMascarado: "***.982.247-**" }, servico: { descricao: "Aula de personal trainer — Corrida", local: "Academia Y", data: dia(-2), horario: "08:00–09:00" }, valores: { valor: 6000, taxaFixa: 0, total: 6000 }, pagamento: { metodo: "pix", mpPaymentId: "999" }, emitidoEm: { toDate: () => new Date() } } };
+  const st2 = { ...store, "recibos/r1": { numeroFmt: "000001", serie: "A1", uid: "ana", aluno: { nome: "Ana", email: "ana@x.com" }, personal: { nome: "Leo", cref: "123-G/SP", documentoMascarado: "***.982.247-**" }, servico: { descricao: "Aula de personal trainer — Corrida", local: "Academia Y", data: dia(-2), horario: "08:00–09:00" }, valores: { valor: 6000, taxaFixa: 0, total: 6000 }, pagamento: { metodo: "pix", mpPaymentId: "999" }, emitidoEm: { toDate: () => new Date() } } };
   ({ page, erros } = await abrir("recibo.html", { user: ana, store: st2 }, "?id=r1"));
   ok(await page.locator("#recibo").isVisible(), "recibo.html renderiza");
   const rt = await page.locator("#recibo").textContent();

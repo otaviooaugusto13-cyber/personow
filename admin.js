@@ -55,7 +55,7 @@ const MODELOS = [
     ["Conferir CPF", "Olá, tudo bem? O CPF informado no seu cadastro não confere. Fale com o suporte pelo WhatsApp informando o CPF correto para a gente corrigir e liberar seu acesso."],
     ["Conferir nascimento", "Olá! A data de nascimento do seu cadastro não confere com seu documento. Fale com o suporte pelo WhatsApp para corrigirmos e liberar seu acesso."],
     ["CREF pendente", "Olá! Para liberar seu acesso falta informar o número do seu CREF. Complete essa etapa em Meus dados ou fale com o suporte pelo WhatsApp."],
-    ["Treinamento", "Olá! Para liberar as aulas falta concluir o capacitação Personow. Assim que terminar, é só nos avisar."],
+    ["Treinamento", "Olá! Para liberar as aulas falta concluir a capacitação Personow. Assim que terminar, é só nos avisar."],
     ["Só um oi", "Oi, tudo bem? Passando para falar do seu cadastro no Personow. Pode nos responder pelo WhatsApp?"]
 ];
 function pedir({ titulo, texto = "", rotulo = "", min = 0, ok = "Confirmar", perigo = false, modelos = false, senha = false }) {
@@ -817,7 +817,7 @@ $("tx-salvar").addEventListener("click", seguro(async () => {
     const b = $("tx-salvar"), html = b.innerHTML; b.disabled = true; b.textContent = "Salvando…";
     try {
         const r = await sensivel(() => chamarFuncao("admin/taxas", { ...f, versao: a.versao }, "PUT"));
-        aplicarRespostaTaxas(r); toast("Taxas atualizadas. Já valem para os próximos aulas.", "ok");
+        aplicarRespostaTaxas(r); toast("Taxas atualizadas. Já valem para as próximas aulas.", "ok");
     } catch (e) {
         if (e.code === "taxas-desatualizadas") { await carregarTaxas(); toast(e.message, "err", 12000); } else throw e;
     } finally { b.innerHTML = html; renderTaxas(); }

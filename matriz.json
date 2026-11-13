@@ -1,0 +1,1418 @@
+{
+ "linhas": [
+  {
+   "arq": "conta",
+   "metodo": "POST",
+   "rota": "/cadastro/aluno",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 409,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "POST",
+   "rota": "/cadastro/personal",
+   "anon": 401,
+   "aluno": 409,
+   "personal": 400,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "PUT",
+   "rota": "/perfil/personal/privado",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "PUT",
+   "rota": "/perfil/personal/cref",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "PUT",
+   "rota": "/perfil/personal/pix",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "GET",
+   "rota": "/perfil/privado",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "PUT",
+   "rota": "/perfil/personal/inteligente",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "GET",
+   "rota": "/perfil/personal/inteligente",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "POST",
+   "rota": "/perfil/recado/lido",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "GET",
+   "rota": "/habilitacao",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "conta",
+   "metodo": "POST",
+   "rota": "/sessao",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "treinamento",
+   "metodo": "GET",
+   "rota": "/treinamento",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "treinamento",
+   "metodo": "GET",
+   "rota": "/treinamento/modulos/:id/prova",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 404,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "treinamento",
+   "metodo": "POST",
+   "rota": "/treinamento/modulos/:id/prova",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 404,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "treinamento",
+   "metodo": "POST",
+   "rota": "/treinamento/ping",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "categorias",
+   "metodo": "GET",
+   "rota": "/habilitacoes",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "categorias",
+   "metodo": "POST",
+   "rota": "/habilitacoes/iniciar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "categorias",
+   "metodo": "POST",
+   "rota": "/habilitacoes/ping",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "categorias",
+   "metodo": "POST",
+   "rota": "/habilitacoes/questionario",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "categorias",
+   "metodo": "POST",
+   "rota": "/habilitacoes/responder",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "aulas",
+   "metodo": "POST",
+   "rota": "/cartao/registrar",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "aulas",
+   "metodo": "POST",
+   "rota": "/cartao/remover",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "aulas",
+   "metodo": "POST",
+   "rota": "/criarAula",
+   "anon": 401,
+   "aluno": 402,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "aulas",
+   "metodo": "POST",
+   "rota": "/aceitarAula",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "aulas",
+   "metodo": "POST",
+   "rota": "/cancelarAula",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "aulas",
+   "metodo": "POST",
+   "rota": "/desistirAula",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "aulas",
+   "metodo": "POST",
+   "rota": "/avaliarServico",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "pagamentos",
+   "metodo": "POST",
+   "rota": "/criarCobranca",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "pagamentos",
+   "metodo": "POST",
+   "rota": "/confirmarPagamento",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "pagamentos",
+   "metodo": "POST",
+   "rota": "/webhookMP",
+   "anon": 401,
+   "aluno": 401,
+   "personal": 401,
+   "admin": 401,
+   "ti": 401
+  },
+  {
+   "arq": "nota",
+   "metodo": "POST",
+   "rota": "/nota/:id/emitir",
+   "anon": 401,
+   "aluno": 404,
+   "personal": 403,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "nota",
+   "metodo": "POST",
+   "rota": "/nota/verificar",
+   "anon": 200,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 200,
+   "ti": 200
+  },
+  {
+   "arq": "carteira",
+   "metodo": "GET",
+   "rota": "/carteira",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "carteira",
+   "metodo": "POST",
+   "rota": "/carteira/saque",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "carteira",
+   "metodo": "GET",
+   "rota": "/carteira/exportar.csv",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "carteira",
+   "metodo": "GET",
+   "rota": "/aluno/exportar.csv",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "taxas",
+   "metodo": "GET",
+   "rota": "/config/taxas",
+   "anon": 200,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 200,
+   "ti": 200
+  },
+  {
+   "arq": "taxas",
+   "metodo": "GET",
+   "rota": "/admin/taxas",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "taxas",
+   "metodo": "PUT",
+   "rota": "/admin/taxas",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/personais",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/personais/:uid",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/recado/:tipo/:uid",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/personais/:uid/status",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/ti/operadores",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/ti/operadores",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "PUT",
+   "rota": "/admin/ti/operadores/:uid/nivel",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/ti/operadores/:uid/senha",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/ti/operadores/:uid/excluir",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/ti/operadores/:uid/restaurar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "PUT",
+   "rota": "/admin/personais/:uid",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "PUT",
+   "rota": "/admin/alunos/:uid",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/personais/:uid/excluir",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/alunos/:uid/excluir",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/usuarios/:uid/revogar-sessoes",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/treinamento/modulos",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/treinamento/modulos",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "PUT",
+   "rota": "/admin/treinamento/modulos/:id",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/habilitacoes/categorias",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "PUT",
+   "rota": "/admin/habilitacoes/categorias/:id",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/pagamentos",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/aulas/:id/estornar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/saques",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/saques/:id/pagar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/saques/:id/rejeitar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/conciliacao",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/liberar-saldos",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/interno/liberar",
+   "anon": 401,
+   "aluno": 401,
+   "personal": 401,
+   "admin": 401,
+   "ti": 401
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/auditoria",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/aviso",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "PUT",
+   "rota": "/admin/aviso",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/aviso",
+   "anon": 200,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 200,
+   "ti": 200
+  },
+  {
+   "arq": "admin",
+   "metodo": "POST",
+   "rota": "/admin/auditar-exportacao",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/financeiro/resumo",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/admin/exportar/:tipo",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "suporte",
+   "metodo": "POST",
+   "rota": "/suporte/mensagem",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "suporte",
+   "metodo": "POST",
+   "rota": "/suporte/lido",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "suporte",
+   "metodo": "POST",
+   "rota": "/admin/suporte/:uid/mensagem",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "suporte",
+   "metodo": "POST",
+   "rota": "/admin/suporte/:uid/lido",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "suporte",
+   "metodo": "GET",
+   "rota": "/admin/suporte/:uid/perfil",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "suporte",
+   "metodo": "POST",
+   "rota": "/push/registrar",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 400,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "suporte",
+   "metodo": "POST",
+   "rota": "/push/remover",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 400,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/sessao",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/sessao/sair",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/eu/senha",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/operadores",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/operadores",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "PUT",
+   "rota": "/ti/operadores/:uid/nivel",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/operadores/:uid/senha",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/operadores/:uid/excluir",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/operadores/:uid/restaurar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/auditoria",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/auditoria/exportar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/auditoria/verificar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/chamados",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/chamados/:id",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/chamados",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/chamados/:id/assumir",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/chamados/:id/atribuir",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/chamados/:id/status",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "PUT",
+   "rota": "/ti/chamados/:id/prioridade",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/chamados/:id/comentarios",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/dashboard",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/stream",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/chamados",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 400,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/chamados/meus",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/chamados/:id",
+   "anon": 401,
+   "aluno": 404,
+   "personal": 404,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/chamados/:id/responder",
+   "anon": 401,
+   "aluno": 404,
+   "personal": 404,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/presenca/ping",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 200,
+   "ti": 200
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/solicitantes/:uid/perfil",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "GET",
+   "rota": "/ti/administradores",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/administradores",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/administradores/:uid/senha",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "ti",
+   "metodo": "POST",
+   "rota": "/ti/administradores/:uid/revogar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "execucao",
+   "metodo": "POST",
+   "rota": "/checkin",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "execucao",
+   "metodo": "POST",
+   "rota": "/checkout",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "execucao",
+   "metodo": "POST",
+   "rota": "/reportarFaltaAluno",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "execucao",
+   "metodo": "POST",
+   "rota": "/auditarFoto",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "execucao",
+   "metodo": "GET",
+   "rota": "/execucao/foto/:id",
+   "anon": 401,
+   "aluno": 404,
+   "personal": 404,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "execucao",
+   "metodo": "POST",
+   "rota": "/aluno/localizacao",
+   "anon": 401,
+   "aluno": 400,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "relampago",
+   "metodo": "POST",
+   "rota": "/personal/alertas",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 400,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "relampago",
+   "metodo": "POST",
+   "rota": "/criarRelampago",
+   "anon": 401,
+   "aluno": 402,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "mapa",
+   "metodo": "GET",
+   "rota": "/personais/online",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "reputacao",
+   "metodo": "GET",
+   "rota": "/reputacao",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "reputacao",
+   "metodo": "GET",
+   "rota": "/admin/infracoes",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "reputacao",
+   "metodo": "GET",
+   "rota": "/admin/banidos",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "reputacao",
+   "metodo": "POST",
+   "rota": "/admin/infracoes/:id/revogar",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "reputacao",
+   "metodo": "POST",
+   "rota": "/admin/infracoes/:id/multa-cobrada",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 404,
+   "ti": 403
+  },
+  {
+   "arq": "reputacao",
+   "metodo": "POST",
+   "rota": "/admin/contas/:uid/desbanir",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "reputacao",
+   "metodo": "POST",
+   "rota": "/interno/manutencao",
+   "anon": 401,
+   "aluno": 401,
+   "personal": 401,
+   "admin": 401,
+   "ti": 401
+  },
+  {
+   "arq": "b2b",
+   "metodo": "GET",
+   "rota": "/parceiros",
+   "anon": 401,
+   "aluno": 200,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "b2b",
+   "metodo": "GET",
+   "rota": "/b2b/painel",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "b2b",
+   "metodo": "GET",
+   "rota": "/b2b/foto/:id",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 403,
+   "ti": 403
+  },
+  {
+   "arq": "b2b",
+   "metodo": "GET",
+   "rota": "/admin/parceiros",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 200,
+   "ti": 403
+  },
+  {
+   "arq": "b2b",
+   "metodo": "POST",
+   "rota": "/admin/parceiros",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "b2b",
+   "metodo": "POST",
+   "rota": "/admin/parceiros/:id/acesso",
+   "anon": 401,
+   "aluno": 403,
+   "personal": 403,
+   "admin": 400,
+   "ti": 403
+  },
+  {
+   "arq": "server",
+   "metodo": "GET",
+   "rota": "/saude",
+   "anon": 200,
+   "aluno": 200,
+   "personal": 200,
+   "admin": 200,
+   "ti": 200
+  }
+ ],
+ "achados": [
+  {
+   "tipo": "anon-2xx",
+   "arq": "nota",
+   "metodo": "POST",
+   "rota": "/nota/verificar",
+   "res": {
+    "anon": 200,
+    "aluno": 200,
+    "personal": 200,
+    "admin": 200,
+    "ti": 200
+   }
+  },
+  {
+   "tipo": "anon-2xx",
+   "arq": "taxas",
+   "metodo": "GET",
+   "rota": "/config/taxas",
+   "res": {
+    "anon": 200,
+    "aluno": 200,
+    "personal": 200,
+    "admin": 200,
+    "ti": 200
+   }
+  },
+  {
+   "tipo": "anon-2xx",
+   "arq": "admin",
+   "metodo": "GET",
+   "rota": "/aviso",
+   "res": {
+    "anon": 200,
+    "aluno": 200,
+    "personal": 200,
+    "admin": 200,
+    "ti": 200
+   }
+  },
+  {
+   "tipo": "anon-2xx",
+   "arq": "server",
+   "metodo": "GET",
+   "rota": "/saude",
+   "res": {
+    "anon": 200,
+    "aluno": 200,
+    "personal": 200,
+    "admin": 200,
+    "ti": 200
+   }
+  }
+ ]
+}

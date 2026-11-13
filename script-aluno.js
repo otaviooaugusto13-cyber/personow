@@ -324,7 +324,7 @@ function renderAulas() {
     let l = aulas.slice();
     if (filtro === "ativos") l = l.filter((p) => p.status === "aberta" || p.status === "aceita").sort(ordemData);
     else { if (filtro === "pagos") l = l.filter(estaPago); l.sort((a, b) => ordemData(b, a)); }
-    $("lista-aulas").innerHTML = l.length ? l.map(cartao).join("") : vazio("📋", filtro === "pagos" ? "Nenhum pagamento ainda" : "Nenhum aula por aqui", filtro === "pagos" ? "As aulas pagas e suas notas aparecem aqui." : "Faça seu primeira aula na aba Início.", filtro === "pagos" ? "" : '<button class="btn btn-primary" data-ir="tab-home">Solicitar personal</button>');
+    $("lista-aulas").innerHTML = l.length ? l.map(cartao).join("") : vazio("📋", filtro === "pagos" ? "Nenhum pagamento ainda" : "Nenhum aula por aqui", filtro === "pagos" ? "As aulas pagas e suas notas aparecem aqui." : "Faça sua primeira aula na aba Início.", filtro === "pagos" ? "" : '<button class="btn btn-primary" data-ir="tab-home">Solicitar personal</button>');
 }
 
 // ============================================================
