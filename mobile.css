@@ -1,0 +1,131 @@
+/* ============================================================
+   PERSONOW — camada MOBILE (carregada por último em todas as páginas)
+   Princípios: toque primeiro, polegar alcança tudo, teclado nunca cobre o campo,
+   nada de zoom acidental, nada de rolagem lateral, respeita notch e barra de gestos.
+   Só refina; não muda cores nem identidade visual.
+   ============================================================ */
+
+/* ---------- comportamento de toque ---------- */
+html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+    scroll-padding-top: 76px; scroll-padding-bottom: 120px;     /* campo focado não fica atrás de cabeçalho/menu */
+    color-scheme: dark light;
+}
+body { overflow-wrap: break-word; -webkit-touch-callout: none; }
+a, button, [role="button"], summary, label, select, input, textarea, .chip, .pill, .nav-item, .menu-item {
+    touch-action: manipulation;                                  /* sem atraso de 300 ms e sem zoom por toque duplo */
+}
+img, video, canvas, svg { max-width: 100%; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+button, .btn, .chip, .pill, .nav-item, .menu-item, .icon-btn, .seg button { -webkit-user-select: none; user-select: none; }
+p, h1, h2, h3, h4, .muted, .small { text-wrap: pretty; }
+h1, h2, h3 { text-wrap: balance; }
+
+/* rolagem dentro de folhas/modais não "vaza" para a página de trás (e sem puxar-para-atualizar sem querer) */
+.sheet, .modal-box, .app-overlay, .chat-box, .ax-chat { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+@media (display-mode: standalone) { html, body { overscroll-behavior-y: none; } }
+
+/* ---------- alvos de toque ≥ 44 px (WCAG 2.5.5 / guia da Apple e do Google) ---------- */
+.nav-item { min-height: 52px; justify-content: center; font-size: 11px; }
+.icon-btn { width: 44px; height: 44px; }
+.btn { min-height: 48px; }
+.btn-sm, .btn-mini { min-height: 44px; padding-inline: 16px; }
+.pill { min-height: 40px; display: inline-flex; align-items: center; }
+.seg button { min-height: 44px; }
+.chip { min-height: 72px; }
+.menu-item { min-height: 56px; }
+.todo, .sw-row { min-height: 52px; }
+.check-line { padding-block: 6px; }
+.check-line input[type="checkbox"], .sw-row input[type="checkbox"] { width: 22px; height: 22px; }
+.auth-links a, .link-btn, a.small, .muted a { display: inline-block; padding-block: 10px; }   /* link de texto vira alvo confortável */
+.cal-day { min-height: 44px; }
+select { min-height: 48px; }
+input[type="date"], input[type="time"], input[type="datetime-local"], input[type="month"] {
+    min-height: 50px; -webkit-appearance: none; appearance: none; text-align: left;   /* iOS: mesma altura/aspecto dos outros campos */
+}
+input[type="date"]::-webkit-date-and-time-value, input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+input[type="search"] { -webkit-appearance: none; appearance: none; }
+
+/* ---------- botão do WhatsApp: nunca em cima de formulário ---------- */
+.btn-whatsapp { width: 48px; height: 48px; right: max(12px, env(safe-area-inset-right, 0px)); opacity: .96; transition: opacity .2s, transform .2s; }
+body:has(.login-screen.active) .btn-whatsapp,
+body:has(.app-overlay.active) .btn-whatsapp,
+body.teclado-aberto .btn-whatsapp { opacity: 0; pointer-events: none; transform: scale(.7); }
+
+/* ---------- teclado aberto: libera espaço e esconde o menu fixo ---------- */
+body.teclado-aberto .bottom-nav { transform: translateY(110%); }
+.bottom-nav { transition: transform .22s ease; padding-left: max(6px, env(safe-area-inset-left, 0px)); padding-right: max(6px, env(safe-area-inset-right, 0px)); }
+body.teclado-aberto .main-app-screen { padding-bottom: 24px; }
+body.teclado-aberto .sheet { padding-bottom: 16px; }
+
+.sheet { scroll-padding-bottom: 96px; }
+
+/* ---------- notch / orelhas em modo paisagem ---------- */
+.main-app-screen, .login-screen, .sheet {
+    padding-left: max(var(--pad-lado, 16px), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--pad-lado, 16px), env(safe-area-inset-right, 0px));
+}
+.sheet { --pad-lado: 18px; }
+#toast-area { padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- sem hover em tela de toque (evita "hover grudado") ---------- */
+@media (hover: none) {
+    .btn-primary:hover:not(:disabled) { filter: none; }
+    .btn-ghost:hover, .menu-item:hover, .nav-links a:hover { background: inherit; }
+    .btn:active, .chip:active, .pill:active, .menu-item:active, .nav-item:active { transform: scale(.97); }
+    .menu-item:active { background: var(--surface-2, rgba(255,255,255,.06)); }
+}
+
+/* ---------- telas muito estreitas (iPhone SE, Android compacto) ---------- */
+@media (max-width: 360px) {
+    body { font-size: 14.5px; }
+    .main-app-screen { padding-inline: 12px; }
+    .auth-card { padding: 22px 16px; border-radius: 20px; }
+    .nav-item { font-size: 10px; }
+    .nav-item svg { width: 21px; height: 21px; }
+    .grid-2 { gap: 8px; }
+    .toast { font-size: 13px; }
+}
+
+/* ---------- telas baixas (paisagem no celular) ---------- */
+@media (max-height: 480px) and (orientation: landscape) {
+    .bottom-nav { padding-block: 4px; }
+    .nav-item { min-height: 44px; flex-direction: row; gap: 6px; justify-content: center; }
+    .sheet { max-height: 100dvh; border-radius: 0; }
+    .login-screen { padding-block: 10px; }
+    .auth-logo { width: 48px; height: 48px; margin-bottom: 6px; }
+}
+
+/* ---------- banner "Instalar o app" (criado por mobile.js) ---------- */
+.pw-instalar {
+    position: fixed; left: 12px; right: 12px; z-index: 300; display: none; gap: 12px; align-items: center;
+    bottom: calc(var(--nav-h, 68px) + 12px + env(safe-area-inset-bottom, 0px)); max-width: 616px; margin-inline: auto;
+    padding: 12px 12px 12px 14px; border-radius: 18px; background: var(--surface, #1b1d22); color: var(--text, #f4f6fa);
+    border: 1px solid var(--line-strong, rgba(255,255,255,.16)); box-shadow: 0 18px 40px -14px rgba(0,0,0,.7);
+    animation: sobe .3s cubic-bezier(.2,.8,.2,1) both; font-size: 13.5px; line-height: 1.35;
+}
+.pw-instalar.on { display: flex; }
+.pw-instalar img { width: 40px; height: 40px; border-radius: 11px; flex: none; }
+.pw-instalar .txt { flex: 1; min-width: 0; }
+.pw-instalar .txt b { display: block; font-size: 14px; }
+.pw-instalar button { min-height: 44px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 700; padding: 0 14px; }
+.pw-instalar .ok { background: var(--accent, #3b82f6); color: var(--accent-ink, #fff); }
+.pw-instalar .x { background: transparent; color: var(--muted, #9aa3b2); padding: 0 10px; font-size: 18px; }
+.pw-offline {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10000; padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 6px;
+    text-align: center; font-size: 12.5px; font-weight: 700; background: #b45309; color: #fff; transform: translateY(-110%); transition: transform .25s;
+}
+.pw-offline.on { transform: none; }
+
+@media (prefers-reduced-motion: reduce) { .pw-instalar, .bottom-nav, .btn-whatsapp { animation: none !important; transition: none !important; } }
+@media print { .pw-instalar, .pw-offline { display: none !important; } }
+
+/* ---------- landing ---------- */
+.nav-in .brand, .nav-in a.btn, .nav a { min-height: 44px; }
+.strip-wrap { overflow: hidden; }
+
+/* ---------- links soltos que ficavam com menos de 44 px de altura ---------- */
+.auth-switch a { min-height: 48px; display: flex; align-items: center; justify-content: center; }
+.auth-links a { min-height: 44px; display: inline-flex; align-items: center; }
+.brand { min-height: 44px; }
